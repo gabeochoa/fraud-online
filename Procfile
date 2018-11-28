@@ -1,1 +1,1 @@
-web: gunicorn fraud-server:wsgi
+web: gunicorn fraud_server.wsgi
