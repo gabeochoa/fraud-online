@@ -41,14 +41,15 @@ class BaseApplication extends Component {
   }
 }
 
+// const App = () => (
+//   <BaseApplication 
+//     render={data => <Table data={data} /> } />
+// );
+
 const App = () => (
-  <BaseApplication 
-    render={data => <Table data={data} /> } />
+  <DataProvider endpoint="api/package/" 
+                render={data => <Table data={data} />} />
 );
 
-// const App = () => (
-//   <DataProvider endpoint="api/example/" 
-//                 render={data => <Table data={data} />} />
-// );
 const wrapper = document.getElementById("app");
 wrapper ? ReactDOM.render(<App />, wrapper) : null;

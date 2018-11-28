@@ -4,6 +4,7 @@ static_media/*
 *.swp
 .vscode/*
 db.sqlite3
+.coverage
 
 .DS_STORE
 node_modules

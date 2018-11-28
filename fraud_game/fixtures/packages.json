@@ -1,0 +1,22 @@
+[
+    {
+        "model": "fraud_game.package",
+        "pk": 1,
+        "fields": {
+            "name": "Fraud",
+            "meta_name": "Package for single fraud game",
+            "price": 0.99,
+            "price_currency": "USD"
+        }
+    },
+    {
+        "model": "fraud_game.package",
+        "pk": 2,
+        "fields": {
+            "name": "Double Trouble",
+            "meta_name": "Package for fraud and dixit game",
+            "price": 1.99,
+            "price_currency": "USD"
+        }
+    }
+]

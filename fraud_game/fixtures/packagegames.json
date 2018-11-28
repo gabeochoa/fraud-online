@@ -1,0 +1,26 @@
+[
+    {
+        "model": "fraud_game.packagegame",
+        "pk": 1,
+        "fields": {
+            "package": 1,
+            "game": 1
+        }
+    },
+    {
+        "model": "fraud_game.packagegame",
+        "pk": 2,
+        "fields": {
+            "package": 2,
+            "game": 1
+        }
+    },
+    {
+        "model": "fraud_game.packagegame",
+        "pk": 3,
+        "fields": {
+            "package": 2,
+            "game": 2
+        }
+    }
+]

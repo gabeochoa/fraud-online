@@ -7,3 +7,8 @@ whitenoise
 psycopg2
 dj-database-url
 ipython
+django-money
+
+# testing 
+coverage
+django-nose

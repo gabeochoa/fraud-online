@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from fraud_server.views import Example, UsersListCreate
+from fraud_server.views import Example, GamesListCreate, PackagesListCreate
 
 urlpatterns = [
-    url(r'^api/example/?', UsersListCreate.as_view()),
+    url(r'^api/game/?', GamesListCreate.as_view()),
+    url(r'^api/package/?', PackagesListCreate.as_view()),
     url(r'^admin/', admin.site.urls),
 
     url('', include('react_frontend.urls')),

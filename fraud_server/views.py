@@ -10,9 +10,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from fraud_game.models import UserPackage
+from fraud_game.models import UserPackage, PackageGame, Game, Package
 
-# Create your views here.
 
 class Example(APIView):
     def get(self, request):
@@ -20,11 +19,34 @@ class Example(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-class CurrentUserSerializer(serializers.Serializer):
+class GameSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserPackage
-        fields = ('user', 'package', 'purchased_at')
+        model = Game
+        fields = '__all__'
 
-class UsersListCreate(generics.ListCreateAPIView):
-    queryset = UserPackage.objects.all()
-    serializer_class = CurrentUserSerializer
+
+class GamesListCreate(generics.ListAPIView):
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
+
+
+class PackageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Package
+        fields = '__all__'
+
+
+class PackagesListCreate(generics.ListAPIView):
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer
+
+
+class PackageGameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PackageGame
+        fields = '__all__'
+
+
+class PackageGamesListCreate(generics.ListAPIView):
+    queryset = PackageGame.objects.all()
+    serializer_class = PackageGameSerializer
