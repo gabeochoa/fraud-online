@@ -3,4 +3,5 @@
 gunicorn
 django
 djangorestframework
+whitenoise
 ipython
