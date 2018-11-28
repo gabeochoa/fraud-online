@@ -19,4 +19,4 @@ coverage/
 
 
 ./react_frontend/build/
-./react_frontend/package-lock.json
+package-lock.json
