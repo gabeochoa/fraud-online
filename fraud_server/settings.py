@@ -25,8 +25,10 @@ SECRET_KEY = '@=ddt#+(96k_(_ywakqiqc1q!vdm@urw)y6-dmcg_yck(el1x%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "fraud-online.herokuapp.com",
+]
 
 # Application definition
 
@@ -37,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'rest_framework',
+
+    'fraud_game',
 ]
 
 MIDDLEWARE = [
@@ -50,7 +56,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
-ROOT_URLCONF = 'fraud.urls'
+ROOT_URLCONF = 'fraud_server.urls'
 
 TEMPLATES = [
     {
