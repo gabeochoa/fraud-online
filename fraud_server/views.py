@@ -3,13 +3,14 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 
-from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework import generics
 
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from fraud_game.models import UserPackage
 
 # Create your views here.
 
@@ -21,9 +22,9 @@ class Example(APIView):
 
 class CurrentUserSerializer(serializers.Serializer):
     class Meta:
-        model = User
-        fields = ('username', 'email', 'id')
+        model = UserPackage
+        fields = ('user', 'package', 'purchased_at')
 
 class UsersListCreate(generics.ListCreateAPIView):
-    queryset = User.objects.all()
+    queryset = UserPackage.objects.all()
     serializer_class = CurrentUserSerializer
