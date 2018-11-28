@@ -16,13 +16,13 @@ class Package(models.Model):
 
 class PackageGame(models.Model):
     ''' Maps a package and game together '''
-    package = models.ForeignKey(Package)
-    game = models.ForeignKey(Game)
+    package = models.ForeignKey(Package, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
 
 class UserPackage(models.Model):
     '''
         Keeps track of which users own which packages
     '''
-    user = models.ForeignKey(User)
-    package = models.ForeignKey(Package)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    package = models.ForeignKey(Package, on_delete=models.CASCADE)
     purchased_at = models.DateTimeField(auto_now_add=True)
