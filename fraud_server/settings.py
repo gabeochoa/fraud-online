@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'rest_framework',
 
+    'react_frontend',
     'fraud_game',
 ]
 
@@ -86,6 +87,12 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+
+import dj_database_url
+db_config = dj_database_url.config()
+if db_config != {}:
+    DATABASES['default'] =  db_config
 
 
 # Password validation
