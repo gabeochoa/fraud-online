@@ -4,5 +4,6 @@ gunicorn
 django
 djangorestframework
 whitenoise
+psycopg2
 dj-database-url
 ipython
