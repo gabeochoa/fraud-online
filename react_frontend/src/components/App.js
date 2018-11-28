@@ -25,7 +25,6 @@ class BaseApplication extends Component {
   constructor(props) {
     super(props);
     this.state = { 
-      data: list,
       loaded: false, 
       placeholder: "Loading..."
      };
@@ -36,19 +35,26 @@ class BaseApplication extends Component {
   }
 
   render() {
-    const { data, loaded, placeholder } = this.state;
-    return loaded ? this.props.render(data) : <p>{placeholder}</p>;
+    const { loaded, placeholder } = this.state;
+    if(loaded){
+      return (
+        <div>
+          <DataProvider endpoint="api/package/" 
+            render={data => <Table data={data} />} />
+          <DataProvider endpoint="api/game/" 
+            render={data => <Table data={data} />} />
+        </div>
+      );
+    }
+    else{
+      return <p>{placeholder}</p>
+    }
   }
 }
 
-// const App = () => (
-//   <BaseApplication 
-//     render={data => <Table data={data} /> } />
-// );
-
 const App = () => (
-  <DataProvider endpoint="api/package/" 
-                render={data => <Table data={data} />} />
+  <BaseApplication 
+    render={data => <Table data={data} /> } />
 );
 
 const wrapper = document.getElementById("app");
