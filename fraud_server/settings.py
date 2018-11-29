@@ -78,6 +78,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'fraud.wsgi.application'
+ASGI_APPLICATION = "fraud_server.routing.application"
 
 
 # Database
