@@ -12,6 +12,7 @@ ipython
 django-money
 channels
 django-redis
+channels_redis
 
 # testing 
 coverage
