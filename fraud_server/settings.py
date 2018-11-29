@@ -80,21 +80,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'fraud.wsgi.application'
 ASGI_APPLICATION = "fraud_server.routing.application"
 
-import dj_redis_url
-redis_config  = dj_redis_url.config()
-if redis_config is not None and len(redis_config) != 0:
-    # redis://user:pass@host:port
-    host = redis_config['HOST']
-    port = redis_config['PORT']
-else:
-    host = "127.0.0.1"
-    port = "6379"
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [(host, port)],
+             "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')]
         },
     },
 }
