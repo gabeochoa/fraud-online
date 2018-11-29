@@ -13,3 +13,6 @@ channels
 # testing 
 coverage
 django-nose
+
+# heroku
+honcho
