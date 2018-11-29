@@ -14,9 +14,9 @@
     var roomName = {{ room_name_json }};
 
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var chatSocket = new WebSocket(ws_scheme + '://' + 
-                                 window.location.host + 
-                                 '/ws/spyfall/' + roomName + '/');
+    var chatSocket = new ReconnectingWebSocket(ws_scheme + '://' + 
+                                               window.location.host + 
+                                               '/ws/spyfall/' + roomName + '/');
     
     // var chatSocket = new WebSocket(
     //     'wss://' + window.location.hostname + ":8000" + 
