@@ -1,14 +1,17 @@
 
 
 gunicorn
+uvicorn
 django
 djangorestframework
 whitenoise
 psycopg2
 dj-database-url
+dj-redis-url
 ipython
 django-money
 channels
+django-redis
 
 # testing 
 coverage

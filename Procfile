@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: honcho -f ProcfileHoncho start
+web: gunicorn fraud_server.asgi -k uvicorn.workers.UvicornWorker --forwarded-allow-ips "*"
