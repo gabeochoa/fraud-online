@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^api/package/?', PackagesListCreate.as_view()),
     url(r'^admin/', admin.site.urls),
 
-    url('', include('react_frontend.urls')),
-    url('spyfall/', include('spyfall.urls')),
+    url('^spyfall/', include('spyfall.urls')),
+
+    url('^$', include('react_frontend.urls')),
 ]

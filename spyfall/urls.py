@@ -3,6 +3,6 @@ from django.conf.urls import url
 from spyfall.views import index, room
 
 urlpatterns = [
-    url(r'^$', index, name='index'),
-    url(r'^(?P<room_name>[^/]+)/$', room, name='room'),
+    url(r'/?$', index, name='index'),
+    url(r'(?P<room_name>[^/]+)/?$', room, name='room'),
 ]

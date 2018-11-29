@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='package',
             name='price',
-            field=djmoney.models.fields.MoneyField(decimal_places=4, default=Decimal('0.0'), default_currency=b'USD', max_digits=19),
+            field=djmoney.models.fields.MoneyField(decimal_places=4, default=Decimal('0.0'), default_currency='USD', max_digits=19),
         ),
         migrations.AddField(
             model_name='package',
