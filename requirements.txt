@@ -8,6 +8,7 @@ psycopg2
 dj-database-url
 ipython
 django-money
+channels
 
 # testing 
 coverage

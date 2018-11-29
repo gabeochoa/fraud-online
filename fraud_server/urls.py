@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url('', include('react_frontend.urls')),
+    url('spyfall/', include('spyfall.urls')),
 ]

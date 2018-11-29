@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'djmoney',
+    'channels',
 
     'react_frontend',
     'fraud_game',
