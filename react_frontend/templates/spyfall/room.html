@@ -14,7 +14,7 @@
     var roomName = {{ room_name_json }};
 
     var chatSocket = new WebSocket(
-        'ws://' + window.location.hostname + ":8000" + 
+        'wss://' + window.location.hostname + ":8000" + 
         '/ws/spyfall/' + roomName + '/');
 
     chatSocket.onmessage = function(e) {
