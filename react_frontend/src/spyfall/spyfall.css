@@ -1,0 +1,26 @@
+
+.button_bar_style {
+    display: block;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+}
+
+.hrstyle {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.input_style {
+}
+
+.divider{
+    width:auto;
+    height:10px;
+    display:block;
+}
+.button_style {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
