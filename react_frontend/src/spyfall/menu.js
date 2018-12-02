@@ -10,9 +10,9 @@ class MenuButtonBar extends Component {
     super(props);
 
     this.state = { 
-        location: "home",
-        name: "",
-        room: "" 
+        location: this.props.start_location,
+        name: this.props.username,
+        room: this.props.room,
       };
 
     this.next_loc = {
@@ -24,6 +24,7 @@ class MenuButtonBar extends Component {
 
     // This binding is necessary to make `this` work in the callback
     this.handleClick = this.handleClick.bind(this);
+    this.handleNewRoom = this.handleNewRoom.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -35,14 +36,19 @@ class MenuButtonBar extends Component {
     });
   }
 
+  handleNewRoom(event){
+    this.props.changeUsername(this.state.name);
+    // TODO : replace with create in db 
+    this.props.changeLocation("new room ", "waiting");
+  }
+  // external 
   handleSubmit(event){
-    // when the person hits submit
-    // we just send them to that room
-    // with the name they chose
-    console.log(this.state.name + " " + this.state.room)
-    event.preventDefault();
+    // tell my mom my name and location changed
+    this.props.changeUsername(this.state.name);
+    this.props.changeLocation(this.state.room, "waiting");
   }
 
+  // for internal to the menu
   handleClick(event) {
     console.log("button was clicked : " + event.target.name);
     let next_target = this.next_loc[event.target.name];
@@ -66,13 +72,12 @@ class MenuButtonBar extends Component {
   renderCreate(){
     return (
       <React.Fragment>
-          <form onSubmit={this.handleSubmit}>
             <input name="name" className="input input_style" value={this.state.name} 
-                   onChange={this.handleChange} type="text" placeholder="Name"/>
+                   onChange={this.handleChange} type="text" placeholder="Name"
+                   />
             <hr className="hrstyle" />
-            <button className="button is-outlined button_style" type="submit" value="Join">Create</button>
+            <button className="button is-outlined button_style" type="submit" onClick={this.handleNewRoom} value="Join">Create</button>
             <a name="create_back" className="button is-outlined button_style" onClick={this.handleClick}>Back</a>
-          </form>
       </React.Fragment>
     );
   }
@@ -80,16 +85,14 @@ class MenuButtonBar extends Component {
   renderJoin(){
     return (
       <React.Fragment>
-          <form onSubmit={this.handleSubmit}>
             <input name="name" className="input input_style" value={this.state.name} 
-                   onChange={this.handleChange} type="text" placeholder="Name" autofocus/>
+                   onChange={this.handleChange} type="text" placeholder="Name"/>
             <div className="vspace10"/>
-            <input name="room" className="input input_style" value={this.state.room_code} 
+            <input name="room" className="input input_style" value={this.state.room} 
                    onChange={this.handleChange}  type="text" placeholder="Room Code"/>
             <hr className="hrstyle" />
-            <button className="button is-outlined button_style" type="submit" value="Join">Join</button>
+            <button className="button is-outlined button_style" onClick={this.handleSubmit} value="Join">Join</button>
             <a name="join_back" className="button is-outlined button_style" onClick={this.handleClick}>Back</a>
-          </form>
       </React.Fragment>
     );
   }

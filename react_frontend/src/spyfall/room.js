@@ -26,7 +26,7 @@ class SpyfallWaitingRoom extends Component {
             people: [               
                 {
                     id: 1,
-                    name: "100% me",
+                    name: this.props.username,
                     is_me: true,
                 },
                 {
@@ -56,7 +56,19 @@ class SpyfallWaitingRoom extends Component {
         while(event.target.getAttribute("name") === null){
             event.target = event.target.parentNode;
         }
-        console.log("button was clicked : " + event.target.getAttribute("name"));
+        let button = event.target.getAttribute("name");
+
+        switch(button){
+            case "edit_name":
+                this.props.changeLocation(this.props.access_code, "menu");
+            break;
+            case "room_leave":
+                this.props.changeLocation("", "menu");
+            break;
+            default:
+            console.log("button was clicked : " + button);
+            break
+        }
     }
 
     render_person(person){
@@ -94,10 +106,12 @@ class SpyfallWaitingRoom extends Component {
                     </ol>
                 </div>
                 <hr className="hrstyle"/>
-                <a name="room_start" className="button is-outlined button_style"
-                    onClick={this.handleClick}>Start Game</a>           
-                <a name="room_leave" className="button is-outlined button_style" 
-                    onClick={this.handleClick}>Leave Game</a>
+                <div className="field is-centered button_bar_style">
+                    <a name="room_start" className="button is-outlined button_style"
+                        onClick={this.handleClick}>Start Game</a>           
+                    <a name="room_leave" className="button is-outlined button_style" 
+                        onClick={this.handleClick}>Leave Game</a>
+                </div>
             </React.Fragment>
         );
     }

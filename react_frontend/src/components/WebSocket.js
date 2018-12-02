@@ -1,4 +1,5 @@
-const API_PATH = 'ws://localhost:8000/ws/chat';
+import ReconnectingWebSocket from 'reconnecting-websocket'
+const API_PATH = 'ws://localhost:8000/ws/spyfall';
 
 class WebSocketService {
   static instance = null;
@@ -15,9 +16,9 @@ class WebSocketService {
     this.socketRef = null;
   }
 
-  connect() {
-    const path = API_PATH;
-    this.socketRef = new WebSocket(path);
+  connect(room) {
+    const path = API_PATH + "/" + room + "/";
+    this.socketRef = new ReconnectingWebSocket(path);
     this.socketRef.onopen = () => {
       console.log('WebSocket open');
     };
@@ -49,7 +50,7 @@ class WebSocketService {
   }
 
   initChatUser(username) {
-    this.sendMessage({ command: 'init_chat', username: username });
+    this.sendMessage({ command: 'join_lobby', username: username });
   }
 
   fetchMessages(username) {
