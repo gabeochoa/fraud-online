@@ -56,7 +56,7 @@ class MenuButtonBar extends Component {
     return (
       <React.Fragment>
           <a name="home_create" className="button is-outlined button_style"
-             onClick={this.handleClick}>New Game</a>
+             onClick={this.handleClick}>New Game</a>           
           <a name="home_join" className="button is-outlined button_style" 
              onClick={this.handleClick}>Join Game</a>
         </React.Fragment>
@@ -82,13 +82,12 @@ class MenuButtonBar extends Component {
       <React.Fragment>
           <form onSubmit={this.handleSubmit}>
             <input name="name" className="input input_style" value={this.state.name} 
-                   onChange={this.handleChange} type="text" placeholder="Name"/>
-            <div className="divider"/>
+                   onChange={this.handleChange} type="text" placeholder="Name" autofocus/>
+            <div className="vspace10"/>
             <input name="room" className="input input_style" value={this.state.room_code} 
                    onChange={this.handleChange}  type="text" placeholder="Room Code"/>
             <hr className="hrstyle" />
             <button className="button is-outlined button_style" type="submit" value="Join">Join</button>
-            
             <a name="join_back" className="button is-outlined button_style" onClick={this.handleClick}>Back</a>
           </form>
       </React.Fragment>
