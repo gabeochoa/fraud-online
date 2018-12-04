@@ -41,6 +41,19 @@ def start_game(cache_key):
     print("start game end", value)
     return value
 
+def end_game(cache_key):
+    value = cache.get(cache_key)
+    players = []
+    for index, player in enumerate(value["players"]):
+        player["role"] = None
+        player["location"] = None
+        player["is_spy"] = False
+        players.append(player)
+    value["players"] = players
+    cache.set(cache_key, value, timeout=None)
+    return value
+
+
 class SpyfallConsumer(WebsocketConsumer):
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -144,6 +157,8 @@ class SpyfallConsumer(WebsocketConsumer):
             self.send_get_room_response()
         elif command == "start_game":
             self.send_start_game()
+        elif command == "end_game":
+            self.send_end_game()
 
     def send_start_game(self):
         async_to_sync(self.channel_layer.group_send)(
@@ -157,6 +172,20 @@ class SpyfallConsumer(WebsocketConsumer):
     def start_game(self, event):
         message = event['message']
         self.send_command("start_game", message)
+
+
+    def send_end_game(self):
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'end_game',
+                'message': end_game(self.room_group_name)
+            }
+        )
+
+    def end_game(self, event):
+        message = event['message']
+        self.send_command("end_game", message)
 
     def new_user(self, event):
         message = event['message']

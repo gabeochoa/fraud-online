@@ -34,27 +34,7 @@ class SpyfallGame extends Component{
     constructor(props){
         super(props);
 
-        let player = {location: null, role: "Spy", is_spy:true}
-
-        if( Math.floor(Math.random()*100) % 2 == 0){
-            player = {location: "Airplane", role: "Flight Attendant", is_spy: false}
-        }
-
         this.state = {
-            players: [
-                { "name": "me", "is_first": false},
-                { "name": "you", "is_first": true},
-                { "name": "mom", "is_first": false},
-                { "name": "dad", "is_first": false},
-            ],
-            locations: [
-                ["Airplane", true],
-                ["Bank", false],
-                ["Beach", false],
-                ["Cathedral", false],
-                ["Circus Tent", false],
-                ["Corporate Party", false],
-            ],
         }
 
         this.handleClick = this.handleClick.bind(this);
@@ -64,7 +44,19 @@ class SpyfallGame extends Component{
         while(event.target.getAttribute("name") === null){
             event.target = event.target.parentNode;
         }
-        console.log("button was clicked : " + event.target.getAttribute("name"));
+        let button = event.target.getAttribute("name");
+
+        switch(button){
+            case "room_end":
+                this.props.changeLocation(this.props.access_code, "lobby");
+            break;
+            case "room_leave":
+                this.props.changeLocation("", "menu");
+            break;
+            default:
+            console.log("button was clicked : " + button);
+            break
+        }
     }
 
     renderPlayer(person){
@@ -202,7 +194,20 @@ class SpyfallGameParent extends Component{
         const sender = parsedData.sender;
         console.log("react recivied new message", command, message)
        
-        if (command === 'get_room_response' || command == "start_game") {
+        if(command == "start_game"){
+            this.setState({
+                in_lobby: false
+            })
+        }
+        
+        if(command == "end_game"){
+            this.setState({
+                in_lobby: true
+            })
+        }
+
+        //all commands
+        {
             let update_players = [...message.players]
             update_players.forEach((item)=>{
                 if (item.channel == sender){
@@ -252,11 +257,14 @@ class SpyfallGameParent extends Component{
         if(location == "game"){
             //user wants to start the game
             // send the start_game message to all clients
-            this.setState({in_lobby: false}, ()=>{
-                this.send_message({
+            this.send_message({
                     command: "start_game"
-                });
             });
+        }
+        else if(location == "lobby"){
+            this.send_message({
+                command: "end_game"
+            })
         }
         else{
             //otherwise its probably someone leaving the room to go back to the menu
@@ -284,6 +292,7 @@ class SpyfallGameParent extends Component{
                     player={this.state.player}
                     locations={this.state.locations}
                     handleClickLocation={this.handleClickLocation}
+                    changeLocation={this.changeLocationWrapper}
                 />
             );
         }
