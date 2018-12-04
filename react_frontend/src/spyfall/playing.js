@@ -38,6 +38,7 @@ class SpyfallGame extends Component{
         }
 
         this.handleClick = this.handleClick.bind(this);
+        this.pretty_location = this.pretty_location.bind(this);
     }
 
     handleClick(event) {
@@ -69,19 +70,32 @@ class SpyfallGame extends Component{
                 </li>);
     }
 
+
+
+    pretty_location(location){
+        if(location == null || location == undefined || location == "")
+        {
+            return location;
+        }
+        return (location.split("_").map(
+                    (item) => {
+                        return item.charAt(0).toUpperCase() + item.slice(1);
+                }
+            ).join(" "));
+    }
+
     renderPlace(place){
         let place_text = null;
         if(place[1]){
-            place_text =  <p style={{color: "#bbb", textDecoration: "line-through"}}> {place[0]} </p>
+            place_text =  <p style={{color: "#bbb", textDecoration: "line-through"}}> {this.pretty_location(place[0])} </p>
         }
         else{
-            place_text = <p> {place[0]} </p>
+            place_text = <p> {this.pretty_location(place[0])} </p>
         }
         return (<li key={place[0]} name={place[0]} onClick={this.props.handleClickLocation} style={column_list_item}>
                     {place_text}
                 </li>);
     }
-
     renderRole(player){
         if(player.is_spy){
             return <p style={{textAlign:"center"}}> You are the {player.role} </p>
@@ -90,7 +104,7 @@ class SpyfallGame extends Component{
             return (
                 <React.Fragment>
                 <p style={{textAlign:"center"}}>You are not the spy!</p>
-                <p style={{textAlign:"center"}}>The location: {player.location}</p>
+                <p style={{textAlign:"center"}}>The location: {this.pretty_location(player.location)}</p>
                 <p style={{textAlign:"center"}}>Your role: {player.role}</p>
                 </React.Fragment>
             );

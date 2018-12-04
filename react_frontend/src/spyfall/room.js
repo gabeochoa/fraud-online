@@ -78,7 +78,7 @@ class SpyfallWaitingRoom extends Component {
         return (
             <React.Fragment>
                 <h4 style={{fontSize: 30}}><Icon path={mdiHatFedora} size={1.5}/>Waiting For Players...</h4>
-                <h5>Access Code: {this.props.access_code.toUpperCase()}</h5>
+                <h5>Access Code: {this.props.access_code}</h5>
                 <hr className="hrstyle"/>
                 <div>
                     <ol className="olstyle">
