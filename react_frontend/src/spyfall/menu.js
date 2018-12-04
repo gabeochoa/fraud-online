@@ -37,15 +37,17 @@ class MenuButtonBar extends Component {
   }
 
   handleNewRoom(event){
-    this.props.changeUsername(this.state.name);
+    this.props.changeUsername(this.state.name, ()=>{});
     // TODO : replace with create in db 
-    this.props.changeLocation("new room ", "waiting");
+    this.props.changeLocation("new room", "waiting", ()=>{});
   }
   // external 
   handleSubmit(event){
     // tell my mom my name and location changed
-    this.props.changeUsername(this.state.name);
-    this.props.changeLocation(this.state.room, "waiting");
+    this.props.changeUsername(this.state.name, ()=>{});
+    this.props.changeLocation(this.state.room, "waiting", () => {
+      console.log("Change location menu")
+    });
   }
 
   // for internal to the menu

@@ -2,10 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import Container from "../components/Container";
 import MenuButtonBar from "./menu";
-import SpyfallWaitingRoom from "./room";
-import SpyfallGame from "./playing";
-
-import WebSocketInstance from '../components/WebSocket';
+import SpyfallGameParent from "./playing";
 
 class SpyfallApp extends Component {
   constructor(props) {
@@ -14,30 +11,48 @@ class SpyfallApp extends Component {
       username: "",
       room: "", 
       location_state: "menu",
+      people: [               
+        {
+            id: 1,
+            name: "me",
+            is_me: true,
+        },
+        {
+            id: 2,
+            name: "not me",
+            is_me: false
+        },
+        {
+            id: 3,
+            name: "also not me",
+            is_me: false
+        },
+        {
+            id: 4,
+            name: "might be me",
+            is_me: false
+        },
+    ],
+
     };
 
     this.changeUsername = this.changeUsername.bind(this);
     this.changeLocation = this.changeLocation.bind(this);
   }
 
-  changeUsername(username){
+  changeUsername(username, callback){
     this.setState({
       username: username,
-    })
+    },
+    this.callback)
   }
 
-  changeLocation(room, newLocation){
+  changeLocation(room, newLocation, changeRoom){
     console.log("got room " + room + " " + newLocation);
     this.setState({
       room: room, 
       location_state: newLocation,
-    });
-    // dont try to connect to empty room 
-    if(room == ""){
-      return 
-    }
-    WebSocketInstance.connect(room);
-    WebSocketInstance.initChatUser(this.state.username);
+    }, changeRoom);
   }
 
   render() {
@@ -57,17 +72,12 @@ class SpyfallApp extends Component {
         content = content;
         break;
       case "waiting":
-        content = <SpyfallWaitingRoom 
-                   access_code={this.state.room}
-                   username={this.state.username}
-                   changeLocation={this.changeLocation}
-                   />
-        break;
       case "game":
-        content = <SpyfallGame
-                   access_code={this.state.room}
+        content = <SpyfallGameParent
+                   room={this.state.room}
                    username={this.state.username}
                    changeLocation={this.changeLocation}
+                   waitForSocket={this.waitForSocket}
                   /> 
         break;
       default:

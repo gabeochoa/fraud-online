@@ -1,7 +1,6 @@
 // this is the screen for waiting to play
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import Container from "../components/Container";
 import Icon from '@mdi/react'
 import { mdiHatFedora, mdiDelete, mdiPencil, mdiPen } from '@mdi/js'
 
@@ -22,29 +21,7 @@ class SpyfallWaitingRoom extends Component {
     
         this.state = { 
             location: "home",
-            name: "",
-            people: [               
-                {
-                    id: 1,
-                    name: this.props.username,
-                    is_me: true,
-                },
-                {
-                    id: 2,
-                    name: "not me",
-                    is_me: false
-                },
-                {
-                    id: 3,
-                    name: "also not me",
-                    is_me: false
-                },
-                {
-                    id: 4,
-                    name: "might be me",
-                    is_me: false
-                },
-            ]
+            name: this.props.username,
           };
     
         // This binding is necessary to make `this` work in the callback
@@ -64,6 +41,9 @@ class SpyfallWaitingRoom extends Component {
             break;
             case "room_leave":
                 this.props.changeLocation("", "menu");
+            break;
+            case "room_start":
+                this.props.changeLocation(this.props.access_code, "game");
             break;
             default:
             console.log("button was clicked : " + button);
@@ -85,7 +65,7 @@ class SpyfallWaitingRoom extends Component {
         return (
             <li key={person.id} style={{display:"float",  marginBottom:5}}>
                 <h1 style={{float: "left", paddingLeft:5}}>
-                        {person.name} 
+                        {person.username} 
                 </h1>
                 <div style={{float: "right"}} name={icon_name} onClick={this.handleClick}> 
                     {icon}
@@ -102,7 +82,7 @@ class SpyfallWaitingRoom extends Component {
                 <hr className="hrstyle"/>
                 <div>
                     <ol className="olstyle">
-                        {this.state.people.map((item) => this.render_person(item))}
+                        {this.props.players.map((item) => this.render_person(item))}
                     </ol>
                 </div>
                 <hr className="hrstyle"/>
