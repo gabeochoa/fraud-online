@@ -43,10 +43,14 @@ class SpyfallWaitingRoom extends Component {
                 this.props.changeLocation("", "menu");
             break;
             case "room_start":
-                this.props.changeLocation(this.props.access_code, "game");
+                if(!this.props.is_game_started){
+                    this.props.changeLocation(this.props.access_code, "game");
+                }
             break;
             case "kick_person":
-                this.props.kickPerson(event.target.getAttribute("player"));
+                if(!this.props.is_game_started){
+                    this.props.kickPerson(event.target.getAttribute("player"));
+                }
             break
             default:
             console.log("button was clicked : " + button);

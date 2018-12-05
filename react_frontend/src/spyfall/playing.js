@@ -122,6 +122,7 @@ class SpyfallGame extends Component{
     }
 
     renderPlayer(person){
+        if(person.role == null){return}
         let extra = <p></p>;
         if(person.is_first){
             extra = <sup style={{color:"red"}}> 1st</sup>
@@ -311,6 +312,7 @@ class SpyfallGameParent extends Component{
             this.setState({
               players: update_players,
               locations: locations,
+              is_game_started: message.is_game_started
             });
         }
     }
@@ -374,6 +376,7 @@ class SpyfallGameParent extends Component{
                 players={this.state.players}
                 changeLocation={this.changeLocationWrapper}
                 kickPerson={this.kickPerson}
+                is_game_started={this.state.is_game_started}
                 />)
         }
         else{

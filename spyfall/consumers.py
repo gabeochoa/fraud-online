@@ -562,29 +562,31 @@ def get_roles(location):
 def start_game(cache_key):
     value = cache.get(cache_key)
     print("start game", value)
-    # get a random person and assign them as spy
-    spy_index = random.randrange(len(value['players']))
-    first_person = random.randrange(len(value['players']))
-
-    person = value['players'][spy_index] # random_person()
-    person["role"] = "spy"
-    person["is_spy"] = True
     # set the rest to random jobs for that location
     location = random.choice(get_locations())
     roles = get_roles(location)
     players = []
-    for index, player in enumerate(value["players"]):
-        if index == spy_index:
-            person['is_first'] = True
-            players.append(person)
-            continue
-        if index == first_person:
-            player['is_first']: True
+    for player in (value["players"]):
         player["role"] = random.choice(roles)
         player["location"] = location
         players.append(player)
 
+    # then generate first player and spy
+
+    # get a random person and assign them as spy
+    spy_index = random.randrange(len(players))
+    first_person = random.randrange(len(players))
+
+    players[spy_index]["location"] = None
+    players[spy_index]["role"] = "spy"
+    players[spy_index]["is_spy"] = True
+
+    
+    players[first_person]['is_first'] = True
+
+    # set cache
     value["players"] = players
+    value['is_game_started'] = True
     cache.set(cache_key, value, timeout=None)
     print("start game end", value)
     return value
@@ -599,6 +601,7 @@ def end_game(cache_key):
         player['is_first'] = False
         players.append(player)
     value["players"] = players
+    value['is_game_started'] = False
     cache.set(cache_key, value, timeout=None)
     return value
 
