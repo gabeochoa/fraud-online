@@ -13,6 +13,7 @@ class MenuButtonBar extends Component {
         location: this.props.start_location,
         name: this.props.username,
         room: this.props.room,
+        bad_input: false, 
       };
 
     this.next_loc = {
@@ -27,19 +28,49 @@ class MenuButtonBar extends Component {
     this.handleNewRoom = this.handleNewRoom.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleTimerChange = this.handleTimerChange.bind(this);
+    this.makeid = this.makeid.bind(this);
   }
 
   handleChange(event) {
-    name = event.target.name;
+    var name = event.target.name;
     this.setState({
       [name]: event.target.value
     });
   }
 
+  handleTimerChange(event){
+    if(event.target === undefined){
+      console.log(event)
+      return 
+    }
+    var validRE = /^\d{1,100}$/;
+    if(event.target.value.match(validRE) == null){
+      this.setState({
+        bad_input: true
+      })
+    }
+    else{
+      this.setState({
+        bad_input: false,
+      })
+      this.handleTimerChange(parseInt(event.target.value))
+    }
+  }
+
+  makeid() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < 5; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+  }
+
   handleNewRoom(event){
-    this.props.changeUsername(this.state.name, ()=>{});
-    // TODO : replace with create in db 
-    this.props.changeLocation("new room", "waiting", ()=>{});
+    if(!this.state.bad_input){
+      this.props.changeUsername(this.state.name, ()=>{});
+      this.props.changeLocation(this.makeid(), "waiting", ()=>{});
+    }
   }
   // external 
   handleSubmit(event){
@@ -77,9 +108,10 @@ class MenuButtonBar extends Component {
             <input name="name" className="input input_style" value={this.state.name} 
                   onChange={this.handleChange} type="text" placeholder="Name"
                   />
+            {this.state.bad_input? <p style={{color:"red"}}> Not a valid number</p>:<p>Enter a number in minutes</p>}
              <input name="minutes" className="input input_style" value={this.state.minutes} 
-                    onChange={this.handleChange} type="text" placeholder="5"
-                    />
+                  onChange={this.handleTimerChange} type="text" placeholder="5"
+                  />
             <hr className="hrstyle" />
             <button className="button is-outlined button_style" type="submit" onClick={this.handleNewRoom} value="Join">Create</button>
             <a name="create_back" className="button is-outlined button_style" onClick={this.handleClick}>Back</a>

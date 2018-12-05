@@ -94,6 +94,10 @@ class SpyfallGame extends Component{
         }
     }
 
+    componentWillUnmount(){
+        clearInterval(this.intervalHandle);
+    }
+    
     tick() {
         let minutes = Math.floor(this.secondsRemaining / 60);
         let seconds = this.secondsRemaining - minutes * 60;
