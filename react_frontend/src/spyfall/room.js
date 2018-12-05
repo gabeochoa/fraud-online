@@ -82,9 +82,18 @@ class SpyfallWaitingRoom extends Component {
     }
 
     render(){
+        let content = ""
+
+        if(this.props.is_game_started){
+            content = "Game is in progess"
+        }
+        else{
+            content = "Waiting For Players..."
+        }
+
         return (
             <React.Fragment>
-                <h4 style={{fontSize: 30}}><Icon path={mdiHatFedora} size={1.5}/>Waiting For Players...</h4>
+                <h4 style={{fontSize: 30}}><Icon path={mdiHatFedora} size={1.5}/>{content}</h4>
                 <h5>Access Code: {this.props.access_code}</h5>
                 <hr className="hrstyle"/>
                 <div>

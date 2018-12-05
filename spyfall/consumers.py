@@ -675,6 +675,15 @@ class SpyfallConsumer(WebsocketConsumer):
             if player['channel'] == channel:
                 continue
             players.append(player) 
+        
+        for player in players:
+            if player['role'] is not None:
+                # we found someone without none
+                break
+            continue
+        else:
+            # all were none
+            value['is_game_started'] = False
         value['players'] = players
         cache.set(self.room_group_name, value, timeout=None)
 
