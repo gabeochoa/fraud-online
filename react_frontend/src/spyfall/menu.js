@@ -75,8 +75,11 @@ class MenuButtonBar extends Component {
     return (
       <React.Fragment>
             <input name="name" className="input input_style" value={this.state.name} 
-                   onChange={this.handleChange} type="text" placeholder="Name"
-                   />
+                  onChange={this.handleChange} type="text" placeholder="Name"
+                  />
+             <input name="minutes" className="input input_style" value={this.state.minutes} 
+                    onChange={this.handleChange} type="text" placeholder="5"
+                    />
             <hr className="hrstyle" />
             <button className="button is-outlined button_style" type="submit" onClick={this.handleNewRoom} value="Join">Create</button>
             <a name="create_back" className="button is-outlined button_style" onClick={this.handleClick}>Back</a>

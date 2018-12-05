@@ -16,15 +16,24 @@ const column_list_item = {
     margin: "0 0 4px 0",
     backgroundColor: "#f0f0f0",
     columnSpan: "1",
+    wordWrap: "break-word",
 }
+
+import "./spyfall.css"
 
 class Timer extends Component{
 
     constructor(props){
         super(props);
-
     }
     render(){
+        if(this.props.minutes == 0 && parseInt(this.props.seconds) < 30){
+            return (
+                <div style={{textAlign:"center"}} className="blinking">
+                    <h1>{this.props.minutes}:{this.props.seconds}</h1>
+                </div>
+            );
+        }
         return (
             <div style={{textAlign:"center"}}>
                 <h1>{this.props.minutes}:{this.props.seconds}</h1>
@@ -33,15 +42,37 @@ class Timer extends Component{
     }
 }
 
+
+function str_pad_left(string,pad,length) {
+    return (new Array(length+1).join(pad)+string).slice(-length);
+}
+
 class SpyfallGame extends Component{
 
     constructor(props){
         super(props);
 
+        this.secondsRemaining = this.props.total_time;
+
+        let minutes = Math.floor(this.secondsRemaining / 60);
+        let seconds = this.secondsRemaining - minutes * 60;
+        
         this.state = {
+            value: str_pad_left(minutes,'0',2),
+            seconds: str_pad_left(seconds,'0',2),
         }
+
+        this.intervalHandle;
+        this.startCountDown = this.startCountDown.bind(this);
+        this.tick = this.tick.bind(this);
+
         this.handleClick = this.handleClick.bind(this);
         this.pretty_location = this.pretty_location.bind(this);
+
+    }
+
+    componentDidMount(){
+        this.startCountDown();
     }
 
     handleClick(event) {
@@ -61,6 +92,29 @@ class SpyfallGame extends Component{
             console.log("button was clicked : " + button);
             break
         }
+    }
+
+    tick() {
+        let minutes = Math.floor(this.secondsRemaining / 60);
+        let seconds = this.secondsRemaining - minutes * 60;
+
+        this.setState({
+            seconds: str_pad_left(seconds,'0',2),
+            value: str_pad_left(minutes,'0',2),
+        });
+
+        if (minutes === 0 & seconds === 0) {
+            clearInterval(this.intervalHandle);
+        }
+        this.secondsRemaining--
+    }
+
+    startCountDown() {
+        this.intervalHandle = setInterval(this.tick, 1000);
+        this.secondsRemaining = this.props.total_time;
+        this.setState({
+            isClicked : true
+        })
     }
 
     renderPlayer(person){
@@ -119,7 +173,7 @@ class SpyfallGame extends Component{
         return (
             <div>
                 <div style={{textAlign:"center"}}>
-                    <Timer minutes={12} seconds={34} />
+                    <Timer minutes={this.state.value} seconds={this.state.seconds} />
                     <hr className="hrstyle"/>
                     {this.renderRole(this.props.player)}
                     <hr className="hrstyle"/>
@@ -169,6 +223,7 @@ class SpyfallGameParent extends Component{
           players: [],
           rws: new ReconnectingWebSocket(path),
           locations: [],
+          total_time: this.props.minutes*60,
         };
     
         this.changeUsername = this.changeUsername.bind(this);
@@ -176,6 +231,7 @@ class SpyfallGameParent extends Component{
         this.send_message = this.send_message.bind(this);
         this.changeLocationWrapper = this.changeLocationWrapper.bind(this);
         this.handleClickLocation = this.handleClickLocation.bind(this);
+        this.kickPerson = this.kickPerson.bind(this);
 
         this.state.rws.onopen = (event) => {
             console.log('WebSocket open', event);
@@ -194,6 +250,11 @@ class SpyfallGameParent extends Component{
             console.log("WebSocket closed", event);
             if(event.code == 1000 && event.reason == "leave_lobby"){
                 return // we are leaving 
+            }
+            if(event.code == 1001){
+                // we are being kicked
+                this.changeLocationWrapper("", "menu");
+                return 
             }
            this.state.rws.reconnect();
         };
@@ -257,6 +318,14 @@ class SpyfallGameParent extends Component{
         this.joinRoom)
     }
 
+    kickPerson(person){
+        const player = this.state.players.filter(c => c.id == parseInt(person))[0];
+        this.send_message({
+            command: "kick_player",
+            player: player,
+        })
+    }
+
     handleClickLocation(event){
         while(event.target.getAttribute("name") === null){
             event.target = event.target.parentNode;
@@ -300,6 +369,7 @@ class SpyfallGameParent extends Component{
                 username={this.props.username}
                 players={this.state.players}
                 changeLocation={this.changeLocationWrapper}
+                kickPerson={this.kickPerson}
                 />)
         }
         else{
@@ -310,6 +380,7 @@ class SpyfallGameParent extends Component{
                     locations={this.state.locations}
                     handleClickLocation={this.handleClickLocation}
                     changeLocation={this.changeLocationWrapper}
+                    total_time={this.state.total_time}
                 />
             );
         }

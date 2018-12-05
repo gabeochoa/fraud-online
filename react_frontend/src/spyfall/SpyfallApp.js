@@ -8,6 +8,7 @@ class SpyfallApp extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      minutes: 5,
       username: "",
       room: "", 
       location_state: "menu",
@@ -38,6 +39,13 @@ class SpyfallApp extends Component {
 
     this.changeUsername = this.changeUsername.bind(this);
     this.changeLocation = this.changeLocation.bind(this);
+    this.changeTimer = this.changeTimer.bind(this);
+  }
+
+  changeTimer(new_time){
+    this.setState({
+      minutes: new_time
+    })
   }
 
   changeUsername(username, callback){
@@ -65,6 +73,7 @@ class SpyfallApp extends Component {
        start_location={menu_location}
        username={this.state.username}
        room={this.state.room}
+       changeTimer={this.changeTimer}
        />
     );
     switch(this.state.location_state){
@@ -78,6 +87,7 @@ class SpyfallApp extends Component {
                    username={this.state.username}
                    changeLocation={this.changeLocation}
                    waitForSocket={this.waitForSocket}
+                   minutes={this.state.minutes}
                   /> 
         break;
       default:

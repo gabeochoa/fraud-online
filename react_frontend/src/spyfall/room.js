@@ -45,6 +45,9 @@ class SpyfallWaitingRoom extends Component {
             case "room_start":
                 this.props.changeLocation(this.props.access_code, "game");
             break;
+            case "kick_person":
+                this.props.kickPerson(event.target.getAttribute("player"));
+            break
             default:
             console.log("button was clicked : " + button);
             break
@@ -60,11 +63,11 @@ class SpyfallWaitingRoom extends Component {
         }
         else{
             icon_name = "kick_person"
-            icon = <MyIcon name={icon_name} path={mdiDelete} size={1} />
+            icon = <MyIcon name={icon_name} player={person.id} path={mdiDelete} size={1} />
         }
         return (
             <li key={person.id} style={{display:"float",  marginBottom:5}}>
-                <h1 style={{float: "left", paddingLeft:5}}>
+                <h1 style={{float: "left", paddingLeft:5, wordWrap: "break-word"}}>
                         {person.username} 
                 </h1>
                 <div style={{float: "right"}} name={icon_name} onClick={this.handleClick}> 

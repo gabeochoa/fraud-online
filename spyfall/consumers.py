@@ -708,6 +708,48 @@ class SpyfallConsumer(WebsocketConsumer):
             self.send_start_game()
         elif command == "end_game":
             self.send_end_game()
+        elif command == "kick_player":
+            self.send_kick_player(text_data_json['player'])
+
+
+    def send_kick_player(self, player):
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'kick_player',
+                'player': player
+            }
+        )
+    
+    def kick_player(self, message):
+        # specific.DXSWSJHM!qLEPQPwbXFOO 
+        # {'type': 'kick_player', 'message': {
+        #   'username': 'kickme', 'id': 1, 
+        #   'channel': 'specific.DXSWSJHM!kdNElAVJIuRY', 'role': None, 'location': None, 
+        #   'is_spy': False, 'is_me': False}
+        # }
+        player = message['player']
+        if self.channel_name == player['channel']:
+            self.close(code=1001)
+        # otherwise send the removal to the other people 
+
+        # store this user in our room cache
+        value = cache.get(self.room_group_name, default=None)
+        if value is None: # no one to remove ? 
+            value = {
+                "locations": get_locations(),
+                "players": [],
+            }
+        elif len(value.get("players", [])) == 0:
+            pass 
+        else:
+            players = []
+            for p in value['players']:
+                if p['id'] == player['id']:
+                    continue
+                players.append(p)
+            value['players'] = players
+        cache.set(self.room_group_name, value, timeout=None)
 
     def send_start_game(self):
         async_to_sync(self.channel_layer.group_send)(
