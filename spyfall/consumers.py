@@ -564,6 +564,8 @@ def start_game(cache_key):
     print("start game", value)
     # get a random person and assign them as spy
     spy_index = random.randrange(len(value['players']))
+    first_person = random.randrange(len(value['players']))
+
     person = value['players'][spy_index] # random_person()
     person["role"] = "spy"
     person["is_spy"] = True
@@ -573,8 +575,11 @@ def start_game(cache_key):
     players = []
     for index, player in enumerate(value["players"]):
         if index == spy_index:
+            person['is_first'] = True
             players.append(person)
             continue
+        if index == first_person:
+            player['is_first']: True
         player["role"] = random.choice(roles)
         player["location"] = location
         players.append(player)
@@ -591,6 +596,7 @@ def end_game(cache_key):
         player["role"] = None
         player["location"] = None
         player["is_spy"] = False
+        player['is_first'] = False
         players.append(player)
     value["players"] = players
     cache.set(cache_key, value, timeout=None)

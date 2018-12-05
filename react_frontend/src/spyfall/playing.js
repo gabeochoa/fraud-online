@@ -7,11 +7,15 @@ import SpyfallWaitingRoom from './room';
 const column_list = {
     columnCount: 2,
     columnGap: "3px",
+    columnRuleColor: "white",
+    columnRuleStyle: "solid",
+    columnRuleWidth: "10px",
 }
 const column_list_item = {
-    padding: "3px 10px",
+    padding: "0 0 0 10px",
     margin: "0 0 4px 0",
     backgroundColor: "#f0f0f0",
+    columnSpan: "1",
 }
 
 class Timer extends Component{
@@ -36,7 +40,6 @@ class SpyfallGame extends Component{
 
         this.state = {
         }
-
         this.handleClick = this.handleClick.bind(this);
         this.pretty_location = this.pretty_location.bind(this);
     }
@@ -65,7 +68,7 @@ class SpyfallGame extends Component{
         if(person.is_first){
             extra = <sup style={{color:"red"}}> 1st</sup>
         }
-        return (<li key={person.username} style={column_list_item}>
+        return (<li key={person.id} style={column_list_item}>
                     {person.username} {extra}
                 </li>);
     }
