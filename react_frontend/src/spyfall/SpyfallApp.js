@@ -43,6 +43,7 @@ class SpyfallApp extends Component {
   }
 
   changeTimer(new_time){
+    // console.log("new time" +  new_time)
     this.setState({
       minutes: new_time
     })
@@ -56,7 +57,7 @@ class SpyfallApp extends Component {
   }
 
   changeLocation(room, newLocation, changeRoom){
-    console.log("got room " + room + " " + newLocation);
+    // console.log("got room " + room + " " + newLocation);
     this.setState({
       room: room, 
       location_state: newLocation,

@@ -54,7 +54,7 @@ class MenuButtonBar extends Component {
       this.setState({
         bad_input: false,
       })
-      this.handleTimerChange(parseInt(event.target.value))
+      this.props.changeTimer(parseInt(event.target.value))
     }
   }
 
@@ -62,7 +62,7 @@ class MenuButtonBar extends Component {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (var i = 0; i < 5; i++)
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
+      text += possible.charAt(Math.floor(Math.random() * possible.length)).toLocaleLowerCase();
     return text;
   }
 
