@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url('^spyfall/', include('spyfall.urls')),
+    url('^drawit/', include('drawit.urls')),
 
     url('^$', include('react_frontend.urls')),
 ]

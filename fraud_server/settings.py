@@ -28,6 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "fraud-online.herokuapp.com",
+    "ochoag.com",
 ]
 SECURE_SSL_REDIRECT = False
 
