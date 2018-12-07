@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 import ReactDOM from 'react-dom';
+import windowSize from '../components/windowSize';
+import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
+
 
 class Canvas extends Component {
     constructor(props) {
@@ -11,6 +14,7 @@ class Canvas extends Component {
       this.onMouseDown = this.onMouseDown.bind(this);
       this.onMouseMove = this.onMouseMove.bind(this);
       this.onMouseUp = this.onMouseUp.bind(this);
+      document.body.classList.add("no-sroll")
     }
 
     onMouseDown({ nativeEvent }) {
@@ -57,14 +61,19 @@ class Canvas extends Component {
       this.past_positions = []
     }
 
-    componentDidMount() {
-      // Here we set up the properties of the canvas element. 
-      this.canvas.width = 1000;
-      this.canvas.height = 800;
+    componentDidMount(){
+      disableBodyScroll(this.canvas);
+
+      this.canvas.width = 900;//this.props.width;
+      this.canvas.height = 300;//this.props.height;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
       this.ctx.lineWidth = 5;
+    }
+
+    componentWillUnmount() {
+      clearAllBodyScrollLocks();
     }
 
     render() {
@@ -72,7 +81,7 @@ class Canvas extends Component {
         <canvas
         // We use the ref attribute to get direct access to the canvas element. 
           ref={(ref) => (this.canvas = ref)}
-          style={{ background: 'black' }}
+          style={{ background: 'black'}}
           onMouseDown={this.onMouseDown}
           onMouseLeave={this.onMouseUp}
           onMouseUp={this.onMouseUp}
@@ -81,4 +90,4 @@ class Canvas extends Component {
       );
     }
   }
-  export default Canvas;
+  export default windowSize(Canvas);
