@@ -1,8 +1,6 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
-import Container from "../components/Container";
 import Icon from '@mdi/react'
-import { mdiEye, mdiHatFedora } from '@mdi/js'
+import { mdiHatFedora } from '@mdi/js'
 import "./spyfall.css"
 
 class MenuButtonBar extends Component {

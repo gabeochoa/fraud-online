@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import windowSize from '../components/windowSize';
 import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
+import ReconnectingWebSocket from 'reconnecting-websocket'
+
 
 class Canvas extends Component {
     constructor(props) {
@@ -22,6 +24,41 @@ class Canvas extends Component {
       this.onEventBegin = this.onEventBegin.bind(this);
       this.onEventEnd = this.onEventEnd.bind(this);
       this.onEventMove = this.onEventMove.bind(this);
+
+      const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+      const host =  window.location.host;
+      // const extra = "username=" + this.props.username;
+      const extra = "username=" + "myusername";
+      //const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
+      var room = "room";
+      const path = (ws_scheme + '://' + host + '/ws/drawit/' + room + '/?' + extra);
+      this.rws = new ReconnectingWebSocket(path);
+
+      this.rws.onopen = (event) => {
+        console.log('WebSocket open', event);
+        // this.send_message({ command: 'get_room' });
+      };
+      this.rws.onmessage = e => {
+          console.log("websocket on message", e.data);
+          // this.process_message(e.data)
+      };
+
+      this.rws.onerror = e => {
+          console.log(e.message);
+      };
+
+      this.rws.onclose = (event) => {
+          console.log("WebSocket closed", event);
+          if(event.code == 1000 && event.reason == "leave_lobby"){
+              return // we are leaving 
+          }
+          if(event.code == 1001){
+              // we are being kicked
+              // this.changeLocationWrapper("", "menu");
+              return 
+          }
+        this.rws.reconnect();
+      };
     }
 
     onEventBegin(x,y){
@@ -49,13 +86,13 @@ class Canvas extends Component {
 
     onMouseDown({ nativeEvent }) {
       const { offsetX: x, offsetY: y } = nativeEvent;
-      console.log("im down", x, y);
+      // console.log("im down", x, y);
       this.onEventBegin(x,y)
     }
 
     onMouseMove({ nativeEvent }) {
       const { offsetX: x, offsetY: y } = nativeEvent;
-      console.log("im moving ", x, y, this.past_positions.length);
+      // console.log("im moving ", x, y, this.past_positions.length);
       this.onEventMove(x,y)
     }
 
@@ -78,7 +115,10 @@ class Canvas extends Component {
     }
     
     onTouchStart(event){
-      console.log("touchstart", event)
+      if (event.target == canvas) {
+       event.preventDefault();
+      }
+      // console.log("touchstart", event)
       var rect = this.canvas.getBoundingClientRect();
       var x = event.touches[0].clientX - rect.left
       var y = event.touches[0].clientY - rect.top
@@ -88,10 +128,16 @@ class Canvas extends Component {
 
   // document.body.ontouchmove = (e) => { e.preventDefault; return false; };
     onTouchEnd(event){
+      if (event.target == canvas) {
+       event.preventDefault();
+      }
       // console.log("touchend", event)
       this.onEventEnd()
     }
     onTouchMove(event){
+      if (event.target == canvas) {
+        event.preventDefault();
+      }
       // console.log("touchmove", event)
       var rect = this.canvas.getBoundingClientRect();
       var x = event.touches[0].clientX - rect.left
