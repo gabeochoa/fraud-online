@@ -5,11 +5,36 @@ import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'bo
 
 import ReconnectingWebSocket from 'reconnecting-websocket'
 
+function rainbow(numOfSteps, step) {
+  // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
+  // Adam Cole, 2011-Sept-14
+  // HSV to RBG adapted from: http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
+  var r, g, b;
+  var h = step / numOfSteps;
+  var i = ~~(h * 6);
+  var f = h * 6 - i;
+  var q = 1 - f;
+  switch(i % 6){
+      case 0: r = 1; g = f; b = 0; break;
+      case 1: r = q; g = 1; b = 0; break;
+      case 2: r = 0; g = 1; b = f; break;
+      case 3: r = 0; g = q; b = 1; break;
+      case 4: r = f; g = 0; b = 1; break;
+      case 5: r = 1; g = 0; b = q; break;
+  }
+  var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
+  return (c);
+}
 
 class Canvas extends Component {
     constructor(props) {
       super(props);
 
+      this.state = {
+        in_lobby: false
+      }
+      this.numOfSteps = 10 // this would be set to num of players
+      this.player_colors = {}
       this.mouse_clicked = false;
       this.past_positions = []
 
@@ -24,6 +49,9 @@ class Canvas extends Component {
       this.onEventBegin = this.onEventBegin.bind(this);
       this.onEventEnd = this.onEventEnd.bind(this);
       this.onEventMove = this.onEventMove.bind(this);
+      
+      this.send_message = this.send_message.bind(this);
+      this.process_message = this.process_message.bind(this);
 
       const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
       const host =  window.location.host;
@@ -40,7 +68,7 @@ class Canvas extends Component {
       };
       this.rws.onmessage = e => {
           console.log("websocket on message", e.data);
-          // this.process_message(e.data)
+          this.process_message(e.data)
       };
 
       this.rws.onerror = e => {
@@ -59,6 +87,70 @@ class Canvas extends Component {
           }
         this.rws.reconnect();
       };
+    }
+
+
+
+    send_message(data){
+      console.log("sending ", data)
+      this.rws.send(JSON.stringify({ ...data }));
+    }
+
+  process_message(data) {
+      const parsedData = JSON.parse(data);
+  
+      const command = parsedData.command;
+      const message = parsedData.message;
+      const sender = parsedData.sender;
+      console.log("react recivied new message", command, message)
+     
+      if(command == "start_game"){
+          this.setState({
+              in_lobby: false
+          })
+      }
+      
+      if(command == "end_game"){
+          this.setState({
+              in_lobby: true
+          })
+      }
+
+      if(command == "draw"){
+        if(this.player_colors[sender] == undefined)
+        {
+          var new_color = rainbow(this.numOfSteps, Object.keys(this.player_colors).length);
+          this.player_colors[sender] = new_color
+        }
+
+        this.paint(parsedData.message.prev, parsedData.message.cur, this.player_colors[sender])
+      }
+      // //all commands
+      // {
+      //     let update_players = [...message.players]
+      //     update_players.forEach((item)=>{
+      //         if (item.channel == sender){
+      //             item.is_me = true;
+      //             this.setState({
+      //                 player: item,
+      //             })
+      //         }
+      //         else{
+      //             item.is_me = false;
+      //         }
+      //     });
+
+      //     let locations = this.state.locations;
+      //     if(locations.length == 0){
+      //         locations = [...message.locations].map((item)=>{return [item, false]})
+      //     }
+                      
+      //     this.setState({
+      //       players: update_players,
+      //       locations: locations,
+      //       is_game_started: message.is_game_started
+      //     });
+      // }
     }
 
     onEventBegin(x,y){
@@ -96,7 +188,18 @@ class Canvas extends Component {
       this.onEventMove(x,y)
     }
 
-    paint(prev, cur, stroke='#EE92C2'){
+    paint(prev, cur, stroke){
+      console.log("paint", prev, cur, stroke)
+      if(stroke == undefined){
+          stroke ='#EE92C2'
+          this.send_message({
+            command: "draw",
+            message:{
+              prev: prev,
+              cur: cur
+            }
+        })
+      }
       const { x, y } = prev;
       const { x: x2, y: y2 } = cur;
 
@@ -108,6 +211,8 @@ class Canvas extends Component {
       this.ctx.lineTo(x2, y2);
       // Visualize the line using the strokeStyle
       this.ctx.stroke();
+
+
     }
 
     onMouseUp(){

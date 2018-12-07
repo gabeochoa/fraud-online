@@ -86,7 +86,11 @@ class DrawItConsumer(BaseConsumer):
 
     def extra_commands(self, command, data):
         if command == "draw":
-            self.send_draw_command(data)
+            print(data)
+            self.send_draw_command({
+                "prev": data['message']['prev'],
+                "cur": data['message']['cur'],
+            })
 
     def send_draw_command(self, data):
         async_to_sync(self.channel_layer.group_send)(
