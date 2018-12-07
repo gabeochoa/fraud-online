@@ -146,6 +146,9 @@ class BaseConsumer(WebsocketConsumer):
         )
         self._send_get_room_response()
 
+    def extra_commands(self, command, data):
+        pass
+        
     # Receive message from WebSocket
     def receive(self, text_data):
         # print(text_data)
@@ -162,6 +165,8 @@ class BaseConsumer(WebsocketConsumer):
             self._send_end_game()
         elif command == "kick_player":
             self._send_kick_player(text_data_json['player'])
+        
+        self.extra_commands(command, text_data_json)
 
     def _send_join_lobby(self, username):
         async_to_sync(self.channel_layer.group_send)(
