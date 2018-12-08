@@ -56,7 +56,7 @@ class Canvas extends Component {
       const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
       const host =  window.location.host;
       // const extra = "username=" + this.props.username;
-      const extra = "username=" + "myusername";
+      const extra = "username=" + rainbow(this.numOfSteps*10, Math.random() * 10).slice(1);
       //const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
       var room = "room";
       const path = (ws_scheme + '://' + host + '/ws/drawit/' + room + '/?' + extra);
@@ -101,7 +101,7 @@ class Canvas extends Component {
   
       const command = parsedData.command;
       const message = parsedData.message;
-      const sender = parsedData.sender;
+      const username = parsedData.message.username;
       console.log("react recivied new message", command, message)
      
       if(command == "start_game"){
@@ -116,14 +116,17 @@ class Canvas extends Component {
           })
       }
 
+      console.log(username, this.player_colors)
+
       if(command == "draw"){
-        if(this.player_colors[sender] == undefined)
+        if(!(username in this.player_colors))
         {
+          console.log("choosing new color")
           var new_color = rainbow(this.numOfSteps, Object.keys(this.player_colors).length);
-          this.player_colors[sender] = new_color
+          this.player_colors[username] = new_color
         }
 
-        this.paint(parsedData.message.prev, parsedData.message.cur, this.player_colors[sender])
+        this.paint(parsedData.message.prev, parsedData.message.cur, this.player_colors[username])
       }
       // //all commands
       // {
@@ -199,7 +202,7 @@ class Canvas extends Component {
             command: "draw",
             message:{
               prev: prev,
-              cur: cur
+              cur: cur,
             }
         })
       }

@@ -90,6 +90,7 @@ class DrawItConsumer(BaseConsumer):
             self.send_draw_command({
                 "prev": data['message']['prev'],
                 "cur": data['message']['cur'],
+                "username": self.get_username
             })
 
     def send_draw_command(self, data):
