@@ -220,7 +220,7 @@ class Canvas extends Component {
     }
     
     onTouchStart(event){
-      if (event.target == canvas) {
+      if (event.target == this.canvas) {
        event.preventDefault();
       }
       // console.log("touchstart", event)
@@ -233,14 +233,14 @@ class Canvas extends Component {
 
   // document.body.ontouchmove = (e) => { e.preventDefault; return false; };
     onTouchEnd(event){
-      if (event.target == canvas) {
+      if (event.target == this.canvas) {
        event.preventDefault();
       }
       // console.log("touchend", event)
       this.onEventEnd()
     }
     onTouchMove(event){
-      if (event.target == canvas) {
+      if (event.target == this.canvas) {
         event.preventDefault();
       }
       // console.log("touchmove", event)
