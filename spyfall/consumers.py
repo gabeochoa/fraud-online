@@ -19,6 +19,8 @@ def start_game(cache_key):
     for player in (value["players"]):
         player["role"] = random.choice(roles)
         player["location"] = location
+        player["is_spy"] = False
+        player['is_first'] = False
         players.append(player)
 
     # then generate first player and spy
