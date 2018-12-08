@@ -157,6 +157,9 @@ class Canvas extends Component {
       this.mouse_clicked = true;
       //always draw a dot on mouse down
       this.paint({x:x,y:y}, {x:x,y:y})
+      if(this.past_positions.length == 0){
+        this.past_positions.push({x:x,y:y})
+      }
     }
 
     onEventMove(x,y){     
@@ -211,8 +214,6 @@ class Canvas extends Component {
       this.ctx.lineTo(x2, y2);
       // Visualize the line using the strokeStyle
       this.ctx.stroke();
-
-
     }
 
     onMouseUp(){
