@@ -4,6 +4,8 @@ import windowSize from '../components/windowSize';
 import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 import ReconnectingWebSocket from 'reconnecting-websocket'
+import Icon from "@mdi/react";
+import { mdiPencil, mdiEraser } from "@mdi/js";
 
 function rainbow(numOfSteps, step) {
   // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
@@ -26,6 +28,15 @@ function rainbow(numOfSteps, step) {
   return (c);
 }
 
+
+const PENCIL = {
+  stroke: 'red'
+}
+
+const ERASER = {
+  stroke: 'black'
+}
+
 class Canvas extends Component {
     constructor(props) {
       super(props);
@@ -36,7 +47,8 @@ class Canvas extends Component {
       this.numOfSteps = 10 // this would be set to num of players
       this.player_colors = {}
       this.mouse_clicked = false;
-      this.past_positions = []
+      this.past_positions = [];
+      this._tool = PENCIL;
 
       this.onMouseDown = this.onMouseDown.bind(this);
       this.onMouseMove = this.onMouseMove.bind(this);
@@ -52,6 +64,8 @@ class Canvas extends Component {
       
       this.send_message = this.send_message.bind(this);
       this.process_message = this.process_message.bind(this);
+
+      this.onClickHandler = this.onClickHandler.bind(this);
 
       const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
       const host =  window.location.host;
@@ -119,6 +133,7 @@ class Canvas extends Component {
       console.log(username, this.player_colors)
 
       if(command == "draw"){
+        
         if(!(username in this.player_colors))
         {
           console.log("choosing new color")
@@ -126,7 +141,8 @@ class Canvas extends Component {
           this.player_colors[username] = new_color
         }
 
-        this.paint(parsedData.message.prev, parsedData.message.cur, this.player_colors[username])
+        this.paint(parsedData.message.prev, parsedData.message.cur, parsedData.message.stroke)
+        // this.player_colors[username])
       }
       // //all commands
       // {
@@ -197,14 +213,16 @@ class Canvas extends Component {
     paint(prev, cur, stroke){
       console.log("paint", prev, cur, stroke)
       if(stroke == undefined){
-          stroke ='#EE92C2'
+          stroke = this._tool.stroke; //'#EE92C2'
           this.send_message({
             command: "draw",
             message:{
               prev: prev,
               cur: cur,
+              stroke: this._tool.stroke,
             }
         })
+        return;
       }
       const { x, y } = prev;
       const { x: x2, y: y2 } = cur;
@@ -217,6 +235,18 @@ class Canvas extends Component {
       this.ctx.lineTo(x2, y2);
       // Visualize the line using the strokeStyle
       this.ctx.stroke();
+    }
+
+    onClickHandler(event){
+      const button_ = event.target.getAttribute("name")
+      if(button_ == "pencil"){
+        console.log("tool is now pencil")
+        this._tool = PENCIL;
+      }
+      else if(button_ == "eraser"){
+        console.log("tool is now eraser")
+        this._tool = ERASER;
+      }
     }
 
     onMouseUp(){
@@ -269,6 +299,13 @@ class Canvas extends Component {
 
     render() {
       return (
+        <React.Fragment>
+          <button name="pencil" onClick={this.onClickHandler}>
+            <Icon path={mdiPencil} size={1.5}/>
+          </button>
+          <button name="eraser" onClick={this.onClickHandler}>
+            <Icon path={mdiEraser} size={1.5}/>
+          </button>
         <canvas
         // We use the ref attribute to get direct access to the canvas element. 
           ref={(ref) => (this.canvas = ref)}
@@ -281,6 +318,7 @@ class Canvas extends Component {
           onTouchEnd={this.onTouchEnd}
           onTouchMove={this.onTouchMove}
         />
+        </React.Fragment>
       );
     }
   }
