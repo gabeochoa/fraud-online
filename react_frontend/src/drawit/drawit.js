@@ -7,7 +7,11 @@ class DrawIt extends Component {
 
   render(){
     return (
-      <Canvas></Canvas>
+      
+      <Canvas
+        width= {document.width}
+        height= {document.height}
+      />
     );
   }
 }

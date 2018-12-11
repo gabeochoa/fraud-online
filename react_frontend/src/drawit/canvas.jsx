@@ -329,12 +329,12 @@ class Canvas extends Component {
     }
 
     componentDidMount(){
-      this.canvas.width = 1900;//this.props.width;
-      this.canvas.height = 1300;//this.props.height;
+      this.canvas.width = 1000;this.props.width;
+      this.canvas.height = 1000;this.props.height;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
-      this.ctx.lineWidth = 5;
+      this.ctx.lineWidth = this._tool.lineWidth;
     }
 
     handleColorChange(color){
@@ -349,38 +349,69 @@ class Canvas extends Component {
     render() {
       return (
         <React.Fragment>
-          <div id="button_bar" style={{display: "block"}}>
-            <button name={CLEAR} onClick={this.onClickHandler} style={{width: "40"}}>
+          <div id="button_bar" style={button_bar_style}>
+            <button name={CLEAR} onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiClose} size={1.5}/>
             </button>
-            <button name="pencil" onClick={this.onClickHandler} style={{width: "40"}}>
+            <button name="pencil" onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiPencil} size={1.5}/>
             </button>
-            <button name="eraser" onClick={this.onClickHandler} style={{width: "40"}}>
+            <button name="eraser" onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiEraser} size={1.5}/>
             </button>
-            <GithubPicker
-              width={40}
-              color={ this._tool.stroke }
-              colors={COLOR_CHOICES}
-              onChangeComplete={ this.handleColorChange }
-              triangle={"hide"}
-              />
+            <div style={gh_style}>
+              <GithubPicker
+                width={40}
+                color={ this._tool.stroke }
+                colors={COLOR_CHOICES}
+                onChangeComplete={ this.handleColorChange }
+                triangle={"hide"}
+                />
+              </div>
           </div>
-        <canvas
-        // We use the ref attribute to get direct access to the canvas element. 
-          ref={(ref) => (this.canvas = ref)}
-          style={{ background: 'black', touchAction: "None"}}
-          onMouseDown={this.onMouseDown}
-          onMouseLeave={this.onMouseUp}
-          onMouseUp={this.onMouseUp}
-          onMouseMove={this.onMouseMove}
-          onTouchStart={this.onTouchStart}
-          onTouchEnd={this.onTouchEnd}
-          onTouchMove={this.onTouchMove}
-        />
+          <canvas
+            style={canvas_style}
+          // We use the ref attribute to get direct access to the canvas element. 
+            ref={(ref) => (this.canvas = ref)}
+            onMouseDown={this.onMouseDown}
+            onMouseLeave={this.onMouseUp}
+            onMouseUp={this.onMouseUp}
+            onMouseMove={this.onMouseMove}
+            onTouchStart={this.onTouchStart}
+            onTouchEnd={this.onTouchEnd}
+            onTouchMove={this.onTouchMove}
+          />
         </React.Fragment>
       );
     }
   }
   export default windowSize(Canvas);
+
+  const button_bar_style = {
+    display: "block",
+    position: "absolute",
+    zIndex: "2",
+    top: -40,
+    // left: -30,
+    left: -10,
+    pointerEvents: "None",
+    touchAction: "None",
+  }
+  const button_style = {
+    touchAction: "auto",
+    pointerEvents: "auto",
+    left: -5,
+    width: "40px",
+  }
+
+  const gh_style = {
+    touchAction: "auto",
+    pointerEvents: "auto",
+  }
+
+  const canvas_style = {
+    background: BACKGROUND, 
+    touchAction: "None",
+    zIndex: "1",
+    maxHeight: "inherit",
+  }
