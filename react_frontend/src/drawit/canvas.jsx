@@ -407,6 +407,7 @@ class Canvas extends Component {
   const gh_style = {
     touchAction: "auto",
     pointerEvents: "auto",
+    width: 40
   }
 
   const canvas_style = {
