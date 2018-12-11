@@ -5,7 +5,8 @@ import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'bo
 
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import Icon from "@mdi/react";
-import { mdiPencil, mdiEraser } from "@mdi/js";
+import { mdiPencil, mdiEraser, mdiClose } from "@mdi/js";
+import { GithubPicker, CirclePicker } from 'react-color';
 
 function rainbow(numOfSteps, step) {
   // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
@@ -28,13 +29,19 @@ function rainbow(numOfSteps, step) {
   return (c);
 }
 
+const BACKGROUND = 'black'
 
-const PENCIL = {
-  stroke: 'red'
+const COLOR_CHOICES = ['#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
+'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#BEDADC', '#FFFFFF', ];//'#BED3F3', '#D4C4FB'];
+
+let PENCIL = {
+  stroke: COLOR_CHOICES[0],
+  lineWidth: 10,
 }
 
 const ERASER = {
-  stroke: 'black'
+  stroke: BACKGROUND,
+  lineWidth: 15,
 }
 
 class Canvas extends Component {
@@ -49,6 +56,10 @@ class Canvas extends Component {
       this.mouse_clicked = false;
       this.past_positions = [];
       this._tool = PENCIL;
+
+      this.paint = this.paint.bind(this);
+      this._paint = this._paint.bind(this);
+      this.handleColorChange = this.handleColorChange.bind(this);
 
       this.onMouseDown = this.onMouseDown.bind(this);
       this.onMouseMove = this.onMouseMove.bind(this);
@@ -110,7 +121,7 @@ class Canvas extends Component {
       this.rws.send(JSON.stringify({ ...data }));
     }
 
-  process_message(data) {
+    process_message(data) {
       const parsedData = JSON.parse(data);
   
       const command = parsedData.command;
@@ -133,6 +144,11 @@ class Canvas extends Component {
       console.log(username, this.player_colors)
 
       if(command == "draw"){
+
+        if(parsedData.message.tool == "CLEAR"){
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          return; 
+        }
         
         if(!(username in this.player_colors))
         {
@@ -141,7 +157,7 @@ class Canvas extends Component {
           this.player_colors[username] = new_color
         }
 
-        this.paint(parsedData.message.prev, parsedData.message.cur, parsedData.message.stroke)
+        this._paint(parsedData.message.prev, parsedData.message.cur, parsedData.message.tool)
         // this.player_colors[username])
       }
       // //all commands
@@ -210,25 +226,13 @@ class Canvas extends Component {
       this.onEventMove(x,y)
     }
 
-    paint(prev, cur, stroke){
-      console.log("paint", prev, cur, stroke)
-      if(stroke == undefined){
-          stroke = this._tool.stroke; //'#EE92C2'
-          this.send_message({
-            command: "draw",
-            message:{
-              prev: prev,
-              cur: cur,
-              stroke: this._tool.stroke,
-            }
-        })
-        return;
-      }
+    _paint(prev, cur, tool){
       const { x, y } = prev;
       const { x: x2, y: y2 } = cur;
 
       this.ctx.beginPath();
-      this.ctx.strokeStyle = stroke;
+      this.ctx.lineWidth = tool.lineWidth;
+      this.ctx.strokeStyle = tool.stroke;
       // Move the the prevPosition of the mouse
       this.ctx.moveTo(x, y);
       // Draw a line to the current position of the mouse
@@ -237,7 +241,34 @@ class Canvas extends Component {
       this.ctx.stroke();
     }
 
+    drawOutline(cur){
+      const {x, y} = cur;
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, this._tool.lineWidth, 0, 2 * Math.PI);
+      this.ctx.fillStyle = 'white';//#40000';
+      this.ctx.fill();
+    }
+
+    paint(prev, cur){
+      console.log("paint", prev, cur, this._tool)
+      this.send_message({
+          command: "draw",
+          message:{
+            prev: prev,
+            cur: cur,
+            tool: this._tool,
+          }
+      });
+
+      this._paint(prev, cur, this._tool)
+      // this.drawOutline(cur)
+    }
+
     onClickHandler(event){
+      console.log("click event", event, event.target)
+      while(event.target.getAttribute("name") === null){
+        event.target = event.target.parentNode;
+      }
       const button_ = event.target.getAttribute("name")
       if(button_ == "pencil"){
         console.log("tool is now pencil")
@@ -246,6 +277,17 @@ class Canvas extends Component {
       else if(button_ == "eraser"){
         console.log("tool is now eraser")
         this._tool = ERASER;
+      }
+      else if(button_ == "clear"){
+        console.log("clearing canvas")
+        this.send_message({
+            command: "draw",
+            message:{
+              prev: null,
+              cur: null,
+              tool: "CLEAR",
+            }
+        });
       }
     }
 
@@ -293,6 +335,11 @@ class Canvas extends Component {
       this.ctx.lineWidth = 5;
     }
 
+    handleColorChange(color){
+      // TODO what when eraser 
+      this._tool.stroke = color.hex;
+    }
+
     componentWillUnmount() {
       clearAllBodyScrollLocks();
     }
@@ -300,12 +347,24 @@ class Canvas extends Component {
     render() {
       return (
         <React.Fragment>
-          <button name="pencil" onClick={this.onClickHandler}>
-            <Icon path={mdiPencil} size={1.5}/>
-          </button>
-          <button name="eraser" onClick={this.onClickHandler}>
-            <Icon path={mdiEraser} size={1.5}/>
-          </button>
+          <div id="button_bar" style={{display: "block"}}>
+            <button name="clear" onClick={this.onClickHandler} style={{width: "40"}}>
+              <Icon path={mdiClose} size={1.5}/>
+            </button>
+            <button name="pencil" onClick={this.onClickHandler} style={{width: "40"}}>
+              <Icon path={mdiPencil} size={1.5}/>
+            </button>
+            <button name="eraser" onClick={this.onClickHandler} style={{width: "40"}}>
+              <Icon path={mdiEraser} size={1.5}/>
+            </button>
+            <GithubPicker
+              width={40}
+              color={ this._tool.stroke }
+              colors={COLOR_CHOICES}
+              onChangeComplete={ this.handleColorChange }
+              triangle={"hide"}
+              />
+          </div>
         <canvas
         // We use the ref attribute to get direct access to the canvas element. 
           ref={(ref) => (this.canvas = ref)}
