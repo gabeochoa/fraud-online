@@ -361,8 +361,11 @@ class Canvas extends Component {
             <button name="eraser" onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiEraser} size={1.5}/>
             </button>
-            <div style={{float: "right"}}>
-              <h1 style={{color: BACKGROUND, left: 10, margin: 10 }}>{this.props.word}</h1>
+            <div style={{float: "right", display: "flex", left: 10, margin: 10}}>
+              <b>WORD: </b>
+              <h1 style={{color: 'black'}}>
+                {this.props.word}
+              </h1>
             </div>
 
             <div style={gh_style}>
