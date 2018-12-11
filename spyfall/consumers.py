@@ -60,12 +60,12 @@ class SpyfallConsumer(BaseConsumer):
 
     def get_user(self, players=None):
         base_player = {
-                "username": self.get_username,
-                "id": 0,
-                "channel": self.channel_name,
-                "role": None,
-                "location": None,
-                "is_spy": False,
+            "username": self.get_username,
+            "id": 0,
+            "channel": self.channel_name,
+            "role": None,
+            "location": None,
+            "is_spy": False,
         }
         if players is None or len(players) == 0:
             return base_player
@@ -76,7 +76,18 @@ class SpyfallConsumer(BaseConsumer):
             return base_player
         
     def store_extra_in_cache(self):
+        self.store_timer_amount_in_cache()
         self.store_locations_in_cache()
+
+    def store_timer_amount_in_cache(self):
+        local_time = self.get_params.get("minutes", [5])[0]
+        value = cache.get(self.room_group_name, default=None)
+        if 'minutes' in value:
+            # time already set
+            return 
+        self.get_total_time = local_time
+        value['minutes'] = self.get_total_time
+        cache.set(self.room_group_name, value, timeout=None)
 
     def store_locations_in_cache(self):
         value = cache.get(self.room_group_name, default=None)

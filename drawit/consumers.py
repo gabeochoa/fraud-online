@@ -68,10 +68,10 @@ class DrawItConsumer(BaseConsumer):
 
     def get_user(self, players=None):
         base_player = {
-                "username": self.get_username,
-                "id": 0,
-                "channel": self.channel_name,
-                "is_in_game": False,
+            "username": self.get_username,
+            "id": 0,
+            "channel": self.channel_name,
+            "is_in_game": False,
         }
         if players is None or len(players) == 0:
             return base_player

@@ -11,7 +11,9 @@ class SpyfallGameParent extends Component{
 
         const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
         const host =  window.location.host;
-        const extra = "username=" + this.props.username;
+        const extra = ("username=" + this.props.username + 
+                       "&" + "minutes=" + this.props.minutes
+                        );
         const path = (ws_scheme + '://' + host + '/ws/spyfall/' + this.props.room + '/?' + extra);
 
         this.state = {
@@ -110,7 +112,8 @@ class SpyfallGameParent extends Component{
             this.setState({
               players: update_players,
               locations: locations,
-              is_game_started: message.is_game_started
+              is_game_started: message.is_game_started,
+              total_time: (message.minutes * 60)
             });
         }
     }

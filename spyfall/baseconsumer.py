@@ -25,6 +25,7 @@ class BaseConsumer(WebsocketConsumer):
         # parse get_params 
         self.get_params = parse_qs(self.scope['query_string'].decode("utf-8"))
         self.get_username = self.get_params.get("username", [time.time()])[0]
+
         # print(username)
 
         # store this user in our room cache
