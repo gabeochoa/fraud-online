@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from 'react-dom';
 import windowSize from '../components/windowSize';
 import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
+import Button from '@material-ui/core/Button';
 
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import Icon from "@mdi/react";
@@ -352,15 +353,15 @@ class Canvas extends Component {
       return (
         <React.Fragment>
           <div id="button_bar" style={button_bar_style}>
-            <button name={CLEAR} onClick={this.onClickHandler} style={button_style}>
+            <Button name={CLEAR} onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiClose} size={1.5}/>
-            </button>
-            <button name="pencil" onClick={this.onClickHandler} style={button_style}>
+            </Button>
+            <Button name="pencil" onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiPencil} size={1.5}/>
-            </button>
-            <button name="eraser" onClick={this.onClickHandler} style={button_style}>
+            </Button>
+            <Button name="eraser" onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiEraser} size={1.5}/>
-            </button>
+            </Button>
             <div style={{float: "right", display: "flex", left: 10, margin: 10}}>
               <b>WORD: </b>
               <h1 style={{color: 'black'}}>
