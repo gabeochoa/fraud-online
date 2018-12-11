@@ -338,7 +338,9 @@ class Canvas extends Component {
     }
 
     handleColorChange(color){
-      // TODO what when eraser 
+      //auto matically change to pencil and then change color
+      // we dont want to keep on eraser and overwrite the black
+      this._tool = PENCIL
       this._tool.stroke = color.hex;
     }
 
