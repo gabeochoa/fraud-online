@@ -34,6 +34,8 @@ const BACKGROUND = 'black'
 const COLOR_CHOICES = ['#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
 '#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#BEDADC', '#FFFFFF', ];//'#BED3F3', '#D4C4FB'];
 
+const CLEAR = "__CLEAR"
+
 let PENCIL = {
   stroke: COLOR_CHOICES[0],
   lineWidth: 10,
@@ -145,7 +147,7 @@ class Canvas extends Component {
 
       if(command == "draw"){
 
-        if(parsedData.message.tool == "CLEAR"){
+        if(parsedData.message.tool == CLEAR){
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
           return; 
         }
@@ -278,14 +280,14 @@ class Canvas extends Component {
         console.log("tool is now eraser")
         this._tool = ERASER;
       }
-      else if(button_ == "clear"){
+      else if(button_ == CLEAR){
         console.log("clearing canvas")
         this.send_message({
             command: "draw",
             message:{
               prev: null,
               cur: null,
-              tool: "CLEAR",
+              tool: CLEAR,
             }
         });
       }
@@ -348,7 +350,7 @@ class Canvas extends Component {
       return (
         <React.Fragment>
           <div id="button_bar" style={{display: "block"}}>
-            <button name="clear" onClick={this.onClickHandler} style={{width: "40"}}>
+            <button name={CLEAR} onClick={this.onClickHandler} style={{width: "40"}}>
               <Icon path={mdiClose} size={1.5}/>
             </button>
             <button name="pencil" onClick={this.onClickHandler} style={{width: "40"}}>
