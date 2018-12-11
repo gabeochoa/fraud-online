@@ -11,6 +11,7 @@ class DrawIt extends Component {
       <Canvas
         width= {document.width}
         height= {document.height}
+        word={"penguin"}
       />
     );
   }

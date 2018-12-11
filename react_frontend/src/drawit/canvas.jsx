@@ -29,10 +29,10 @@ function rainbow(numOfSteps, step) {
   return (c);
 }
 
-const BACKGROUND = 'black'
+const BACKGROUND = 'white'
 
 const COLOR_CHOICES = ['#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
-'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#BEDADC', '#FFFFFF', ];//'#BED3F3', '#D4C4FB'];
+'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#BEDADC', 'white', 'black'];//'#BED3F3', '#D4C4FB'];
 
 const CLEAR = "__CLEAR"
 
@@ -361,6 +361,10 @@ class Canvas extends Component {
             <button name="eraser" onClick={this.onClickHandler} style={button_style}>
               <Icon path={mdiEraser} size={1.5}/>
             </button>
+            <div style={{float: "right"}}>
+              <h1 style={{color: BACKGROUND, left: 10, margin: 10 }}>{this.props.word}</h1>
+            </div>
+
             <div style={gh_style}>
               <GithubPicker
                 width={40}
@@ -371,18 +375,20 @@ class Canvas extends Component {
                 />
               </div>
           </div>
-          <canvas
-            style={canvas_style}
-          // We use the ref attribute to get direct access to the canvas element. 
-            ref={(ref) => (this.canvas = ref)}
-            onMouseDown={this.onMouseDown}
-            onMouseLeave={this.onMouseUp}
-            onMouseUp={this.onMouseUp}
-            onMouseMove={this.onMouseMove}
-            onTouchStart={this.onTouchStart}
-            onTouchEnd={this.onTouchEnd}
-            onTouchMove={this.onTouchMove}
-          />
+          <div style={canvas_wrapper}>
+           <canvas
+              style={canvas_style}
+            // We use the ref attribute to get direct access to the canvas element. 
+              ref={(ref) => (this.canvas = ref)}
+              onMouseDown={this.onMouseDown}
+              onMouseLeave={this.onMouseUp}
+              onMouseUp={this.onMouseUp}
+              onMouseMove={this.onMouseMove}
+              onTouchStart={this.onTouchStart}
+              onTouchEnd={this.onTouchEnd}
+              onTouchMove={this.onTouchMove}
+            > Your browser does not support the HTML 5 Canvas.  </canvas>
+          </div>
         </React.Fragment>
       );
     }
@@ -417,4 +423,7 @@ class Canvas extends Component {
     touchAction: "None",
     zIndex: "1",
     maxHeight: "inherit",
+  }
+  const canvas_wrapper = {
+    border: "2px black solid",
   }
