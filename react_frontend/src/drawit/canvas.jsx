@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import ReactDOM from 'react-dom';
 import windowSize from '../components/windowSize';
 import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 import Button from '@material-ui/core/Button';
+import autobind from 'autobind-decorator'
 
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import Icon from "@mdi/react";
@@ -47,7 +47,9 @@ const ERASER = {
   lineWidth: 15,
 }
 
-class Canvas extends Component {
+
+@autobind
+class GameCanvas extends Component {
     constructor(props) {
       super(props);
 
@@ -60,27 +62,6 @@ class Canvas extends Component {
       this.past_positions = [];
       this._tool = PENCIL;
 
-      this.paint = this.paint.bind(this);
-      this._paint = this._paint.bind(this);
-      this.handleColorChange = this.handleColorChange.bind(this);
-
-      this.onMouseDown = this.onMouseDown.bind(this);
-      this.onMouseMove = this.onMouseMove.bind(this);
-      this.onMouseUp = this.onMouseUp.bind(this);
-
-      this.onTouchEnd = this.onTouchEnd.bind(this);
-      this.onTouchMove = this.onTouchMove.bind(this);
-      this.onTouchStart = this.onTouchStart.bind(this);
-
-      this.onEventBegin = this.onEventBegin.bind(this);
-      this.onEventEnd = this.onEventEnd.bind(this);
-      this.onEventMove = this.onEventMove.bind(this);
-      
-      this.send_message = this.send_message.bind(this);
-      this.process_message = this.process_message.bind(this);
-
-      this.onClickHandler = this.onClickHandler.bind(this);
-
       const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
       const host =  window.location.host;
       // const extra = "username=" + this.props.username;
@@ -91,11 +72,11 @@ class Canvas extends Component {
       this.rws = new ReconnectingWebSocket(path);
 
       this.rws.onopen = (event) => {
-        console.log('WebSocket open', event);
+        // console.log('WebSocket open', event);
         // this.send_message({ command: 'get_room' });
       };
       this.rws.onmessage = e => {
-          console.log("websocket on message", e.data);
+          // console.log("websocket on message", e.data);
           this.process_message(e.data)
       };
 
@@ -104,7 +85,7 @@ class Canvas extends Component {
       };
 
       this.rws.onclose = (event) => {
-          console.log("WebSocket closed", event);
+          // console.log("WebSocket closed", event);
           if(event.code == 1000 && event.reason == "leave_lobby"){
               return // we are leaving 
           }
@@ -117,10 +98,8 @@ class Canvas extends Component {
       };
     }
 
-
-
     send_message(data){
-      console.log("sending ", data)
+      // console.log("sending ", data)
       this.rws.send(JSON.stringify({ ...data }));
     }
 
@@ -130,7 +109,7 @@ class Canvas extends Component {
       const command = parsedData.command;
       const message = parsedData.message;
       const username = parsedData.message.username;
-      console.log("react recivied new message", command, message)
+      // console.log("react recivied new message", command, message)
      
       if(command == "start_game"){
           this.setState({
@@ -144,7 +123,7 @@ class Canvas extends Component {
           })
       }
 
-      console.log(username, this.player_colors)
+      // console.log(username, this.player_colors)
 
       if(command == "draw"){
 
@@ -155,18 +134,18 @@ class Canvas extends Component {
         
         if(!(username in this.player_colors))
         {
-          console.log("choosing new color")
+          // console.log("choosing new color")
           var new_color = rainbow(this.numOfSteps, Object.keys(this.player_colors).length);
           this.player_colors[username] = new_color
         }
 
         let upscaled_prev = {
             x: parsedData.message.prev.x * this.props.windowWidth,
-            y: parsedData.message.prev.y * this.props.windowHeight
+            y: parsedData.message.prev.y * this.props.windowWidth
         }
         let upscaled_cur = {
           x: parsedData.message.cur.x * this.props.windowWidth,
-          y: parsedData.message.cur.y * this.props.windowHeight
+          y: parsedData.message.cur.y * this.props.windowWidth
         }
         this._paint( upscaled_prev, upscaled_cur, parsedData.message.tool)
       }
@@ -234,14 +213,14 @@ class Canvas extends Component {
     }
 
     paint(prev, cur){
-      console.log("paint", prev, cur, this._tool)
+      // console.log("paint", prev, cur, this._tool)
       let scaled_prev = {
         x: prev.x / this.props.windowWidth,
-        y: prev.y / this.props.windowHeight,
+        y: prev.y / this.props.windowWidth,
       }
       let scaled_cur = {
         x: cur.x / this.props.windowWidth,
-        y: cur.y / this.props.windowHeight,
+        y: cur.y / this.props.windowWidth,
       }
 
       this.send_message({
@@ -258,7 +237,7 @@ class Canvas extends Component {
     }
 
     onClickHandler(event){
-      console.log("click event", event, event.target)
+      // console.log("click event", event, event.target)
       while(event.target.getAttribute("name") === null){
         event.target = event.target.parentNode;
       }
@@ -320,6 +299,8 @@ class Canvas extends Component {
     }
 
     componentDidMount(){
+      this.canvas.width = this.props.windowWidth;
+      this.canvas.height = this.props.windowHeight;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
@@ -371,8 +352,8 @@ class Canvas extends Component {
           </div>
           <div style={canvas_wrapper}>
            <canvas
-              width={this.props.windowWidth}
-              height={this.props.windowHeight}
+              // width={this.props.windowWidth}
+              // height={this.props.windowHeight}
               style={canvas_style}
             // We use the ref attribute to get direct access to the canvas element. 
               ref={(ref) => (this.canvas = ref)}
@@ -389,7 +370,7 @@ class Canvas extends Component {
       );
     }
   }
-  export default windowSize(Canvas);
+  export default windowSize(GameCanvas);
 
   const button_bar_style = {
     display: "block",
