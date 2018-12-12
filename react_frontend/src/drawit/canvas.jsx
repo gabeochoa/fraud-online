@@ -160,35 +160,16 @@ class Canvas extends Component {
           this.player_colors[username] = new_color
         }
 
-        this._paint(parsedData.message.prev, parsedData.message.cur, parsedData.message.tool)
-        // this.player_colors[username])
+        let upscaled_prev = {
+            x: parsedData.message.prev.x * this.props.windowWidth,
+            y: parsedData.message.prev.y * this.props.windowHeight
+        }
+        let upscaled_cur = {
+          x: parsedData.message.cur.x * this.props.windowWidth,
+          y: parsedData.message.cur.y * this.props.windowHeight
+        }
+        this._paint( upscaled_prev, upscaled_cur, parsedData.message.tool)
       }
-      // //all commands
-      // {
-      //     let update_players = [...message.players]
-      //     update_players.forEach((item)=>{
-      //         if (item.channel == sender){
-      //             item.is_me = true;
-      //             this.setState({
-      //                 player: item,
-      //             })
-      //         }
-      //         else{
-      //             item.is_me = false;
-      //         }
-      //     });
-
-      //     let locations = this.state.locations;
-      //     if(locations.length == 0){
-      //         locations = [...message.locations].map((item)=>{return [item, false]})
-      //     }
-                      
-      //     this.setState({
-      //       players: update_players,
-      //       locations: locations,
-      //       is_game_started: message.is_game_started
-      //     });
-      // }
     }
 
     onEventBegin(x,y){
@@ -254,11 +235,20 @@ class Canvas extends Component {
 
     paint(prev, cur){
       console.log("paint", prev, cur, this._tool)
+      let scaled_prev = {
+        x: prev.x / this.props.windowWidth,
+        y: prev.y / this.props.windowHeight,
+      }
+      let scaled_cur = {
+        x: cur.x / this.props.windowWidth,
+        y: cur.y / this.props.windowHeight,
+      }
+
       this.send_message({
           command: "draw",
           message:{
-            prev: prev,
-            cur: cur,
+            prev: scaled_prev,
+            cur: scaled_cur,
             tool: this._tool,
           }
       });
@@ -330,8 +320,6 @@ class Canvas extends Component {
     }
 
     componentDidMount(){
-      this.canvas.width = 1000;this.props.width;
-      this.canvas.height = 1000;this.props.height;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
@@ -349,7 +337,9 @@ class Canvas extends Component {
       clearAllBodyScrollLocks();
     }
 
+    
     render() {
+      console.log(this.props);
       return (
         <React.Fragment>
           <div id="button_bar" style={button_bar_style}>
@@ -381,6 +371,8 @@ class Canvas extends Component {
           </div>
           <div style={canvas_wrapper}>
            <canvas
+              width={this.props.windowWidth}
+              height={this.props.windowHeight}
               style={canvas_style}
             // We use the ref attribute to get direct access to the canvas element. 
               ref={(ref) => (this.canvas = ref)}
@@ -427,7 +419,11 @@ class Canvas extends Component {
     touchAction: "None",
     zIndex: "1",
     maxHeight: "inherit",
+    maxWidth: "inherit",
   }
+
   const canvas_wrapper = {
     border: "2px black solid",
+    width: "90%",
+    height: "75%"
   }
