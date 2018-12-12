@@ -1,0 +1,51 @@
+
+.button_bar_style {
+    display: block;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+}
+
+.hrstyle {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.olstyle {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.olstyle>li:nth-child(even){
+    background-color: #e6e6e6;
+}
+
+.olstyle>li{
+    margin-left: 1em;
+}
+
+
+.vspace10{
+    width:auto;
+    height:10px;
+    display:block;
+}
+
+.button_style {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.blinking{
+    animation:blinkingText 0.8s infinite;
+}
+@keyframes blinkingText{
+    0%{     color: #000;    }
+    49%{    color: transparent; }
+    50%{    color: transparent; }
+    99%{    color:transparent;  }
+    100%{   color: #000;    }
+}
