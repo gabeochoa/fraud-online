@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import Icon from '@mdi/react'
 import { mdiHatFedora } from '@mdi/js'
 import "./spyfall.css"
+import autobind from "autobind-decorator";
 
+@autobind
 class MenuButtonBar extends Component {
   constructor(props) {
     super(props);
@@ -20,14 +22,6 @@ class MenuButtonBar extends Component {
       "join_back": "home",
       "create_back": "home"
     }
-
-    // This binding is necessary to make `this` work in the callback
-    this.handleClick = this.handleClick.bind(this);
-    this.handleNewRoom = this.handleNewRoom.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleTimerChange = this.handleTimerChange.bind(this);
-    this.makeid = this.makeid.bind(this);
   }
 
   handleChange(event) {
