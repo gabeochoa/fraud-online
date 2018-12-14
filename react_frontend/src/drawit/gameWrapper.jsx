@@ -20,10 +20,10 @@ class GameWrapper extends Component{
         this.state = {
           in_lobby: true,
           location_state: "menu",
+          word: this.props.word,
           player: {
               username: this.props.username,
               role: "",
-              word: "",
           },
           players: [],
           rws: new ReconnectingWebSocket(path),

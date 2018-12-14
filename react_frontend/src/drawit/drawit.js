@@ -9,6 +9,8 @@ import Home from '../components/Home';
 import Menu from '../components/Menu';
 import Lobby from '../components/Lobby';
 
+import 'lodash';
+
 import Icon from '@mdi/react'
 import { mdiPen } from '@mdi/js'
 
@@ -28,6 +30,45 @@ class DrawItApp extends Component {
       people: [],
       seconds: 90
     }
+  }
+
+  get_random_word(){ 
+    let memes = [
+    "Surprised Pikachu",
+    "Distracted Boyfriend",
+    "Two Buttons",
+    "Mocking Spongebob",
+    "Expanding Brain",
+    "Batman Slapping Robin",
+    "Left Exit 12 Off Ramp",
+    "Roll Safe Think About It",
+    "Blank Nut Button",
+    "Waiting Skeleton",
+    "Is This A Pigeon",
+    "Boardroom Meeting Suggestion",
+    "One Does Not Simply",
+    "Inhaling Seagull",
+    "Hide the Pain Harold",
+    "Ancient Aliens",
+    "The Most Interesting Man In The World",
+    "Futurama Fry",
+    "Oprah You Get A",
+    "Trump Bill Signing",
+    "The Rock Driving",
+    "Disaster Girl",
+    "Evil Kermit",
+    "Brace Yourselves X is Coming",
+    "Bad Luck Brian",
+    "Leonardo Dicaprio Cheers",
+    "Y U No",
+    "Black Girl Wat",
+    "Who Would Win?",
+    "But Thats None Of My Business",
+    "First World Problems",
+    "Creepy Condescending Wonka",
+    "X All The Y",
+    ]
+    return _.sample(memes);
   }
 
   changeTimer(new_time){
@@ -101,11 +142,13 @@ class DrawItApp extends Component {
       />
     );
 
+    let first_word = this.get_random_word();
     let game_jsx = (
       <GameWrapper
         room={this.state.room_code}
         username={this.state.username}
         seconds={this.state.seconds}
+        word={first_word}
       /> 
     );
 

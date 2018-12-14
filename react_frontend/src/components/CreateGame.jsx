@@ -10,7 +10,7 @@ class CreateGame extends Component{
         super(props);
         
         this.state = {
-            username: this.props.username,
+            name: this.props.username || "",
             bad_input: false,
         }
     }
@@ -30,10 +30,10 @@ class CreateGame extends Component{
         switch(button){
             case "create_create":
                 if(!this.state.bad_input){
-                    // this.props.changeUsername(this.state.name, ()=>{});
-                    // // must happen before location change ? 
-                    // this.props.changeRoomCode(makeid(), ()=>{});
-                    // this.props.changeLocation("waiting", ()=>{});
+                    this.props.changeUsername(this.state.name, ()=>{});
+                    // must happen before location change ? 
+                    this.props.changeRoomCode(makeid(), ()=>{});
+                    this.props.changeLocation("lobby", ()=>{});
                 }
             break;
             case "create_back":
