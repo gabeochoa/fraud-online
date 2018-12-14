@@ -217,6 +217,9 @@ class DrawingCanvas extends Component {
     }
 
     onClickHandler(event){
+      if (event.target == this.canvas) {
+        event.preventDefault();
+      }
       // console.log("click event", event, event.target)
       while(event.target.getAttribute("name") === null){
         event.target = event.target.parentNode;
@@ -243,7 +246,10 @@ class DrawingCanvas extends Component {
       }
     }
 
-    onMouseUp(){
+    onMouseUp(event){
+      if (event.target == this.canvas) {
+       event.preventDefault();
+      }
       this.onEventEnd()
     }
     

@@ -1,3 +1,4 @@
+import autobind from "autobind-decorator";
 
 
 export function rainbow(numOfSteps, step) {
@@ -20,3 +21,34 @@ export function rainbow(numOfSteps, step) {
     var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
     return (c);
 }
+
+const SPECIAL_PROPS = [
+    "key",
+    "children",
+    "dangerouslySetInnerHTML",
+];
+
+// https://stackoverflow.com/questions/49358560/react-wrapper-react-does-not-recognize-the-staticcontext-prop-on-a-dom-elemen
+const defaultTester = document.createElement("div")
+export function filterBadProps(props, tester = defaultTester) {
+    if(process.env.NODE_ENV !== 'development') { return props; }
+
+    // filter out any keys which don't exist in reacts special props, or the tester.
+    const out = {};
+    Object.keys(props).filter((propName) => 
+        (propName in tester) || (propName.toLowerCase() in tester) || SPECIAL_PROPS.includes(propName)
+    ).forEach((key) => out[key] = props[key]);
+
+    return out;
+}
+
+
+// TODO at some point we need to check if the game already is existing
+// we cant just create randomly....
+export function makeid() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < 5; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length)).toLocaleLowerCase();
+    return text;
+  }

@@ -7,13 +7,27 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
   <title>DrawIt</title>
+  <style>
+    body, html {
+      height:100%;
+      width: 100%;
+      position: fixed;
+    }
+    div.wrap {
+      height:100%; 
+      overflow:hidden;
+    }
+    body {overflow: hidden; }
+  </style>
 </head>
 <body>
+  <div class=wrap>
   <section class="section">
     <div class="container">
         <div id="app" class="columns"><!-- React --></div>
     </div>
   </section>
+  </div>
 </body>
 {% load static %}
 <script src="{% static "drawit/main.js" %}"></script>
