@@ -363,12 +363,12 @@ class DrawingCanvas extends Component {
 
     render_player_text(){
       if(this.state.current_artist == undefined){
-        return;
+        return this.render_text("Loading...");
       }
       return this.render_text(this.state.current_artist.username + " is drawing")
     }
     render_word_text(){
-      return this.render_text(this.props.word);
+      return this.render_text(this.state.current_artist.word);
     }
 
     render_bottom_buttons(){
