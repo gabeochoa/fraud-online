@@ -162,6 +162,8 @@ class BaseConsumer(WebsocketConsumer):
             self._send_get_room_response()
         elif command == "start_game":
             self._send_start_game()
+        elif command == "end_round":
+            self._send_end_round()
         elif command == "end_game":
             self._send_end_game()
         elif command == "kick_player":
@@ -220,6 +222,24 @@ class BaseConsumer(WebsocketConsumer):
     def end_game(self, event):
         message = event['message']
         self.send_command("end_game", message)
+
+    def end_round_message(self):
+        raise NotImplementedError("implement end_round_message")
+
+    def _send_end_round(self):
+        self._store_is_game_started(overwrite=True, is_started=False)
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'end_round',
+                'message': self.end_round_message()
+            }
+        )
+
+    def end_round(self, event):
+        message = event['message']
+        self.send_command("end_round", message)
+
 
     def new_user(self, event):
         message = event['message']

@@ -1,10 +1,9 @@
 import React, {Component} from "react";
 import autobind from 'autobind-decorator';
 import PropTypes from 'prop-types';
-// TODO move to component utils? 
-import {filterBadProps} from '../drawit/utils';
 
 const FIRST_ELEM = "__DEFAULT__";
+
 
 @autobind
 class Menu extends Component {
@@ -49,6 +48,7 @@ class Menu extends Component {
         }, callback);
     }
 
+
     render(){
         let content = <p>DEFAULT CASE</p>;
         if(this.state.location == undefined){
@@ -66,7 +66,7 @@ class Menu extends Component {
             // ...this.props,
             changeLocation: this.changeLocation,
         }
-        const matching_props = child_props;//filterBadProps(child_props)
+        const matching_props = child_props;
         return (
             <div id="button_bar" className="field is-centered button_bar_style">
                 {this.props.header}

@@ -4,7 +4,6 @@ import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'bo
 import Button from '@material-ui/core/Button';
 import autobind from 'autobind-decorator'
 
-import ReconnectingWebSocket from 'reconnecting-websocket'
 import Icon from "@mdi/react";
 import { mdiPencil, mdiEraser, mdiClose } from "@mdi/js";
 import { GithubPicker, CirclePicker } from 'react-color';
@@ -13,7 +12,7 @@ import {rainbow} from './utils';
 const BACKGROUND = 'white'
 
 const COLOR_CHOICES = ['#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
-'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#BEDADC', 'white', 'black'];//'#BED3F3', '#D4C4FB'];
+'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#BEDADC', 'white', '#C0C0C0', 'black'];//'#BED3F3', '#D4C4FB'];
 
 const CLEAR = "__CLEAR"
 
@@ -34,73 +33,73 @@ class DrawingCanvas extends Component {
       super(props);
 
       this.state = {
-        in_lobby: false
+        is_loading: true,
+        in_lobby: false,
+        current_artist: null,
+        is_local_player_artist: false,
       }
       this.numOfSteps = 10 // this would be set to num of players
       this.player_colors = {}
       this.mouse_clicked = false;
       this.past_positions = [];
       this._tool = PENCIL;
+      this.props.register_socket_callbacks("drawingCanvas", "onmessage", this.process_message)
 
-      const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-      const host =  window.location.host;
-      // const extra = "username=" + this.props.username;
-      const extra = "username=" + rainbow(this.numOfSteps*10, Math.random() * 10).slice(1);
-      //const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
-      var room = "room";
-      const path = (ws_scheme + '://' + host + '/ws/drawit/' + room + '/?' + extra);
-      this.rws = new ReconnectingWebSocket(path);
-
-      this.rws.onopen = (event) => {
-        // console.log('WebSocket open', event);
-        // this.send_message({ command: 'get_room' });
-      };
-      this.rws.onmessage = e => {
-          // console.log("websocket on message", e.data);
-          this.process_message(e.data)
-      };
-
-      this.rws.onerror = e => {
-          console.log(e.message);
-      };
-
-      this.rws.onclose = (event) => {
-          // console.log("WebSocket closed", event);
-          if(event.code == 1000 && event.reason == "leave_lobby"){
-              return // we are leaving 
-          }
-          if(event.code == 1001){
-              // we are being kicked
-              // this.changeLocationWrapper("", "menu");
-              return 
-          }
-        this.rws.reconnect();
-      };
+      // TODO remove 
+      this.props.send_message({
+        command: "start_game"
+      });
     }
 
-    send_message(data){
-      // console.log("sending ", data)
-      this.rws.send(JSON.stringify({ ...data }));
-    }
-
-    process_message(data) {
-      const parsedData = JSON.parse(data);
-  
-      const command = parsedData.command;
-      const message = parsedData.message;
-      const username = parsedData.message.username;
-      // console.log("react recivied new message", command, message)
-     
-      if(command == "start_game"){
-          this.setState({
-              in_lobby: false
-          })
+    end_round(data, sender){
+      this.clear_canvas();
+      console.log("end round", data, sender)
+      if(data.current_player >= data.players.length){
+        // ran out of players
+        this.props.send_message({
+            command: "end_game"
+        })
+        return;
       }
+
+      const player = data.players[data.current_player]
+
+      this.setState({
+        current_artist: player,
+        is_local_player_artist: (player.channel == sender)
+      })
+    }
+
+    process_message(parsedData) {
+      // console.log("drawing canvas process message", parsedData)
+  
+      // dont care what message, just "done loading"
+      if(this.state.is_loading){
+        this.setState({
+          is_loading: false
+        })
+      }
+
+      const command = parsedData.command;
+      const username = parsedData.message.username;
+      const sender = parsedData.sender;
       
+      if(command == "start_game"){
+        // start of game is kinda like switching rounds
+        this.setState({
+            in_lobby: false
+        })
+        this.end_round(parsedData.message, sender)
+      }
+      if(command == "end_round"){
+        this.end_round(parsedData.message, sender)
+      }
+
       if(command == "end_game"){
           this.setState({
               in_lobby: true
           })
+          this.props.changeLocation("_back");
       }
 
       // console.log(username, this.player_colors)
@@ -193,6 +192,10 @@ class DrawingCanvas extends Component {
     }
 
     paint(prev, cur){
+      if(!this.state.is_local_player_artist){
+        // disable drawing when not local artist
+        return; 
+      }
       // console.log("paint", prev, cur, this._tool)
       let scaled_prev = {
         x: prev.x / this.props.windowWidth,
@@ -203,7 +206,7 @@ class DrawingCanvas extends Component {
         y: cur.y / this.props.windowWidth,
       }
 
-      this.send_message({
+      this.props.send_message({
           command: "draw",
           message:{
             prev: scaled_prev,
@@ -216,6 +219,16 @@ class DrawingCanvas extends Component {
       // this.drawOutline(cur)
     }
 
+    clear_canvas(){
+      this.props.send_message({
+        command: "draw",
+        message:{
+            prev: null,
+            cur: null,
+            tool: CLEAR,
+          }
+      });
+    }
     onClickHandler(event){
       if (event.target == this.canvas) {
         event.preventDefault();
@@ -225,24 +238,32 @@ class DrawingCanvas extends Component {
         event.target = event.target.parentNode;
       }
       const button_ = event.target.getAttribute("name")
-      if(button_ == "pencil"){
-        console.log("tool is now pencil")
-        this._tool = PENCIL;
-      }
-      else if(button_ == "eraser"){
-        console.log("tool is now eraser")
-        this._tool = ERASER;
-      }
-      else if(button_ == CLEAR){
-        console.log("clearing canvas")
-        this.send_message({
-            command: "draw",
-            message:{
-              prev: null,
-              cur: null,
-              tool: CLEAR,
-            }
-        });
+
+      switch(button_){
+        case "pencil":
+          console.log("tool is now pencil")
+          this._tool = PENCIL;
+          break;
+        case "eraser":
+          console.log("tool is now eraser")
+          this._tool = ERASER;
+        break;
+        case CLEAR:
+          console.log("clearing canvas")
+          this.clear_canvas();
+        break;
+        case "end_round":
+          this.props.send_message({
+            command: "end_round"
+          })
+        break;
+        case "exit_room":
+          this.props.changeRoomCode("");
+          this.props.changeLocation("home");
+        break;
+        default:
+          console.log("button clicked but no handler", button_)
+        break;
       }
     }
 
@@ -302,50 +323,93 @@ class DrawingCanvas extends Component {
 
     componentWillUnmount() {
       clearAllBodyScrollLocks();
+      this.props.unregister_socket_callbacks("drawingCanvas", "onmessage")
     }
 
-    
+    render_tools(){
+      return (
+        <div id="button_bar" style={button_bar_style}>
+          <Button name={CLEAR} onClick={this.onClickHandler} style={tool_button_style}>
+            <Icon path={mdiClose} size={1.5}/>
+          </Button>
+          <Button name="pencil" onClick={this.onClickHandler} style={tool_button_style}>
+            <Icon path={mdiPencil} size={1.5}/>
+          </Button>
+          <Button name="eraser" onClick={this.onClickHandler} style={tool_button_style}>
+            <Icon path={mdiEraser} size={1.5}/>
+          </Button>
+          <div style={gh_style}>
+            <GithubPicker
+              width={40}
+              color={ this._tool.stroke }
+              colors={COLOR_CHOICES}
+              onChangeComplete={ this.handleColorChange }
+              triangle={"hide"}
+              />
+            </div>
+        </div>
+      );
+    }
+
+    render_text(text){
+      return (
+        <div style={{position: "inherit", display: "block", left: 40, margin: 10}}>
+          <h1 style={{color: '#4a4a4a'}}>
+            {text}
+          </h1>
+        </div>
+      );
+    }
+
+    render_player_text(){
+      if(this.state.current_artist == undefined){
+        return;
+      }
+      return this.render_text(this.state.current_artist.username + " is drawing")
+    }
+    render_word_text(){
+      return this.render_text(this.props.word);
+    }
+
+    render_bottom_buttons(){
+      return (
+        <div style={room_button_holder}>
+          <Button variant="outlined" name="end_round" onClick={this.onClickHandler} style={room_button_style}>
+            Someone got it
+          </Button>
+          <Button variant="outlined" name="exit_room" onClick={this.onClickHandler} style={room_button_style}>
+            Leave Game
+          </Button>
+        </div>
+      );
+    }
+
     render() {
-      console.log(this.props);
+      // console.log(this.props);
+      let is_artist_ui = null;
+      if(this.state.is_local_player_artist){
+        is_artist_ui = (
+          <React.Fragment>
+            {this.render_tools() }
+            {this.render_word_text() }
+          </React.Fragment>
+        );
+      }
+      else{
+        is_artist_ui = (
+          <React.Fragment>
+            {this.render_player_text() }
+          </React.Fragment>
+        );
+      }
       return (
         <React.Fragment>
-          <div id="button_bar" style={button_bar_style}>
-            <Button name={CLEAR} onClick={this.onClickHandler} style={button_style}>
-              <Icon path={mdiClose} size={1.5}/>
-            </Button>
-            <Button name="pencil" onClick={this.onClickHandler} style={button_style}>
-              <Icon path={mdiPencil} size={1.5}/>
-            </Button>
-            <Button name="eraser" onClick={this.onClickHandler} style={button_style}>
-              <Icon path={mdiEraser} size={1.5}/>
-            </Button>
-            <Button variant="outlined" name="end_round" onClick={this.onClickHandler} style={button_style}>
-              Someone got it
-            </Button>
-            <div style={{float: "right", display: "flex", left: 10, margin: 10}}>
-              <b>WORD: </b>
-              <h1 style={{color: '#4a4a4a'}}>
-                {this.props.word}
-              </h1>
-            </div>
-
-
-            <div style={gh_style}>
-              <GithubPicker
-                width={40}
-                color={ this._tool.stroke }
-                colors={COLOR_CHOICES}
-                onChangeComplete={ this.handleColorChange }
-                triangle={"hide"}
-                />
-              </div>
-          </div>
+          {is_artist_ui}
+          {this.render_bottom_buttons() }
           <div style={canvas_wrapper}>
            <canvas
-              // width={this.props.windowWidth}
-              // height={this.props.windowHeight}
               style={canvas_style}
-            // We use the ref attribute to get direct access to the canvas element. 
+              // We use the ref attribute to get direct access to the canvas element. 
               ref={(ref) => (this.canvas = ref)}
               onMouseDown={this.onMouseDown}
               onMouseLeave={this.onMouseUp}
@@ -366,16 +430,30 @@ class DrawingCanvas extends Component {
     display: "block",
     position: "absolute",
     zIndex: "2",
-    top: 70,
+    top: 100,
     // left: -30,
     left: -10,
     pointerEvents: "None",
     touchAction: "None",
   }
-  const button_style = {
+  const tool_button_style = {
     touchAction: "auto",
     pointerEvents: "auto",
-    left: -5,
+    margin: "5px",
+    left: 5,
+    width: "40px",
+  }
+
+  const room_button_holder = {
+    position: "fixed",
+    left: 20,
+    bottom: -10,
+    width: "100%",
+  }
+  const room_button_style = {
+    touchAction: "auto",
+    pointerEvents: "auto",
+    margin: "5px",
     width: "40px",
   }
 

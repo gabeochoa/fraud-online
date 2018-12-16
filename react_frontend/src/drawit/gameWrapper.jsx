@@ -3,19 +3,70 @@ import ReconnectingWebSocket from 'reconnecting-websocket'
 import "./drawit.css"
 import autobind from "autobind-decorator";
 import DrawingCanvas from './drawingCanvas';
-import GuessingCanvas from './guessingCanvas';
+import {rainbow} from './utils';
+
+
+function generate_websocket_path(room, kwargs){
+    kwargs = kwargs || {};
+
+    const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    const host =  window.location.host;
+    const extra = "username=" + rainbow(20, Math.random() * 10).slice(1);
+    //const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
+    const path = (ws_scheme + '://' + host + '/ws/drawit/' + room + '/?' + extra);
+    return path; 
+}
 
 @autobind
-class GameWrapper extends Component{
+class WebSocketComponent extends Component{
+
+    constructor(props){
+        super(props);
+        this.rws = null;
+    }
+
+    update_websocket(room, kwargs){
+        let path = generate_websocket_path(room, kwargs)
+        this.rws = new ReconnectingWebSocket(path);
+
+        this.rws.onopen = (event) => {
+            // console.log('WebSocket open', event);
+            // this.send_message({ command: 'get_room' });
+        };
+        this.rws.onmessage = e => {
+            // console.log("websocket on message", e.data);
+            this.process_message(e.data)
+        };
+
+        this.rws.onerror = e => {
+            console.log(e.message);
+        };
+
+        this.rws.onclose = (event) => {
+            // console.log("WebSocket closed", event);
+            if(event.code == 1000 && event.reason == "leave_lobby"){
+                return // we are leaving 
+            }
+            if(event.code == 1001){
+                // we are being kicked
+                this.changeLocationWrapper("", "menu");
+                return 
+            }
+        this.rws.reconnect();
+        };
+    }
+
+    send_message(data){
+        // console.log("sending ", data)
+        this.rws.send(JSON.stringify({ ...data }));
+      }
+}
+
+
+@autobind
+class GameWrapper extends WebSocketComponent{
     constructor(props) {
         super(props);
-
-        const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        const host =  window.location.host;
-        const extra = ("username=" + this.props.username + 
-                       "&" + "seconds=" + this.props.seconds
-                        );
-        const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
 
         this.state = {
           in_lobby: true,
@@ -26,46 +77,39 @@ class GameWrapper extends Component{
               role: "",
           },
           players: [],
-          rws: new ReconnectingWebSocket(path),
           round_time: this.props.seconds,
           is_guessing: false,
         };
-    
 
-        this.state.rws.onopen = (event) => {
-            console.log('WebSocket open', event);
-            this.send_message({ command: 'get_room' });
-        };
-        this.state.rws.onmessage = e => {
-            console.log("websocket on message", e.data);
-            this.process_message(e.data)
-        };
-    
-        this.state.rws.onerror = e => {
-            console.log(e.message);
-        };
-
-        this.state.rws.onclose = (event) => {
-            console.log("WebSocket closed", event);
-            if(event.code == 1000 && event.reason == "leave_lobby"){
-                return // we are leaving 
-            }
-            if(event.code == 1001){
-                // we are being kicked
-                this.changeLocationWrapper("", "menu");
-                return 
-            }
-           this.state.rws.reconnect();
+        this.update_websocket("example")
+        this.callbacks = {
+            "player_kicked": {},
+            "onmessage": {},
         };
     }
 
-    send_message(data){
-        this.state.rws.send(JSON.stringify({ ...data }));
+    launch_socket_callback(name, args){
+        var callbacks = this.callbacks[name];
+        // now we need to call these people
+        _.forIn(callbacks, function(value, key) {
+            // console.log("calling", key, args);
+            value(args);
+        });
+    }
+
+    register_socket_callbacks(cbname, name, callback){
+        this.callbacks[name][cbname] = callback;
+    }
+
+    unregister_socket_callbacks(cbname, name){
+        delete this.callbacks[name][cbname];
     }
 
     process_message(data) {
         const parsedData = JSON.parse(data);
-    
+        this.launch_socket_callback("onmessage", parsedData);
+        return;
+
         const command = parsedData.command;
         const message = parsedData.message;
         const sender = parsedData.sender;
@@ -140,7 +184,10 @@ class GameWrapper extends Component{
         this.setState({locations});
     }
 
-    changeLocationWrapper(room, location){
+    changeLocationWrapper(location){
+        console.log("need to fix chLwrapper", location)
+        this.props.changeLocation(location)
+        return; 
         if(location == "game"){
             //user wants to start the game
             // send the start_game message to all clients
@@ -163,47 +210,18 @@ class GameWrapper extends Component{
     }
 
     render(){
-        if(this.state.is_guessing){
-            return (
-              <GuessingCanvas
-              width={document.width}
-              height={document.height}
-              word_length={this.state.word.length}
-              />
-            )
-          }
-          else{
-          return (
-            <DrawingCanvas
-              width= {document.width}
-              height= {document.height}
-              word={this.state.word}
-            />
-          );
-        }
-        // if(this.state.in_lobby){
-        //     return (
-        //     <SpyfallWaitingRoom 
-        //         access_code={this.props.room}
-        //         username={this.props.username}
-        //         players={this.state.players}
-        //         changeLocation={this.changeLocationWrapper}
-        //         kickPerson={this.kickPerson}
-        //         is_game_started={this.state.is_game_started}
-        //         />)
-        // }
-        // else{
-        //     return (
-        //         <SpyfallGame
-        //             players={this.state.players}
-        //             player={this.state.player}
-        //             locations={this.state.locations}
-        //             handleClickLocation={this.handleClickLocation}
-        //             changeLocation={this.changeLocationWrapper}
-        //             total_time={this.state.total_time}
-        //         />
-        //     );
-        //   }
+        return (
+        <DrawingCanvas
+            send_message={this.send_message}
+            register_socket_callbacks={this.register_socket_callbacks}
+            unregister_socket_callbacks={this.unregister_socket_callbacks}
+            width= {document.width}
+            height= {document.height}
+            word={this.state.word}
+            changeLocation={this.changeLocationWrapper}
+            changeRoomCode={this.props.changeRoomCode}
+        />
+        );
     }
 }
 

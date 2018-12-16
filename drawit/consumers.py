@@ -16,37 +16,39 @@ import time
 from urllib.parse import parse_qs
 import json
 import random
+from drawit.data import WORDS
 from spyfall.data import get_locations, get_roles
 from spyfall.baseconsumer import BaseConsumer
 
 def start_game(cache_key):
     value = cache.get(cache_key)
     print("start game", value)
-    # set the rest to random jobs for that location
-    location = random.choice(get_locations())
-    roles = get_roles(location)
+
+    # make list of players
     players = []
     for player in (value["players"]):
-        player["role"] = random.choice(roles)
-        player["location"] = location
+        player['word'] = random.choice(WORDS)
         players.append(player)
 
-    # then generate first player and spy
+    random.shuffle(players)
 
-    # get a random person and assign them as spy
-    spy_index = random.randrange(len(players))
-    first_person = random.randrange(len(players))
-
-    players[spy_index]["location"] = None
-    players[spy_index]["role"] = "spy"
-    players[spy_index]["is_spy"] = True
-
-    players[first_person]['is_first'] = True
+    # now we can assign them numbers 
+    for i, player in enumerate(players):
+        player['order'] = i
 
     # set cache
     value["players"] = players
+    value['current_player'] = 0
     cache.set(cache_key, value, timeout=None)
     print("start game end", value)
+    return value
+
+def progress_game(cache_key):
+    value = cache.get(cache_key)
+    print("progress game", value)
+    value['current_player'] += 1
+    cache.set(cache_key, value, timeout=None)
+    print("progress game end", value)
     return value
 
 def end_game(cache_key):
@@ -54,10 +56,8 @@ def end_game(cache_key):
     value = cache.get(cache_key)
     players = []
     for player in (value["players"]):
-        player["role"] = None
-        player["location"] = None
-        player["is_spy"] = False
-        player['is_first'] = False
+        player["word"] = None
+        player["order"] = None
         players.append(player)
     value["players"] = players
     cache.set(cache_key, value, timeout=None)
@@ -112,6 +112,9 @@ class DrawItConsumer(BaseConsumer):
     
     def start_game_message(self):
         return start_game(self.room_group_name)
+    
+    def end_round_message(self):
+        return progress_game(self.room_group_name)
 
     def end_game_message(self):
         return end_game(self.room_group_name)
