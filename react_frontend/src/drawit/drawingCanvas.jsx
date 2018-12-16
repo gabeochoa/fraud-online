@@ -324,7 +324,7 @@ class DrawingCanvas extends Component {
             </Button>
             <div style={{float: "right", display: "flex", left: 10, margin: 10}}>
               <b>WORD: </b>
-              <h1 style={{color: 'black'}}>
+              <h1 style={{color: '#4a4a4a'}}>
                 {this.props.word}
               </h1>
             </div>
@@ -366,7 +366,7 @@ class DrawingCanvas extends Component {
     display: "block",
     position: "absolute",
     zIndex: "2",
-    top: -40,
+    top: 70,
     // left: -30,
     left: -10,
     pointerEvents: "None",
