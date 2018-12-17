@@ -351,7 +351,7 @@ class DrawingCanvas extends Component {
             <Icon path={mdiEraser} size={1.5}/>
           </Button>
           <div style={gh_style}>
-              <div style={{position: "absolute", left:0}}>
+              <div style={{position: "absolute", top: -20, left:0}}>
               <VerticalSlider
                 min={2}
                 max={50}
@@ -360,7 +360,7 @@ class DrawingCanvas extends Component {
                 onChange={this.sliderChange}
               /> 
               </div>
-              <div style={{position: "absolute", right:-35}}>
+              <div style={{position: "absolute", top: -20, right:-35}}>
              <GithubPicker
                 width={40}
                 color={ this._tool.stroke }
@@ -497,6 +497,7 @@ class DrawingCanvas extends Component {
     pointerEvents: "auto",
     width: "100%",
     display: "-webkit-box",
+    top: "-20px",
   }
 
   const canvas_style = {
