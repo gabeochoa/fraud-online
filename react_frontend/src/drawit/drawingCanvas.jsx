@@ -335,7 +335,6 @@ class DrawingCanvas extends Component {
     }
 
     sliderChange(args){
-      console.log("slider changed", args)
       this._tool.lineWidth = args;
     }
 
@@ -352,13 +351,7 @@ class DrawingCanvas extends Component {
             <Icon path={mdiEraser} size={1.5}/>
           </Button>
           <div style={gh_style}>
-             <GithubPicker
-                width={40}
-                color={ this._tool.stroke }
-                colors={COLOR_CHOICES}
-                onChangeComplete={ this.handleColorChange }
-                triangle={"hide"}
-              /> 
+              <div style={{position: "absolute", left:0}}>
               <VerticalSlider
                 min={2}
                 max={50}
@@ -366,6 +359,16 @@ class DrawingCanvas extends Component {
                 default={this._tool.lineWidth}
                 onChange={this.sliderChange}
               /> 
+              </div>
+              <div style={{position: "absolute", right:-35}}>
+             <GithubPicker
+                width={40}
+                color={ this._tool.stroke }
+                colors={COLOR_CHOICES}
+                onChangeComplete={ this.handleColorChange }
+                triangle={"hide"}
+              /> 
+              </div>
           </div> 
         </div>
       );
@@ -464,6 +467,7 @@ class DrawingCanvas extends Component {
     left: -10,
     pointerEvents: "None",
     touchAction: "None",
+    width: "100%",
   }
   const tool_button_style = {
     touchAction: "auto",
@@ -491,7 +495,7 @@ class DrawingCanvas extends Component {
   const gh_style = {
     touchAction: "auto",
     pointerEvents: "auto",
-    width: 40,
+    width: "100%",
     display: "-webkit-box",
   }
 
