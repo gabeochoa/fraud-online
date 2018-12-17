@@ -88,7 +88,7 @@ class DrawItConsumer(BaseConsumer):
 
     def extra_commands(self, command, data):
         if command == "draw":
-            print(data)
+            # print(data)
             self.send_draw_command({
                 "prev": data['message']['prev'],
                 "cur": data['message']['cur'],

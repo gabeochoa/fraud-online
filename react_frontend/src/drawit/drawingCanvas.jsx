@@ -6,13 +6,15 @@ import autobind from 'autobind-decorator'
 
 import Icon from "@mdi/react";
 import { mdiPencil, mdiEraser, mdiClose } from "@mdi/js";
-import { GithubPicker, CirclePicker } from 'react-color';
+import { GithubPicker, SliderPicker, HuePicker, CustomPicker, ChromePicker} from 'react-color';
 import {rainbow} from './utils';
+import MyColorPicker from '../components/ColorPicker';
+import VerticalSlider from '../components/VerticalSlider';
 
 const BACKGROUND = 'white'
 
 const COLOR_CHOICES = ['#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
-'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#BEDADC', 'white', '#C0C0C0', 'black'];//'#BED3F3', '#D4C4FB'];
+'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#8B4513', 'white', '#C0C0C0', 'black'];//'#BED3F3', '#D4C4FB'];
 
 const CLEAR = "__CLEAR"
 
@@ -332,6 +334,11 @@ class DrawingCanvas extends Component {
       this.props.unregister_socket_callbacks("drawingCanvas", "onmessage")
     }
 
+    sliderChange(args){
+      console.log("slider changed", args)
+      this._tool.lineWidth = args;
+    }
+
     render_tools(){
       return (
         <div id="button_bar" style={button_bar_style}>
@@ -345,14 +352,21 @@ class DrawingCanvas extends Component {
             <Icon path={mdiEraser} size={1.5}/>
           </Button>
           <div style={gh_style}>
-            <GithubPicker
-              width={40}
-              color={ this._tool.stroke }
-              colors={COLOR_CHOICES}
-              onChangeComplete={ this.handleColorChange }
-              triangle={"hide"}
-              />
-            </div>
+             <GithubPicker
+                width={40}
+                color={ this._tool.stroke }
+                colors={COLOR_CHOICES}
+                onChangeComplete={ this.handleColorChange }
+                triangle={"hide"}
+              /> 
+              <VerticalSlider
+                min={2}
+                max={50}
+                step={2}
+                default={this._tool.lineWidth}
+                onChange={this.sliderChange}
+              /> 
+          </div> 
         </div>
       );
     }
@@ -418,6 +432,7 @@ class DrawingCanvas extends Component {
 
       return (
         <React.Fragment>
+     
           {is_artist_ui}
           {this.render_bottom_buttons() }
           <div style={canvas_wrapper}>
@@ -434,6 +449,7 @@ class DrawingCanvas extends Component {
               onTouchMove={this.onTouchMove}
             > Your browser does not support the HTML 5 Canvas.  </canvas>
           </div>
+        
         </React.Fragment>
       );
     }
@@ -475,7 +491,8 @@ class DrawingCanvas extends Component {
   const gh_style = {
     touchAction: "auto",
     pointerEvents: "auto",
-    width: 40
+    width: 40,
+    display: "-webkit-box",
   }
 
   const canvas_style = {

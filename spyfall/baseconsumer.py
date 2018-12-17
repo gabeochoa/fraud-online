@@ -154,7 +154,7 @@ class BaseConsumer(WebsocketConsumer):
     def receive(self, text_data):
         # print(text_data)
         text_data_json = json.loads(text_data)
-        print(text_data_json)
+        # print(text_data_json)
         command = text_data_json['command']
         if command == "join_lobby":
             self._send_join_lobby(text_data_json['username'])

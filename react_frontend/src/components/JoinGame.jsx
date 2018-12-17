@@ -15,7 +15,7 @@ class JoinGame extends Component{
     }
 
     handleChange(event) {
-        console.log("handle change", event, event.target.name, event.target.value);
+        // console.log("handle change", event, event.target.name, event.target.value);
         var name = event.target.name;
         this.setState({
           [name]: event.target.value
@@ -27,7 +27,7 @@ class JoinGame extends Component{
             event.target = event.target.parentNode;
         }
         let button = event.target.getAttribute("name");
-        console.log("button was clicked : " + button);
+        // console.log("button was clicked : " + button);
         switch(button){
             case "join_join":
                 this.props.changeUsername(this.state.name, ()=>{});
@@ -38,7 +38,7 @@ class JoinGame extends Component{
             case "join_back":
                 this.props.changeUsername(this.state.name, ()=>{});
                 this.props.changeLocation("_back", () => {
-                    console.log("Change location menu")
+                    // console.log("Change location menu")
                 });
             break;
             default:

@@ -26,7 +26,7 @@ class CreateGame extends Component{
             event.target = event.target.parentNode;
         }
         let button = event.target.getAttribute("name");
-        console.log("button was clicked ", button)
+        // console.log("button was clicked ", button)
         switch(button){
             case "create_create":
                 this.props.changeUsername(this.state.name, ()=>{});
@@ -37,7 +37,7 @@ class CreateGame extends Component{
             case "create_back":
                 this.props.changeUsername(this.state.name, ()=>{});
                 this.props.changeLocation("_back", () => {
-                    console.log("Change location menu")
+                    // console.log("Change location menu")
                 });
             break;
             default:

@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^3.6.2",
+    "@material-ui/lab": "^3.0.0-alpha.25",
     "@mdi/font": "^3.0.39",
     "@mdi/js": "^3.0.39",
     "@mdi/react": "^1.1.0",
@@ -44,6 +45,7 @@
     "eslint": "^5.9.0",
     "lodash": "^4.17.11",
     "npm-watch": "^0.5.0",
+    "rc-slider": "^8.6.4",
     "react-color": "^2.14.1",
     "reconnecting-websocket": "^4.1.10",
     "style-loader": "^0.23.1"
