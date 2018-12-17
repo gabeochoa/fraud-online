@@ -39,6 +39,7 @@ def start_game(cache_key):
     # set cache
     value["players"] = players
     value['current_player'] = 0
+    value['is_game_started'] = True
     cache.set(cache_key, value, timeout=None)
     print("start game end", value)
     return value
@@ -60,6 +61,7 @@ def end_game(cache_key):
         player["order"] = None
         players.append(player)
     value["players"] = players
+    value['is_game_started'] = False
     cache.set(cache_key, value, timeout=None)
     return value
 

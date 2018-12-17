@@ -7,11 +7,12 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 const FIRST_ELEM = "__DEFAULT__";
 
 function generate_websocket_path(room, kwargs){
+    console.log("websocket path, ", room, kwargs)
     kwargs = kwargs || {};
 
     const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     const host =  window.location.host;
-    const extra = "username=" + rainbow(20, Math.random() * 10).slice(1);
+    const extra = "username=" + (kwargs.username || rainbow(20, Math.random() * 10).slice(1));
     //const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
     const path = (ws_scheme + '://' + host + '/ws/drawit/' + room + '/?' + extra);
     return path; 
@@ -65,12 +66,17 @@ class WebSocketComponent extends Component{
         };
     }
 
+    socket_null(){
+        return (this.rws == null)
+    }
+
     kill_websocket(username){
         this.send_message({
             command:  "leave_lobby",
             username: username,
         });
         this.rws.close(1000, "leave_lobby");
+        this.rws = null;
     }
 
     send_message(data){
@@ -234,6 +240,7 @@ class Menu extends WebSocketComponent {
             updatePlayers: this.updatePlayers,
             kickPlayer: this.kickPlayer,
             clearGameState: this.clearGameState,
+            socket_null: this.socket_null,
         }
         const matching_props = child_props;
         return (

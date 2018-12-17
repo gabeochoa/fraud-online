@@ -20,21 +20,33 @@ class Lobby extends Component{
 
     constructor(props){
         super(props);
+
+        this.state = {
+            is_loaded: false,
+        }
     }
 
     componentDidMount(){
         // connect to the room that we are trying to join
-        this.props.update_websocket(this.props.room_code);
+        const kwargs = {
+            username: this.props.username,
+        }
+        if(this.props.socket_null()){
+            this.props.update_websocket(this.props.room_code, kwargs);
+        }
         this.props.register_socket_callbacks("lobby", "onmessage", this.process_message);
     }
 
     componentWillUnmount(){
-        this.props.kill_websocket(this.props.username);
         this.props.unregister_socket_callbacks("lobby", "onmessage");
     }
 
     process_message(parsedData){
         console.log("Lobby process_message", parsedData);
+
+        if(!this.state.is_loaded){
+            this.setState({is_loaded:true})
+        }
         const command = parsedData.command;
         const sender = parsedData.sender;
         if(command == "get_room_response"){
@@ -50,6 +62,20 @@ class Lobby extends Component{
             this.props.updatePlayers(players);
             this.props.updateGameStarted(is_game_started);
         }
+        else if(command == "start_game"){
+            let players = parsedData.message.players;
+            players.forEach(
+                (item) => {
+                    if(item.channel == sender){
+                        item.is_me = true;
+                    }
+                }
+            );
+            const is_game_started = parsedData.message.is_game_started;
+            this.props.updatePlayers(players);
+            this.props.updateGameStarted(is_game_started);
+            this.props.changeLocation("game")
+        }
     }
 
     handleClick(event){
@@ -60,13 +86,14 @@ class Lobby extends Component{
         console.log("button was clicked : " + button);
         switch(button){
             case "lobby_start":
-                if(!this.props.is_game_started){
+                if( (!this.props.is_game_started) && this.state.is_loaded){
                     this.props.changeLocation("game");
                 }
             break;
             case "lobby_leave":
+                this.props.kill_websocket(this.props.username);
                 this.props.clearGameState();
-                this.props.changeLocation("_back");
+                this.props.changeLocation("home");
             break;
             case "edit_name":
                 this.props.changeLocation("join");

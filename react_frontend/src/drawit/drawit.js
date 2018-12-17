@@ -50,7 +50,9 @@ class DrawItApp extends Component {
   render_header(){
     return (
       <React.Fragment>
-        <h4 style={{fontSize: 30}}> <Icon path={mdiPen} size={1.5}/> Draw My Meme!</h4>
+        <h4 style={{fontSize: 30}}> <Icon path={mdiPen} size={1.5}/> 
+          Draw My Meme! <sup style={{color: "red", fontSize: 12}}>Beta</sup>
+        </h4>
         <hr className="hrstyle" />
       </React.Fragment>
     );

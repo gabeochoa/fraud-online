@@ -86,9 +86,6 @@ class DrawingCanvas extends Component {
       
       if(command == "start_game"){
         // start of game is kinda like switching rounds
-        this.setState({
-            in_lobby: false
-        })
         this.end_round(parsedData.message, sender)
       }
       if(command == "end_round"){
@@ -96,10 +93,8 @@ class DrawingCanvas extends Component {
       }
 
       if(command == "end_game"){
-          this.setState({
-              in_lobby: true
-          })
-          this.props.changeLocation("_back");
+        this.props.updateGameStarted(false);
+        this.props.changeLocation("_back");
       }
 
       // console.log(username, this.player_colors)
@@ -253,12 +248,22 @@ class DrawingCanvas extends Component {
           this.clear_canvas();
         break;
         case "end_round":
-          this.props.send_message({
-            command: "end_round"
-          })
+          if(this.state.current_artist != undefined){
+            this.props.send_message({
+              command: "end_round"
+            })
+          }
+        break;
+        case "end_game":
+          if(this.state.current_artist != undefined){
+            this.props.send_message({
+              command: "end_game"
+            })
+            this.props.changeLocation("lobby");
+          }
         break;
         case "exit_room":
-          this.props.changeRoomCode("");
+          this.props.kill_websocket(this.props.username);
           this.props.changeLocation("home");
           this.props.clearGameState();
         break;
@@ -308,7 +313,7 @@ class DrawingCanvas extends Component {
 
     componentDidMount(){
       this.canvas.width = this.props.windowWidth;
-      this.canvas.height = this.props.windowHeight;
+      this.canvas.height = this.props.windowHeight*2;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
@@ -363,9 +368,6 @@ class DrawingCanvas extends Component {
     }
 
     render_player_text(){
-      if(this.state.current_artist == undefined){
-        return this.render_text("Loading...");
-      }
       return this.render_text(this.state.current_artist.username + " is drawing")
     }
     render_word_text(){
@@ -377,6 +379,9 @@ class DrawingCanvas extends Component {
         <div style={room_button_holder}>
           <Button variant="outlined" name="end_round" onClick={this.onClickHandler} style={room_button_style}>
             Someone got it
+          </Button>
+          <Button variant="outlined" name="end_game" onClick={this.onClickHandler} style={room_button_style}>
+            End Game
           </Button>
           <Button variant="outlined" name="exit_room" onClick={this.onClickHandler} style={room_button_style}>
             Leave Game
@@ -396,13 +401,21 @@ class DrawingCanvas extends Component {
           </React.Fragment>
         );
       }
-      else{
+      else if(this.state.current_artist != undefined){
         is_artist_ui = (
           <React.Fragment>
             {this.render_player_text() }
           </React.Fragment>
         );
       }
+      else{
+        is_artist_ui = (
+          <React.Fragment>
+            {this.render_text("Loading...")}
+          </React.Fragment>
+        );
+      }
+
       return (
         <React.Fragment>
           {is_artist_ui}
@@ -453,7 +466,7 @@ class DrawingCanvas extends Component {
   const room_button_style = {
     touchAction: "auto",
     pointerEvents: "auto",
-    width: "40%",
+    width: "23.33%",
     margin: "5px",
     maxWidth: "150px",
     boxSizing:"border-box",
@@ -468,13 +481,13 @@ class DrawingCanvas extends Component {
   const canvas_style = {
     background: BACKGROUND, 
     touchAction: "None",
-    // zIndex: "1",
-    // maxHeight: "inherit",
-    // maxWidth: "inherit",
+    zIndex: "1",
+    maxHeight: "inherit",
+    maxWidth: "inherit",
   }
 
   const canvas_wrapper = {
     border: "2px black solid",
-    // width: "90%",
-    // height: "75%"
+    width: "90%",
+    height: "75%"
   }
