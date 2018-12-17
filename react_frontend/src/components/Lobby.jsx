@@ -22,6 +22,36 @@ class Lobby extends Component{
         super(props);
     }
 
+    componentDidMount(){
+        // connect to the room that we are trying to join
+        this.props.update_websocket(this.props.room_code);
+        this.props.register_socket_callbacks("lobby", "onmessage", this.process_message);
+    }
+
+    componentWillUnmount(){
+        this.props.kill_websocket(this.props.username);
+        this.props.unregister_socket_callbacks("lobby", "onmessage");
+    }
+
+    process_message(parsedData){
+        console.log("Lobby process_message", parsedData);
+        const command = parsedData.command;
+        const sender = parsedData.sender;
+        if(command == "get_room_response"){
+            let players = parsedData.message.players;
+            players.forEach(
+                (item) => {
+                    if(item.channel == sender){
+                        item.is_me = true;
+                    }
+                }
+            );
+            const is_game_started = parsedData.message.is_game_started;
+            this.props.updatePlayers(players);
+            this.props.updateGameStarted(is_game_started);
+        }
+    }
+
     handleClick(event){
         while(event.target.getAttribute("name") === null){
             event.target = event.target.parentNode;
@@ -30,11 +60,21 @@ class Lobby extends Component{
         console.log("button was clicked : " + button);
         switch(button){
             case "lobby_start":
-                // TODO need to start game too 
-                this.props.changeLocation("game");
+                if(!this.props.is_game_started){
+                    this.props.changeLocation("game");
+                }
             break;
             case "lobby_leave":
+                this.props.clearGameState();
                 this.props.changeLocation("_back");
+            break;
+            case "edit_name":
+                this.props.changeLocation("join");
+            break;
+            case "kick_person":
+                if(!this.props.is_game_started){
+                    this.props.kickPlayer(event.target.getAttribute("player"));
+                }
             break;
             default:
             console.log("default case");
@@ -55,7 +95,7 @@ class Lobby extends Component{
                 <h1 style={{float: "left", paddingLeft:5, wordWrap: "break-word"}}>
                         {person.username} 
                 </h1>
-                <div style={{float: "right"}} name={icon_name} onClick={this.handleClick}> 
+                <div style={{float: "right"}} player={person.id} name={icon_name} onClick={this.handleClick}> 
                     {icon}
                 </div>
             </li>
@@ -80,16 +120,25 @@ class Lobby extends Component{
                 </ol>
             </div>
             <hr className="hrstyle"/>
-            <div className="field is-centered button_bar_style">
+            <div className="field is-centered button_bar_style" >
                 <a name="lobby_start" className="button is-outlined button_style"
-                    onClick={this.handleClick}>Start Game</a>           
+                    onClick={this.handleClick}
+                    style={button_stretch}
+                    >Start Game</a>           
                 <a name="lobby_leave" className="button is-outlined button_style" 
-                    onClick={this.handleClick}>Leave Game</a>
+                    onClick={this.handleClick}
+                    style={button_stretch}
+                    >Leave Game</a>
             </div>
             </React.Fragment>
         )
     }
 }
+
+const button_stretch = {
+    width: "40%", // 1/X where x is num of buttons
+}
+
 
 Lobby.propTypes = {
     changeLocation: PropTypes.func,

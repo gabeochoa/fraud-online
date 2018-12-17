@@ -260,6 +260,7 @@ class DrawingCanvas extends Component {
         case "exit_room":
           this.props.changeRoomCode("");
           this.props.changeLocation("home");
+          this.props.clearGameState();
         break;
         default:
           console.log("button clicked but no handler", button_)
@@ -353,7 +354,7 @@ class DrawingCanvas extends Component {
 
     render_text(text){
       return (
-        <div style={{position: "inherit", display: "block", left: 40, margin: 10}}>
+        <div style={{position: "inherit", display: "block", left: 40, margin: 3}}>
           <h1 style={{color: '#4a4a4a'}}>
             {text}
           </h1>
@@ -430,8 +431,7 @@ class DrawingCanvas extends Component {
     display: "block",
     position: "absolute",
     zIndex: "2",
-    top: 100,
-    // left: -30,
+    top: 120,
     left: -10,
     pointerEvents: "None",
     touchAction: "None",
@@ -439,22 +439,24 @@ class DrawingCanvas extends Component {
   const tool_button_style = {
     touchAction: "auto",
     pointerEvents: "auto",
-    margin: "5px",
-    left: 5,
-    width: "40px",
+    // margin: "5px",
+    // left: 5,
+    // width: "40px",
   }
 
   const room_button_holder = {
     position: "fixed",
-    left: 20,
-    bottom: -10,
+    left: 0,
+    bottom: 0,
     width: "100%",
   }
   const room_button_style = {
     touchAction: "auto",
     pointerEvents: "auto",
+    width: "40%",
     margin: "5px",
-    width: "40px",
+    maxWidth: "150px",
+    boxSizing:"border-box",
   }
 
   const gh_style = {
@@ -466,13 +468,13 @@ class DrawingCanvas extends Component {
   const canvas_style = {
     background: BACKGROUND, 
     touchAction: "None",
-    zIndex: "1",
-    maxHeight: "inherit",
-    maxWidth: "inherit",
+    // zIndex: "1",
+    // maxHeight: "inherit",
+    // maxWidth: "inherit",
   }
 
   const canvas_wrapper = {
     border: "2px black solid",
-    width: "90%",
-    height: "75%"
+    // width: "90%",
+    // height: "75%"
   }

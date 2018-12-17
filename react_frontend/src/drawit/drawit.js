@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import ReactDOM from 'react-dom';
-import GameWrapper from './gameWrapper';
-import MenuButtonBar from "./menu";
 import autobind from "autobind-decorator";
 import CreateGame from '../components/CreateGame';
 import JoinGame from '../components/JoinGame';
 import Home from '../components/Home';
 import Menu from '../components/Menu';
 import Lobby from '../components/Lobby';
+import DrawingCanvas from './drawingCanvas';
+import "./drawit.css";
+
 
 import 'lodash';
 
@@ -37,20 +38,6 @@ class DrawItApp extends Component {
     this.setState({
       seconds: new_time
     })
-  }
-
-  changeUsername(username, callback){
-    this.setState({
-      username: username,
-    },
-    this.callback)
-  }
-
-  changeRoomCode(room_code, callback){
-    this.setState({
-      room_code: room_code,
-    },
-    this.callback)
   }
 
   changeLocation(newLocation, changeRoom){
@@ -87,8 +74,6 @@ class DrawItApp extends Component {
     let create_jsx = (
       <CreateGame
         changeLocation={()=>{}}
-        changeUsername={this.changeUsername}
-        changeRoomCode={this.changeRoomCode}
       />
     );
 
@@ -96,17 +81,12 @@ class DrawItApp extends Component {
       <JoinGame
         room_code=""
         changeLocation={()=>{}}
-        changeUsername={this.changeUsername}
-        changeRoomCode={this.changeRoomCode}
       />
     );
 
     let game_jsx = (
-      <GameWrapper
-        room={this.state.room_code}
-        username={this.state.username}
+      <DrawingCanvas
         seconds={this.state.seconds}
-        changeRoomCode={this.changeRoomCode}
       /> 
     );
 
@@ -119,16 +99,24 @@ class DrawItApp extends Component {
     }
 
     return (
-      <Menu
-        starting_location="home"
-        all_locations={location_data}
-        header={this.render_header()}
-        footer={<p></p>}
-        />
+      <div style={top_level}>
+        <Menu
+          starting_location="home"
+          all_locations={location_data}
+          header={this.render_header()}
+          footer={<p></p>}
+          />
+      </div>
     );
   }
 }
 
+const top_level = {
+  display: "block", 
+  justifyContent: "center",
+  margin: "auto",
+  top: "0"
+}
 
 const wrapper = document.getElementById("app");
 wrapper ? ReactDOM.render(<DrawItApp />, wrapper) : null;

@@ -11,7 +11,6 @@ class CreateGame extends Component{
         
         this.state = {
             name: this.props.username || "",
-            bad_input: true,
         }
     }
 
@@ -54,11 +53,22 @@ class CreateGame extends Component{
                   onChange={this.handleChange} type="text" placeholder="Name"
                   />
                 <hr className="hrstyle" />
-                <a name="create_create" className="button is-outlined button_style" onClick={this.handleClick}>Create</a>
-                <a name="create_back" className="button is-outlined button_style" onClick={this.handleClick}>Back</a>
+                <a name="create_create" className="button is-outlined button_style" 
+                   onClick={this.handleClick}
+                   style={button_stretch}
+                   >Create</a>
+                <a name="create_back" className="button is-outlined button_style" 
+                   onClick={this.handleClick}
+                   style={button_stretch}
+                   >Back</a>
             </React.Fragment>
         )
     }
+}
+
+
+const button_stretch = {
+    width: "40%", // 1/X where x is num of buttons
 }
 
 CreateGame.propTypes = {

@@ -33,10 +33,12 @@ class Home extends Component{
         return (
             <React.Fragment>
                 <a name="home_create" className="button is-outlined button_style"
+                   style={{width:"40%"}}
                    onClick={this.handleClick}>
                    New Game
                 </a>           
                 <a name="home_join" className="button is-outlined button_style" 
+                   style={{width:"40%"}}
                    onClick={this.handleClick}>
                    Join Game
                 </a>
