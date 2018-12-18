@@ -149,6 +149,12 @@ class DrawingCanvas extends Component {
     }
 
     onEventEnd(){
+      console.log(this.past_positions)
+      console.log(this.past_positions.length)
+      if(this.past_positions.length == 1){
+        // this is a dot boi
+        this.paint(this.past_positions[0], this.past_positions[0])
+      }
       this.mouse_clicked = false;
       this.past_positions = []
     }
@@ -169,6 +175,8 @@ class DrawingCanvas extends Component {
       const { x, y } = prev;
       const { x: x2, y: y2 } = cur;
 
+      this.drawOutline(cur)
+
       this.ctx.beginPath();
       this.ctx.lineWidth = tool.lineWidth;
       this.ctx.strokeStyle = tool.stroke;
@@ -183,8 +191,8 @@ class DrawingCanvas extends Component {
     drawOutline(cur){
       const {x, y} = cur;
       this.ctx.beginPath();
-      this.ctx.arc(x, y, this._tool.lineWidth, 0, 2 * Math.PI);
-      this.ctx.fillStyle = 'white';//#40000';
+      this.ctx.arc(x, y, this._tool.lineWidth / 2, 0, 2 * Math.PI);
+      this.ctx.fillStyle = this._tool.stroke;
       this.ctx.fill();
     }
 
@@ -213,7 +221,6 @@ class DrawingCanvas extends Component {
       });
 
       this._paint(prev, cur, this._tool)
-      // this.drawOutline(cur)
     }
 
     clear_canvas(){
@@ -282,14 +289,34 @@ class DrawingCanvas extends Component {
       this.onEventEnd()
     }
     
+    normalizeTouchLocation(evt, parent){
+      var position = {};
+      
+      position.x = event.touches[0].clientX; //(evt.targetTouches) ? evt.targetTouches[0].pageX : evt.clientX;
+      position.y = event.touches[0].clientY; //(evt.targetTouches) ? evt.targetTouches[0].pageY : evt.clientY;
+      const pren = "pre norm " + position.x + "," + position.y
+      // while(parent.offsetParent){
+          position.x -= parent.offsetLeft - parent.scrollLeft;
+          position.y -= parent.offsetTop - parent.scrollTop;
+          position.x -= 25;
+          position.y -= 30;
+      //     parent = parent.offsetParent;
+      // }
+      console.log(pren, "post norm", position.x, position.y)
+      return position;
+    }
+
     onTouchStart(event){
       if (event.target == this.canvas) {
        event.preventDefault();
       }
-      // console.log("touchstart", event)
-      var rect = this.canvas.getBoundingClientRect();
-      var x = event.touches[0].clientX - rect.left
-      var y = event.touches[0].clientY - rect.top
+      const {x, y} = this.normalizeTouchLocation(event, this.canvas);
+
+      // var rect = this.canvas.getBoundingClientRect();
+      // var x = event.touches[0].clientX - rect.left
+      // var y = event.touches[0].clientY - rect.top
+      // console.log("touchstart", event, event.touches, event.touches[0], rect, x, y)
+      console.log("touchstart", x, y)
       this.onEventBegin(x,y)
     }
 
@@ -299,23 +326,29 @@ class DrawingCanvas extends Component {
       if (event.target == this.canvas) {
        event.preventDefault();
       }
-      // console.log("touchend", event)
+      console.log("touchend", event, event.touches, event.touches[0])
       this.onEventEnd()
     }
     onTouchMove(event){
       if (event.target == this.canvas) {
         event.preventDefault();
       }
-      // console.log("touchmove", event)
-      var rect = this.canvas.getBoundingClientRect();
-      var x = event.touches[0].clientX - rect.left
-      var y = event.touches[0].clientY - rect.top
+      const {x, y} = this.normalizeTouchLocation(event, this.canvas);
+      console.log("touchmove", x, y)
       this.onEventMove(x,y)
+
+      // var rect = this.canvas.getBoundingClientRect();
+      // // var x = event.touches[0].clientX - rect.left
+      // // var y = event.touches[0].clientY - rect.top
+      // var x = event.touches[0].clientX - this.canvas.offsetLeft
+      // var y = event.touches[0].clientY - this.canvas.offsetTop;
+      // console.log("touchmove", event, event.touches, event.touches[0], this.canvas.offsetLeft, this.canvas.offsetTop, rect, x, y)
+      // this.onEventMove(x,y)
     }
 
     componentDidMount(){
       this.canvas.width = this.props.windowWidth;
-      this.canvas.height = this.props.windowHeight*2;
+      this.canvas.height = this.props.windowHeight;//*2;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
