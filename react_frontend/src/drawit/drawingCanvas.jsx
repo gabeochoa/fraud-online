@@ -55,7 +55,7 @@ class DrawingCanvas extends Component {
 
     end_round(data, sender){
       this.clear_canvas();
-      console.log("end round", data, sender)
+      // console.log("end round", data, sender)
       if(data.current_player >= data.players.length){
         // ran out of players
         this.props.send_message({
@@ -149,8 +149,8 @@ class DrawingCanvas extends Component {
     }
 
     onEventEnd(){
-      console.log(this.past_positions)
-      console.log(this.past_positions.length)
+      // console.log(this.past_positions)
+      // console.log(this.past_positions.length)
       if(this.past_positions.length == 1){
         // this is a dot boi
         this.paint(this.past_positions[0], this.past_positions[0])
@@ -245,15 +245,15 @@ class DrawingCanvas extends Component {
 
       switch(button_){
         case "pencil":
-          console.log("tool is now pencil")
+          // console.log("tool is now pencil")
           this._tool = PENCIL;
           break;
         case "eraser":
-          console.log("tool is now eraser")
+          // console.log("tool is now eraser")
           this._tool = ERASER;
         break;
         case CLEAR:
-          console.log("clearing canvas")
+          // console.log("clearing canvas")
           this.clear_canvas();
         break;
         case "end_round":
@@ -294,7 +294,7 @@ class DrawingCanvas extends Component {
       
       position.x = event.touches[0].clientX; //(evt.targetTouches) ? evt.targetTouches[0].pageX : evt.clientX;
       position.y = event.touches[0].clientY; //(evt.targetTouches) ? evt.targetTouches[0].pageY : evt.clientY;
-      const pren = "pre norm " + position.x + "," + position.y
+      // const pren = "pre norm " + position.x + "," + position.y
       // while(parent.offsetParent){
           position.x -= parent.offsetLeft - parent.scrollLeft;
           position.y -= parent.offsetTop - parent.scrollTop;
@@ -302,7 +302,7 @@ class DrawingCanvas extends Component {
           position.y -= 30;
       //     parent = parent.offsetParent;
       // }
-      console.log(pren, "post norm", position.x, position.y)
+      // console.log(pren, "post norm", position.x, position.y)
       return position;
     }
 
@@ -311,12 +311,7 @@ class DrawingCanvas extends Component {
        event.preventDefault();
       }
       const {x, y} = this.normalizeTouchLocation(event, this.canvas);
-
-      // var rect = this.canvas.getBoundingClientRect();
-      // var x = event.touches[0].clientX - rect.left
-      // var y = event.touches[0].clientY - rect.top
-      // console.log("touchstart", event, event.touches, event.touches[0], rect, x, y)
-      console.log("touchstart", x, y)
+      // console.log("touchstart", x, y)
       this.onEventBegin(x,y)
     }
 
@@ -326,7 +321,7 @@ class DrawingCanvas extends Component {
       if (event.target == this.canvas) {
        event.preventDefault();
       }
-      console.log("touchend", event, event.touches, event.touches[0])
+      // console.log("touchend", event, event.touches, event.touches[0])
       this.onEventEnd()
     }
     onTouchMove(event){
@@ -334,16 +329,8 @@ class DrawingCanvas extends Component {
         event.preventDefault();
       }
       const {x, y} = this.normalizeTouchLocation(event, this.canvas);
-      console.log("touchmove", x, y)
+      // console.log("touchmove", x, y)
       this.onEventMove(x,y)
-
-      // var rect = this.canvas.getBoundingClientRect();
-      // // var x = event.touches[0].clientX - rect.left
-      // // var y = event.touches[0].clientY - rect.top
-      // var x = event.touches[0].clientX - this.canvas.offsetLeft
-      // var y = event.touches[0].clientY - this.canvas.offsetTop;
-      // console.log("touchmove", event, event.touches, event.touches[0], this.canvas.offsetLeft, this.canvas.offsetTop, rect, x, y)
-      // this.onEventMove(x,y)
     }
 
     componentDidMount(){
