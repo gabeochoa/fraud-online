@@ -175,7 +175,7 @@ class DrawingCanvas extends Component {
       const { x, y } = prev;
       const { x: x2, y: y2 } = cur;
 
-      this.drawOutline(cur)
+      this.drawOutline(cur, tool)
 
       this.ctx.beginPath();
       this.ctx.lineWidth = tool.lineWidth;
@@ -188,11 +188,11 @@ class DrawingCanvas extends Component {
       this.ctx.stroke();
     }
 
-    drawOutline(cur){
+    drawOutline(cur, tool){
       const {x, y} = cur;
       this.ctx.beginPath();
-      this.ctx.arc(x, y, this._tool.lineWidth / 2, 0, 2 * Math.PI);
-      this.ctx.fillStyle = this._tool.stroke;
+      this.ctx.arc(x, y, tool.lineWidth / 2, 0, 2 * Math.PI);
+      this.ctx.fillStyle = tool.stroke;
       this.ctx.fill();
     }
 

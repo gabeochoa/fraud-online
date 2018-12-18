@@ -25,6 +25,7 @@ class WebSocketComponent extends Component{
         super(props);
 
         this.rws = null;
+        this.was_open = false;
         this.callbacks = {
             "player_kicked": {},
             "onmessage": {},
@@ -36,8 +37,11 @@ class WebSocketComponent extends Component{
         this.rws = new ReconnectingWebSocket(path);
 
         this.rws.onopen = (event) => {
+            if(this.was_open){
+                console.log("websocket was already open, and now open again")
+            }
             console.log('WebSocket open', event);
-            // this.send_message({ command: 'get_room' });
+            this.was_open = true;
             this.launch_socket_callback("onopen", event);
         };
         this.rws.onmessage = e => {
@@ -51,7 +55,7 @@ class WebSocketComponent extends Component{
         };
 
         this.rws.onclose = (event) => {
-            // console.log("WebSocket closed", event);
+            console.log("WebSocket closed", event);
             if(event.code == 1000 && event.reason == "leave_lobby"){
                 return // we are leaving 
             }
@@ -62,6 +66,7 @@ class WebSocketComponent extends Component{
                 this.launch_socket_callback("player_kicked", event);
                 return 
             }
+            this.was_open = false;
             this.rws.reconnect();
         };
     }
@@ -191,8 +196,8 @@ class Menu extends WebSocketComponent {
     }
 
     kickPlayer(person){
-        console.log("kicking player: ", person, this.state.players);
         const player = this.state.players.filter(c => c.id == parseInt(person))[0];
+        console.log("kicking player: ", person, this.state.players, player);
         this.send_message({
             command: "kick_player",
             player: player,
