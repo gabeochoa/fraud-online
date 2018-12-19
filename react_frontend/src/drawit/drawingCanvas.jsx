@@ -305,6 +305,7 @@ class DrawingCanvas extends Component {
                 title="Are you sure?"
                 onConfirm={() => { this.onClickStringHandler(button_)}}
                 onCancel={ () => {this.setState({confirm_box: null})}}
+                closeOnClickOutside={true}
                 >
               {confirm_text}
               </SweetAlert>
