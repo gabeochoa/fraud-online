@@ -21,7 +21,7 @@ class VerticalSlider extends Component {
         super(props)
 
         this.state = {
-            value: this.props.default || this.props.min || 3,
+            value: this.props.value || this.props.min || 3,
         }
     }
 
@@ -40,7 +40,7 @@ class VerticalSlider extends Component {
                     step={this.props.step}
                     classes={{container: this.props.classes.slider}}
                     onChange={this.handleChange}
-                    value={this.state.value}
+                    value={this.props.value}
                     vertical
                 />
             </div>

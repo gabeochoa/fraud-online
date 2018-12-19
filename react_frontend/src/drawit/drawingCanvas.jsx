@@ -41,12 +41,12 @@ class DrawingCanvas extends Component {
         current_artist: null,
         is_local_player_artist: false,
         confirm_box: null, 
+        _tool: PENCIL,
       }
       this.numOfSteps = 10 // this would be set to num of players
       this.player_colors = {}
       this.mouse_clicked = false;
       this.past_positions = [];
-      this._tool = PENCIL;
       this.props.register_socket_callbacks("drawingCanvas", "onmessage", this.process_message)
 
       // TODO remove 
@@ -203,7 +203,7 @@ class DrawingCanvas extends Component {
         // disable drawing when not local artist
         return; 
       }
-      // console.log("paint", prev, cur, this._tool)
+      // console.log("paint", prev, cur, this.state._tool)
       let scaled_prev = {
         x: prev.x / this.props.windowWidth,
         y: prev.y / this.props.windowWidth,
@@ -218,11 +218,11 @@ class DrawingCanvas extends Component {
           message:{
             prev: scaled_prev,
             cur: scaled_cur,
-            tool: this._tool,
+            tool: this.state._tool,
           }
       });
 
-      this._paint(prev, cur, this._tool)
+      this._paint(prev, cur, this.state._tool)
     }
 
     clear_canvas(){
@@ -240,11 +240,11 @@ class DrawingCanvas extends Component {
       switch(button_){
         case "pencil":
           // console.log("tool is now pencil")
-          this._tool = PENCIL;
+          this.setState({_tool:PENCIL});
           break;
         case "eraser":
           // console.log("tool is now eraser")
-          this._tool = ERASER;
+          this.setState({_tool:ERASER});
         break;
         case CLEAR:
           // console.log("clearing canvas")
@@ -285,10 +285,10 @@ class DrawingCanvas extends Component {
       while(event.target.getAttribute("name") === null){
         event.target = event.target.parentNode;
       }
-      const button_ = event.target.getAttribute("name")
+      const button_ = event.target.getAttribute("name");
 
-      if(! (event.target.getAttribute("is_confirm") == "true") ){
-        return this.onClickHandler(button_);
+      if(event.target.getAttribute("is_confirm") != "true"){
+        return this.onClickStringHandler(button_);
       }
 
       const confirm_text = event.target.getAttribute("confirm_text");
@@ -370,14 +370,18 @@ class DrawingCanvas extends Component {
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
-      this.ctx.lineWidth = this._tool.lineWidth;
+      this.ctx.lineWidth = this.state._tool.lineWidth;
     }
 
     handleColorChange(color){
       //auto matically change to pencil and then change color
       // we dont want to keep on eraser and overwrite the black
-      this._tool = PENCIL
-      this._tool.stroke = color.hex;
+      this.setState({
+        _tool: {
+          ...PENCIL,
+          stroke: color.hex,
+        }
+      });
     }
 
     componentWillUnmount() {
@@ -386,7 +390,12 @@ class DrawingCanvas extends Component {
     }
 
     sliderChange(args){
-      this._tool.lineWidth = args;
+      this.setState({
+        _tool: {
+          ...this.state._tool,
+          lineWidth: args,
+        }
+      });
     }
 
     render_tools(){
@@ -402,19 +411,19 @@ class DrawingCanvas extends Component {
             <Icon path={mdiEraser} size={1.5}/>
           </Button>
           <div style={gh_style}>
-              <div style={{position: "absolute", top: -20, left:0}}>
+              <div style={{position: "absolute", top: 5, left:0}}>
               <VerticalSlider
                 min={2}
                 max={50}
                 step={2}
-                default={this._tool.lineWidth}
+                value={this.state._tool.lineWidth}
                 onChange={this.sliderChange}
               /> 
               </div>
-              <div style={{position: "absolute", top: -20, right:-35}}>
+              <div style={{position: "absolute", top: 5, right:-35}}>
              <GithubPicker
                 width={40}
-                color={ this._tool.stroke }
+                color={ this.state._tool.stroke }
                 colors={COLOR_CHOICES}
                 onChangeComplete={ this.handleColorChange }
                 triangle={"hide"}
@@ -564,7 +573,6 @@ class DrawingCanvas extends Component {
     pointerEvents: "auto",
     width: "100%",
     display: "-webkit-box",
-    top: "-20px",
   }
 
   const canvas_style = {
