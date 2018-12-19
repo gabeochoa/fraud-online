@@ -20,11 +20,13 @@ const COLOR_CHOICES = ['#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#
 const CLEAR = "__CLEAR"
 
 let PENCIL = {
+  name: "PENCIL",
   stroke: COLOR_CHOICES[0],
   lineWidth: 10,
 }
 
 const ERASER = {
+  name: "ERASE",
   stroke: BACKGROUND,
   lineWidth: 15,
 }
@@ -43,6 +45,9 @@ class DrawingCanvas extends Component {
         confirm_box: null, 
         _tool: PENCIL,
       }
+      this._my_pencil = PENCIL
+      this._my_eraser = ERASER
+
       this.numOfSteps = 10 // this would be set to num of players
       this.player_colors = {}
       this.mouse_clicked = false;
@@ -57,6 +62,8 @@ class DrawingCanvas extends Component {
 
     end_round(data, sender){
       this.clear_canvas();
+      this._my_pencil = PENCIL;
+      this._my_eraser = ERASER;
       // console.log("end round", data, sender)
       if(data.current_player >= data.players.length){
         // ran out of players
@@ -240,11 +247,11 @@ class DrawingCanvas extends Component {
       switch(button_){
         case "pencil":
           // console.log("tool is now pencil")
-          this.setState({_tool:PENCIL});
+          this.setState({_tool:this._my_pencil});
           break;
         case "eraser":
           // console.log("tool is now eraser")
-          this.setState({_tool:ERASER});
+          this.setState({_tool:this._my_eraser});
         break;
         case CLEAR:
           // console.log("clearing canvas")
@@ -376,11 +383,9 @@ class DrawingCanvas extends Component {
     handleColorChange(color){
       //auto matically change to pencil and then change color
       // we dont want to keep on eraser and overwrite the black
+      this._my_pencil.stroke = color.hex;
       this.setState({
-        _tool: {
-          ...PENCIL,
-          stroke: color.hex,
-        }
+        _tool: this._my_pencil
       });
     }
 
@@ -390,11 +395,20 @@ class DrawingCanvas extends Component {
     }
 
     sliderChange(args){
+      let my_tool = null;
+      switch(this.state._tool.name){
+        case PENCIL.name:
+          this._my_pencil.lineWidth = args;
+          my_tool = this._my_pencil;
+        break;
+        case ERASER.name:
+          this._my_eraser.lineWidth = args;
+          my_tool = this._my_eraser;
+        break;
+      }
+
       this.setState({
-        _tool: {
-          ...this.state._tool,
-          lineWidth: args,
-        }
+        _tool: my_tool
       });
     }
 
