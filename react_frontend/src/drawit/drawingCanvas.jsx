@@ -5,11 +5,12 @@ import Button from '@material-ui/core/Button';
 import autobind from 'autobind-decorator'
 
 import Icon from "@mdi/react";
-import { mdiPencil, mdiEraser, mdiClose } from "@mdi/js";
+import { mdiPencil, mdiEraser, mdiClose, mdiConsoleLine } from "@mdi/js";
 import { GithubPicker, SliderPicker, HuePicker, CustomPicker, ChromePicker} from 'react-color';
 import {rainbow} from './utils';
 import MyColorPicker from '../components/ColorPicker';
 import VerticalSlider from '../components/VerticalSlider';
+import SweetAlert from 'react-bootstrap-sweetalert';
 
 const BACKGROUND = 'white'
 
@@ -39,6 +40,7 @@ class DrawingCanvas extends Component {
         in_lobby: false,
         current_artist: null,
         is_local_player_artist: false,
+        confirm_box: null, 
       }
       this.numOfSteps = 10 // this would be set to num of players
       this.player_colors = {}
@@ -233,16 +235,8 @@ class DrawingCanvas extends Component {
           }
       });
     }
-    onClickHandler(event){
-      if (event.target == this.canvas) {
-        event.preventDefault();
-      }
-      // console.log("click event", event, event.target)
-      while(event.target.getAttribute("name") === null){
-        event.target = event.target.parentNode;
-      }
-      const button_ = event.target.getAttribute("name")
 
+    onClickStringHandler(button_){
       switch(button_){
         case "pencil":
           // console.log("tool is now pencil")
@@ -280,6 +274,42 @@ class DrawingCanvas extends Component {
           console.log("button clicked but no handler", button_)
         break;
       }
+    }
+
+    onClickHandler(event){
+      if (event.target == this.canvas) {
+        event.preventDefault();
+      }
+      
+      // console.log("click event", event, event.target)
+      while(event.target.getAttribute("name") === null){
+        event.target = event.target.parentNode;
+      }
+      const button_ = event.target.getAttribute("name")
+
+      if(! (event.target.getAttribute("is_confirm") == "true") ){
+        return this.onClickHandler(button_);
+      }
+
+      const confirm_text = event.target.getAttribute("confirm_text");
+
+      // otherwise lets draw the thing 
+      this.setState({
+          confirm_box: (
+            <SweetAlert
+                warning
+                showCancel
+                confirmBtnText={"Yes"}
+                confirmBtnBsStyle="warning"
+                cancelBtnBsStyle="default"
+                title="Are you sure?"
+                onConfirm={() => { this.onClickStringHandler(button_)}}
+                onCancel={ () => {this.setState({confirm_box: null})}}
+                >
+              {confirm_text}
+              </SweetAlert>
+          ),
+      });
     }
 
     onMouseUp(event){
@@ -407,6 +437,7 @@ class DrawingCanvas extends Component {
     render_player_text(){
       return this.render_text(this.state.current_artist.username + " is drawing")
     }
+
     render_word_text(){
       return this.render_text(this.state.current_artist.word);
     }
@@ -414,24 +445,32 @@ class DrawingCanvas extends Component {
     render_bottom_buttons(){
       return (
         <div style={room_button_holder}>
-          <Button variant="outlined" name="end_round" onClick={this.onClickHandler} style={room_button_style}>
+          <Button variant="outlined" 
+            name="end_round" 
+            is_confirm="true"
+            confirm_text="Really end round?"
+            onClick={this.onClickHandler} style={room_button_style}>
             Someone got it
           </Button>
-          <Button variant="outlined" name="end_game" onClick={this.onClickHandler} style={room_button_style}>
+          <Button variant="outlined" name="end_game" 
+            is_confirm="true"
+            confirm_text="Really end game?"
+            onClick={this.onClickHandler} style={room_button_style}>
             End Game
           </Button>
-          <Button variant="outlined" name="exit_room" onClick={this.onClickHandler} style={room_button_style}>
+          <Button variant="outlined" name="exit_room" 
+            is_confirm="true"
+            confirm_text="Really exit room?"
+            onClick={this.onClickHandler} style={room_button_style}>
             Leave Game
           </Button>
         </div>
       );
     }
 
-    render() {
-      // console.log(this.props);
-      let is_artist_ui = null;
+    render_artist_ui(){
       if(this.state.is_local_player_artist){
-        is_artist_ui = (
+        return (
           <React.Fragment>
             {this.render_tools() }
             {this.render_word_text() }
@@ -439,23 +478,30 @@ class DrawingCanvas extends Component {
         );
       }
       else if(this.state.current_artist != undefined){
-        is_artist_ui = (
+        return (
           <React.Fragment>
             {this.render_player_text() }
           </React.Fragment>
         );
       }
       else{
-        is_artist_ui = (
+        return (
           <React.Fragment>
             {this.render_text("Loading...")}
           </React.Fragment>
         );
       }
 
+    }
+
+    render() {
+      // console.log(this.props);
+      let is_artist_ui = this.render_artist_ui();
+      
       return (
         <React.Fragment>
-     
+          { this.state.confirm_box != null && this.state.confirm_box}
+
           {is_artist_ui}
           {this.render_bottom_buttons() }
           <div style={canvas_wrapper}>
