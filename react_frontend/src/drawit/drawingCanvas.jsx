@@ -414,13 +414,19 @@ class DrawingCanvas extends Component {
     render_tools(){
       return (
         <div id="button_bar" style={button_bar_style}>
-          <Button name={CLEAR} onClick={this.onClickHandler} style={tool_button_style}>
+          <Button name={CLEAR}
+            onClick={this.onClickHandler} 
+            style={tool_button_style}>
             <Icon path={mdiClose} size={1.5}/>
           </Button>
-          <Button name="pencil" onClick={this.onClickHandler} style={tool_button_style}>
+          <Button name="pencil" onClick={this.onClickHandler} style={tool_button_style}       
+              {...(this.state._tool.name == PENCIL.name? {variant:"outlined" }: {})}
+              >
             <Icon path={mdiPencil} size={1.5}/>
           </Button>
-          <Button name="eraser" onClick={this.onClickHandler} style={tool_button_style}>
+          <Button name="eraser" onClick={this.onClickHandler} style={tool_button_style}       
+              {...(this.state._tool.name == ERASER.name? {variant:"outlined" }: {})}
+              >
             <Icon path={mdiEraser} size={1.5}/>
           </Button>
           <div style={gh_style}>
