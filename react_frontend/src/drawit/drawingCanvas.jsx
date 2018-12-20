@@ -62,6 +62,9 @@ class DrawingCanvas extends Component {
 
     end_round(data, sender){
       this.clear_canvas();
+      this.setState({
+        confirm_box: null
+      })
       this._my_pencil = PENCIL;
       this._my_eraser = ERASER;
       // console.log("end round", data, sender)
@@ -104,6 +107,10 @@ class DrawingCanvas extends Component {
       }
 
       if(command == "end_game"){
+
+        this.setState({
+          confirm_box: null
+        })
         this.props.updateGameStarted(false);
         this.props.changeLocation("_back");
       }
