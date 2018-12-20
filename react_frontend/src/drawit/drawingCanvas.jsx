@@ -55,9 +55,7 @@ class DrawingCanvas extends Component {
       this.props.register_socket_callbacks("drawingCanvas", "onmessage", this.process_message)
 
       // TODO remove 
-      this.props.send_message({
-        command: "start_game"
-      });
+
     }
 
     end_round(data, sender){

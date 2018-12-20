@@ -90,6 +90,9 @@ class Lobby extends Component{
         switch(button){
             case "lobby_start":
                 if( (!this.props.is_game_started) && this.state.is_loaded){
+                    this.props.send_message({
+                      command: "start_game"
+                    });
                     this.props.changeLocation("game");
                 }
             break;

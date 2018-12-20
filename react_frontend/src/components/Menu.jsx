@@ -32,6 +32,28 @@ class WebSocketComponent extends Component{
         };
     }
 
+    oncloseHandler(event){
+        console.log("WebSocket closed", event);
+        this.was_open = false;
+        if(event.code == 1000 && event.reason == "leave_lobby"){
+            this.rws.null;
+            this.changeRoomCode("")
+            this.changeLocation("home");
+            return // we are leaving 
+        }
+        if(event.code == 1001){
+            // we are being kicked
+            console.log("we are being kicked")
+            this.changeRoomCode("")
+            this.changeLocation("home");
+            this.launch_socket_callback("player_kicked", event);
+            this.rws.close(1000, "leave_lobby");
+            this.rws = null;
+            return 
+        }
+        this.rws.reconnect();
+    }
+
     update_websocket(room, kwargs){
         let path = generate_websocket_path(room, kwargs)
         this.rws = new ReconnectingWebSocket(path);
@@ -54,21 +76,7 @@ class WebSocketComponent extends Component{
             this.launch_socket_callback("onerror", e);
         };
 
-        this.rws.onclose = (event) => {
-            console.log("WebSocket closed", event);
-            if(event.code == 1000 && event.reason == "leave_lobby"){
-                return // we are leaving 
-            }
-            if(event.code == 1001){
-                // we are being kicked
-                this.changeRoomCode("")
-                this.changeLocation("home");
-                this.launch_socket_callback("player_kicked", event);
-                return 
-            }
-            this.was_open = false;
-            this.rws.reconnect();
-        };
+        this.rws.onclose = this.oncloseHandler;
     }
 
     socket_null(){
