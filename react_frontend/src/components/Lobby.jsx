@@ -34,6 +34,9 @@ class Lobby extends Component{
         if(this.props.socket_null()){
             this.props.update_websocket(this.props.room_code, kwargs);
         }
+        this.setState({
+            is_loaded: true
+        })
         this.props.register_socket_callbacks("lobby", "onmessage", this.process_message);
     }
 

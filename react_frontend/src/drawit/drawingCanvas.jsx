@@ -283,6 +283,10 @@ class DrawingCanvas extends Component {
       }
     }
 
+    closeConfirmBox(){
+      this.setState({confirm_box: null})
+    }
+
     onClickHandler(event){
       if (event.target == this.canvas) {
         event.preventDefault();
@@ -310,8 +314,8 @@ class DrawingCanvas extends Component {
                 confirmBtnBsStyle="warning"
                 cancelBtnBsStyle="default"
                 title="Are you sure?"
-                onConfirm={() => { this.onClickStringHandler(button_)}}
-                onCancel={ () => {this.setState({confirm_box: null})}}
+                onConfirm={() => { this.onClickStringHandler(button_); this.closeConfirmBox() }}
+                onCancel={ () => {this.closeConfirmBox()}}
                 closeOnClickOutside={true}
                 >
               {confirm_text}
@@ -330,17 +334,12 @@ class DrawingCanvas extends Component {
     normalizeTouchLocation(evt, parent){
       var position = {};
       
-      position.x = event.touches[0].clientX; //(evt.targetTouches) ? evt.targetTouches[0].pageX : evt.clientX;
-      position.y = event.touches[0].clientY; //(evt.targetTouches) ? evt.targetTouches[0].pageY : evt.clientY;
-      // const pren = "pre norm " + position.x + "," + position.y
-      // while(parent.offsetParent){
-          position.x -= parent.offsetLeft - parent.scrollLeft;
-          position.y -= parent.offsetTop - parent.scrollTop;
-          position.x -= 25;
-          position.y -= 30;
-      //     parent = parent.offsetParent;
-      // }
-      // console.log(pren, "post norm", position.x, position.y)
+      position.x = event.touches[0].clientX;
+      position.y = event.touches[0].clientY; 
+      position.x -= parent.offsetLeft - parent.scrollLeft;
+      position.y -= parent.offsetTop - parent.scrollTop;
+      position.x -= 25;
+      position.y -= 30;
       return position;
     }
 
