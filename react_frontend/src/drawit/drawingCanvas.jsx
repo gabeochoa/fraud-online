@@ -54,8 +54,10 @@ class DrawingCanvas extends Component {
       this.past_positions = [];
       this.props.register_socket_callbacks("drawingCanvas", "onmessage", this.process_message)
 
-      // TODO remove 
-
+      // why is this needed tho?
+      this.props.send_message({
+        command: "start_game"
+      });
     }
 
     end_round(data, sender){
@@ -65,7 +67,7 @@ class DrawingCanvas extends Component {
       })
       this._my_pencil = PENCIL;
       this._my_eraser = ERASER;
-      // console.log("end round", data, sender)
+      console.log("end round", data, sender)
       if(data.current_player >= data.players.length){
         // ran out of players
         this.props.send_message({
@@ -74,6 +76,7 @@ class DrawingCanvas extends Component {
         return;
       }
 
+      console.log("end_roundish", data.players, data.current_player)
       const player = data.players[data.current_player]
 
       this.setState({
@@ -83,7 +86,7 @@ class DrawingCanvas extends Component {
     }
 
     process_message(parsedData) {
-      // console.log("drawing canvas process message", parsedData)
+      console.log("drawing canvas process message", parsedData)
   
       // dont care what message, just "done loading"
       if(this.state.is_loading){
@@ -238,6 +241,8 @@ class DrawingCanvas extends Component {
     }
 
     clear_canvas(){
+      // clear ourselves, and then send the clear on the bus
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.props.send_message({
         command: "draw",
         message:{

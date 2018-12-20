@@ -36,16 +36,14 @@ class WebSocketComponent extends Component{
         console.log("WebSocket closed", event);
         this.was_open = false;
         if(event.code == 1000 && event.reason == "leave_lobby"){
-            this.rws.null;
+            this.rws = null;
             this.changeRoomCode("")
-            this.changeLocation("home");
             return // we are leaving 
         }
         if(event.code == 1001){
             // we are being kicked
             console.log("we are being kicked")
             this.changeRoomCode("")
-            this.changeLocation("home");
             this.launch_socket_callback("player_kicked", event);
             this.rws.close(1000, "leave_lobby");
             this.rws = null;
@@ -185,6 +183,7 @@ class Menu extends WebSocketComponent {
     }
 
     changeUsername(username, callback){
+        console.log("changing username")
         this.setState({
           username: username,
         },

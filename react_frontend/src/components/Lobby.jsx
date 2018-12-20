@@ -102,6 +102,7 @@ class Lobby extends Component{
                 this.props.changeLocation("home");
             break;
             case "edit_name":
+                this.props.kill_websocket(this.props.username);
                 this.props.changeLocation("join");
             break;
             case "kick_person":
