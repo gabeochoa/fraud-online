@@ -11,6 +11,7 @@ import {rainbow} from './utils';
 import MyColorPicker from '../components/ColorPicker';
 import VerticalSlider from '../components/VerticalSlider';
 import SweetAlert from 'react-bootstrap-sweetalert';
+import "./drawit.css";
 
 const BACKGROUND = 'white'
 
@@ -557,10 +558,10 @@ class DrawingCanvas extends Component {
 
           {is_artist_ui}
           {this.render_bottom_buttons() }
-          <div style={canvas_wrapper_wrapper}>
-            <div style={canvas_wrapper}>
+          <div className="canvas_wrapper_wrapper">
+            <div className="canvas_wrapper">
             <canvas
-                style={canvas_style}
+                className="canvas_style"
                 // We use the ref attribute to get direct access to the canvas element. 
                 ref={(ref) => (this.canvas = ref)}
                 onMouseDown={this.onMouseDown}
@@ -615,26 +616,4 @@ class DrawingCanvas extends Component {
     pointerEvents: "auto",
     width: "100%",
     display: "-webkit-box",
-  }
-
-  const canvas_style = {
-    background: BACKGROUND, 
-    touchAction: "None",
-    zIndex: "1",
-    width: "100%",
-    height: "100%",
-  }
-
-  
-  const canvas_wrapper = {
-    border: "2px black solid",
-    width: "100%",
-    height: "100%",
-    margin: "auto",
-  }
-  
-  const canvas_wrapper_wrapper = {
-    height: "75%",
-    paddingLeft: "28%",
-    paddingRight: "28%",
   }
