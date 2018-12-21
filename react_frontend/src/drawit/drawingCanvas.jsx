@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import autobind from 'autobind-decorator'
 
 import Icon from "@mdi/react";
-import { mdiPencil, mdiEraser, mdiClose, mdiConsoleLine } from "@mdi/js";
+import { mdiPencil, mdiEraser, mdiClose, mdiConsoleLine, mdiCalculator } from "@mdi/js";
 import { GithubPicker, SliderPicker, HuePicker, CustomPicker, ChromePicker} from 'react-color';
 import {rainbow} from './utils';
 import MyColorPicker from '../components/ColorPicker';
@@ -392,10 +392,11 @@ class DrawingCanvas extends Component {
     }
 
     componentDidMount(){
-      this.canvas.width = this.canvas.clientWidth;
       this.canvas.height = this.canvas.clientHeight;
+      this.canvas.width = this.canvas.clientWidth;
       CANVAS.width = this.canvas.width;
       CANVAS.height = this.canvas.height;
+      // console.log(CANVAS)
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
@@ -556,22 +557,23 @@ class DrawingCanvas extends Component {
 
           {is_artist_ui}
           {this.render_bottom_buttons() }
-          <div style={canvas_wrapper}>
-           <canvas
-              style={canvas_style}
-              // We use the ref attribute to get direct access to the canvas element. 
-              ref={(ref) => (this.canvas = ref)}
-              onMouseDown={this.onMouseDown}
-              onMouseLeave={this.onMouseUp}
-              onMouseUp={this.onMouseUp}
-              onMouseMove={this.onMouseMove}
-              onTouchStart={this.onTouchStart}
-              onTouchEnd={this.onTouchEnd}
-              onTouchMove={this.onTouchMove}
-            > Your browser does not support the HTML 5 Canvas.  
-            </canvas>
+          <div style={canvas_wrapper_wrapper}>
+            <div style={canvas_wrapper}>
+            <canvas
+                style={canvas_style}
+                // We use the ref attribute to get direct access to the canvas element. 
+                ref={(ref) => (this.canvas = ref)}
+                onMouseDown={this.onMouseDown}
+                onMouseLeave={this.onMouseUp}
+                onMouseUp={this.onMouseUp}
+                onMouseMove={this.onMouseMove}
+                onTouchStart={this.onTouchStart}
+                onTouchEnd={this.onTouchEnd}
+                onTouchMove={this.onTouchMove}
+              > Your browser does not support the HTML 5 Canvas.  
+              </canvas>
+            </div>
           </div>
-        
         </React.Fragment>
       );
     }
@@ -623,8 +625,16 @@ class DrawingCanvas extends Component {
     height: "100%",
   }
 
+  
   const canvas_wrapper = {
     border: "2px black solid",
-    width: "90%",
-    height: "75%"
+    width: "100%",
+    height: "100%",
+    margin: "auto",
+  }
+  
+  const canvas_wrapper_wrapper = {
+    height: "75%",
+    paddingLeft: "28%",
+    paddingRight: "28%",
   }
