@@ -140,7 +140,10 @@ class DrawingCanvas extends Component {
           x: parsedData.message.cur.x * this.props.windowWidth,
           y: parsedData.message.cur.y * this.props.windowWidth
         }
-        this._paint( upscaled_prev, upscaled_cur, parsedData.message.tool)
+        let upscaled_tool = {... parsedData.message.tool}
+        upscaled_tool.lineWidth = Math.max(1, upscaled_tool.lineWidth * this.props.windowWidth);
+
+        this._paint( upscaled_prev, upscaled_cur, upscaled_tool)
       }
     }
 
@@ -228,12 +231,15 @@ class DrawingCanvas extends Component {
         y: cur.y / this.props.windowWidth,
       }
 
+      let scaled_tool = {... this.state._tool}
+      scaled_tool.lineWidth = this.state._tool.lineWidth / this.props.windowWidth;
+
       this.props.send_message({
           command: "draw",
           message:{
             prev: scaled_prev,
             cur: scaled_cur,
-            tool: this.state._tool,
+            tool: scaled_tool,
           }
       });
 
