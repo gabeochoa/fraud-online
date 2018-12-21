@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import autobind from 'autobind-decorator';
 import PropTypes from 'prop-types';
+import "./menu.css";
 
 @autobind
 class Home extends Component{
@@ -32,16 +33,18 @@ class Home extends Component{
     render(){
         return (
             <React.Fragment>
-                <a name="home_create" className="button is-outlined button_style"
-                   style={{width:"40%"}}
-                   onClick={this.handleClick}>
-                   New Game
-                </a>           
-                <a name="home_join" className="button is-outlined button_style" 
-                   style={{width:"40%"}}
-                   onClick={this.handleClick}>
-                   Join Game
-                </a>
+                <div className="div_set">
+                    <a name="home_create" className="button is-outlined button_style"
+                    style={{width:"40%"}}
+                    onClick={this.handleClick}>
+                    New Game
+                    </a>           
+                    <a name="home_join" className="button is-outlined button_style" 
+                    style={{width:"40%"}}
+                    onClick={this.handleClick}>
+                    Join Game
+                    </a>
+                </div>
             </React.Fragment>
         )
     }

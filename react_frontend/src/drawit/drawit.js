@@ -50,10 +50,12 @@ class DrawItApp extends Component {
   render_header(){
     return (
       <React.Fragment>
-        <h4 style={{fontSize: 30}}> <Icon path={mdiPen} size={1.5}/> 
-          Draw My Meme! <sup style={{color: "red", fontSize: 12}}>Beta</sup>
-        </h4>
-        <hr className="hrstyle" />
+        <div className="div_set">
+          <h4 style={{fontSize: 30}}> <Icon path={mdiPen} size={1.5}/> 
+            Draw My Meme! <sup style={{color: "red", fontSize: 12}}>Beta</sup>
+          </h4>
+          <hr className="hrstyle" />
+        </div>
       </React.Fragment>
     );
   }
@@ -117,7 +119,9 @@ const top_level = {
   display: "block", 
   justifyContent: "center",
   margin: "auto",
-  top: "0"
+  top: "0",
+  width: "100%",
+  height: "100%",
 }
 
 const wrapper = document.getElementById("app");

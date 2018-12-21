@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import autobind from 'autobind-decorator';
 import PropTypes from 'prop-types';
 import {makeid} from '../drawit/utils';
+import "./menu.css";
 
 @autobind
 class CreateGame extends Component{
@@ -49,18 +50,20 @@ class CreateGame extends Component{
     render(){
         return (
             <React.Fragment>
-                <input name="name" className="input input_style" value={this.state.name} 
-                  onChange={this.handleChange} type="text" placeholder="Name"
-                  />
-                <hr className="hrstyle" />
-                <a name="create_create" className="button is-outlined button_style" 
-                   onClick={this.handleClick}
-                   style={button_stretch}
-                   >Create</a>
-                <a name="create_back" className="button is-outlined button_style" 
-                   onClick={this.handleClick}
-                   style={button_stretch}
-                   >Back</a>
+                <div className="div_set">
+                    <input name="name" className="input input_style" value={this.state.name} 
+                    onChange={this.handleChange} type="text" placeholder="Name"
+                    />
+                    <hr className="hrstyle" />
+                    <a name="create_create" className="button is-outlined button_style" 
+                    onClick={this.handleClick}
+                    style={button_stretch}
+                    >Create</a>
+                    <a name="create_back" className="button is-outlined button_style" 
+                    onClick={this.handleClick}
+                    style={button_stretch}
+                     >Back</a>
+                </div>
             </React.Fragment>
         )
     }

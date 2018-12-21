@@ -3,6 +3,7 @@ import autobind from 'autobind-decorator';
 import PropTypes from 'prop-types';
 import Icon from '@mdi/react'
 import { mdiDelete, mdiPen } from '@mdi/js'
+import "./menu.css";
 
 class SizeZeroIcon extends Component{
     render(){
@@ -145,25 +146,27 @@ class Lobby extends Component{
 
         return (
             <React.Fragment>
-            <h4 style={{fontSize: 30}}>{header}</h4>
-            <h5>Room Code: {this.props.room_code}</h5>
-            <hr className="hrstyle"/>
-            <div>
-                <ol className="olstyle">
-                    {this.props.players.map((item) => this.render_person(item))}
-                </ol>
-            </div>
-            <hr className="hrstyle"/>
-            <div className="field is-centered button_bar_style" >
-                <a name="lobby_start" className="button is-outlined button_style"
-                    onClick={this.handleClick}
-                    style={button_stretch}
-                    >Start Game</a>           
-                <a name="lobby_leave" className="button is-outlined button_style" 
-                    onClick={this.handleClick}
-                    style={button_stretch}
-                    >Leave Game</a>
-            </div>
+                <div className="div_set">
+                    <h4 style={{fontSize: 30}}>{header}</h4>
+                    <h5>Room Code: {this.props.room_code}</h5>
+                    <hr className="hrstyle"/>
+                    <div>
+                        <ol className="olstyle">
+                            {this.props.players.map((item) => this.render_person(item))}
+                        </ol>
+                    </div>
+                    <hr className="hrstyle"/>
+                    <div className="field is-centered button_bar_style" >
+                        <a name="lobby_start" className="button is-outlined button_style"
+                            onClick={this.handleClick}
+                            style={button_stretch}
+                            >Start Game</a>           
+                        <a name="lobby_leave" className="button is-outlined button_style" 
+                            onClick={this.handleClick}
+                            style={button_stretch}
+                            >Leave Game</a>
+                    </div>
+                </div>
             </React.Fragment>
         )
     }

@@ -32,6 +32,11 @@ const ERASER = {
 }
 
 
+let CANVAS = {
+  width: 1000,
+  height: 1000
+}
+
 @autobind
 class DrawingCanvas extends Component {
     constructor(props) {
@@ -133,16 +138,16 @@ class DrawingCanvas extends Component {
         }
 
         let upscaled_prev = {
-            x: parsedData.message.prev.x * this.props.windowWidth,
-            y: parsedData.message.prev.y * this.props.windowWidth
+            x: parsedData.message.prev.x * CANVAS.width,//this.props.windowWidth,
+            y: parsedData.message.prev.y * CANVAS.height,//this.props.windowHeight
         }
         let upscaled_cur = {
-          x: parsedData.message.cur.x * this.props.windowWidth,
-          y: parsedData.message.cur.y * this.props.windowWidth
+          x: parsedData.message.cur.x * CANVAS.width,//this.props.windowWidth,
+          y: parsedData.message.cur.y * CANVAS.height,//this.props.windowHeight
         }
         let upscaled_tool = {... parsedData.message.tool}
         upscaled_tool.lineWidth = Math.max(1, upscaled_tool.lineWidth * this.props.windowWidth);
-
+        console.log(upscaled_prev, upscaled_cur, upscaled_tool)
         this._paint( upscaled_prev, upscaled_cur, upscaled_tool)
       }
     }
@@ -223,12 +228,12 @@ class DrawingCanvas extends Component {
       }
       // console.log("paint", prev, cur, this.state._tool)
       let scaled_prev = {
-        x: prev.x / this.props.windowWidth,
-        y: prev.y / this.props.windowWidth,
+        x: prev.x / CANVAS.width,//this.props.windowWidth,
+        y: prev.y / CANVAS.height,//this.props.windowHeight,
       }
       let scaled_cur = {
-        x: cur.x / this.props.windowWidth,
-        y: cur.y / this.props.windowWidth,
+        x: cur.x / CANVAS.width,//this.props.windowWidth,
+        y: cur.y / CANVAS.height,//this.props.windowHeight,
       }
 
       let scaled_tool = {... this.state._tool}
@@ -387,8 +392,10 @@ class DrawingCanvas extends Component {
     }
 
     componentDidMount(){
-      this.canvas.width = this.props.windowWidth;
-      this.canvas.height = this.props.windowHeight;//*2;
+      this.canvas.width = this.canvas.clientWidth;
+      this.canvas.height = this.canvas.clientHeight;
+      CANVAS.width = this.canvas.width;
+      CANVAS.height = this.canvas.height;
       this.ctx = this.canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
@@ -455,7 +462,7 @@ class DrawingCanvas extends Component {
                 onChange={this.sliderChange}
               /> 
               </div>
-              <div style={{position: "absolute", top: 5, right:-35}}>
+              <div style={{position: "absolute", top: 5, right:0}}>
              <GithubPicker
                 width={40}
                 color={ this.state._tool.stroke }
@@ -561,7 +568,8 @@ class DrawingCanvas extends Component {
               onTouchStart={this.onTouchStart}
               onTouchEnd={this.onTouchEnd}
               onTouchMove={this.onTouchMove}
-            > Your browser does not support the HTML 5 Canvas.  </canvas>
+            > Your browser does not support the HTML 5 Canvas.  
+            </canvas>
           </div>
         
         </React.Fragment>
@@ -583,9 +591,6 @@ class DrawingCanvas extends Component {
   const tool_button_style = {
     touchAction: "auto",
     pointerEvents: "auto",
-    // margin: "5px",
-    // left: 5,
-    // width: "40px",
   }
 
   const room_button_holder = {
@@ -614,8 +619,8 @@ class DrawingCanvas extends Component {
     background: BACKGROUND, 
     touchAction: "None",
     zIndex: "1",
-    maxHeight: "inherit",
-    maxWidth: "inherit",
+    width: "100%",
+    height: "100%",
   }
 
   const canvas_wrapper = {

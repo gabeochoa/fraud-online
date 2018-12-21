@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import autobind from 'autobind-decorator';
 import PropTypes from 'prop-types';
+import "./menu.css";
 
 @autobind
 class JoinGame extends Component{
@@ -50,20 +51,22 @@ class JoinGame extends Component{
     render(){
         return (
             <React.Fragment>  
-                <input name="name" className="input input_style" value={this.state.name} 
-                       onChange={this.handleChange} type="text" placeholder="Name"/>
-                <div className="vspace10"/>
-                <input name="room_code" className="input input_style" value={this.state.room_code} 
-                    onChange={this.handleChange}  type="text" placeholder="Room Code"/>
-                <hr className="hrstyle" />
-                <a name="join_join" className="button is-outlined button_style" 
-                   onClick={this.handleClick}
-                   style={button_stretch}
-                   >Join</a>
-                <a name="join_back" className="button is-outlined button_style" 
-                   onClick={this.handleClick}
-                   style={button_stretch}
-                   >Back</a>
+                <div className="div_set">
+                    <input name="name" className="input input_style" value={this.state.name} 
+                        onChange={this.handleChange} type="text" placeholder="Name"/>
+                    <div className="vspace10"/>
+                    <input name="room_code" className="input input_style" value={this.state.room_code} 
+                        onChange={this.handleChange}  type="text" placeholder="Room Code"/>
+                    <hr className="hrstyle" />
+                    <a name="join_join" className="button is-outlined button_style" 
+                    onClick={this.handleClick}
+                    style={button_stretch}
+                    >Join</a>
+                    <a name="join_back" className="button is-outlined button_style" 
+                    onClick={this.handleClick}
+                    style={button_stretch}
+                    >Back</a>
+                </div>
             </React.Fragment>
         )
     }

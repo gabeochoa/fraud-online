@@ -3,6 +3,7 @@ import autobind from 'autobind-decorator';
 import PropTypes from 'prop-types';
 import {rainbow} from '../drawit/utils';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import "./menu.css"
 
 const FIRST_ELEM = "__DEFAULT__";
 
@@ -256,7 +257,7 @@ class Menu extends WebSocketComponent {
         }
         const matching_props = child_props;
         return (
-            <div id="button_bar" className="field is-centered button_bar_style">
+            <div id="menu" className="field is-centered button_bar_style">
                 {this.props.header}
                 {React.cloneElement(content, matching_props)}
                 {this.props.footer}
