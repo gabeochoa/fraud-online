@@ -21,22 +21,21 @@ const column_list_item = {
     wordWrap: "break-word",
 }
 
-function str_pad_left(string,pad,length) {
-    return (new Array(length+1).join(pad)+string).slice(-length);
-}
-
 @autobind
 class _GameComp extends Component {
     constructor(props){
         super(props);
+        console.log(this.props.total_time);
         this.secondsRemaining = this.props.total_time;
 
         let minutes = Math.floor(this.secondsRemaining / 60);
         let seconds = this.secondsRemaining - minutes * 60;
+
+        console.log(minutes, seconds)
         
         this.state = {
-            value: str_pad_left(minutes,'0',2),
-            seconds: str_pad_left(seconds,'0',2),
+            value: minutes.toString().padStart(2, '0'),
+            seconds: seconds.toString().padStart(2, '0'),
         }
 
         this.intervalHandle;
@@ -55,8 +54,8 @@ class _GameComp extends Component {
         let seconds = this.secondsRemaining - minutes * 60;
 
         this.setState({
-            seconds: str_pad_left(seconds,'0',2),
-            value: str_pad_left(minutes,'0',2),
+            seconds: seconds.toString().padStart(2, '0'),
+            value: minutes.toString().padStart(2, '0'),
         });
 
         if (minutes === 0 & seconds === 0) {
@@ -237,7 +236,6 @@ class NewGame extends Component {
             this.props.updatePlayers(update_players);
 
             this.props.set_extra_game_state("locations", locations);
-            this.props.set_extra_game_state("total_time", message.minutes * 60);
         }
 
         if(command == "end_game"){
@@ -302,6 +300,7 @@ class NewGame extends Component {
                 players={this.props.players}
                 handleClick={this.onClickHandler}
                 handleClickLocation={this.handleClickLocation}
+                total_time={this.props.game_options.timer}
             />
         </React.Fragment>
       );

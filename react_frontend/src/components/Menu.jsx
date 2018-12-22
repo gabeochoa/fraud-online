@@ -287,6 +287,7 @@ class Menu extends WebSocketComponent {
             players: this.state.players,
             is_game_started: this.state.is_game_started,
             extra_game_state: this.state.extra_game_state,
+            game_options: this.state.game_options,
             // function props
             changeLocation: this.changeLocation,
             update_websocket: this.update_websocket,

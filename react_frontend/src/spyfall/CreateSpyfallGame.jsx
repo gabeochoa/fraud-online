@@ -20,12 +20,12 @@ class CreateSpyfallGame extends React.Component{
             console.log(event)
             return [false, null];
         }
-        var validRE = /^\d{1,100}$/;
+        var validRE = /^\d{1,10}$/;
         if(event.target.value.match(validRE) == null){
             return [true, "Not a valid number"];
         }
         else{
-            this.props.set_game_option("timer", parseInt(event.target.value))
+            this.props.set_game_option("timer", parseInt(event.target.value)*60)
             return [false, null];
         }
     }
