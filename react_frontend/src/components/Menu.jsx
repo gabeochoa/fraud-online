@@ -9,7 +9,7 @@ import _ from "lodash";
 const FIRST_ELEM = "__DEFAULT__";
 
 function generate_websocket_path(game, room, kwargs){
-    console.log("websocket path, ", room, kwargs)
+    // console.log("websocket path, ", room, kwargs)
     kwargs = kwargs || {};
 
     const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -36,7 +36,7 @@ class WebSocketComponent extends Component{
     }
 
     oncloseHandler(event){
-        console.log("WebSocket closed", event);
+        // console.log("WebSocket closed", event);
         this.was_open = false;
         if(event.code == 1000 && event.reason == "leave_lobby"){
             this.rws = null;
@@ -45,7 +45,7 @@ class WebSocketComponent extends Component{
         }
         if(event.code == 1001){
             // we are being kicked
-            console.log("we are being kicked")
+            // console.log("we are being kicked")
             this.changeRoomCode("")
             this.launch_socket_callback("player_kicked", event);
             this.rws.close(1000, "leave_lobby");
@@ -61,9 +61,9 @@ class WebSocketComponent extends Component{
 
         this.rws.onopen = (event) => {
             if(this.was_open){
-                console.log("websocket was already open, and now open again")
+                // console.log("websocket was already open, and now open again")
             }
-            console.log('WebSocket open', event);
+            // console.log('WebSocket open', event);
             this.was_open = true;
             this.launch_socket_callback("onopen", event);
         };
@@ -73,7 +73,7 @@ class WebSocketComponent extends Component{
         };
 
         this.rws.onerror = e => {
-            console.log(e.message);
+            // console.log(e.message);
             this.launch_socket_callback("onerror", e);
         };
 
@@ -137,8 +137,7 @@ class Menu extends WebSocketComponent {
 
     constructor(props){
         super(props);
-        console.log(props)
-
+        
         this.prev_locations = [FIRST_ELEM, this.props.starting_location]
 
         this.state = {
@@ -229,7 +228,7 @@ class Menu extends WebSocketComponent {
     }
 
     changeUsername(username, callback){
-        console.log("changing username")
+        // console.log("changing username")
         this.setState({
           username: username,
         },
@@ -243,7 +242,7 @@ class Menu extends WebSocketComponent {
     }
 
     updateGameStarted(newstate){
-        console.log("game started? ", newstate)
+        // console.log("game started? ", newstate)
         this.setState({
             is_game_started: newstate,
         })
@@ -251,7 +250,7 @@ class Menu extends WebSocketComponent {
 
     kickPlayer(person){
         const player = this.state.players.filter(c => c.id == parseInt(person))[0];
-        console.log("kicking player: ", person, this.state.players, player);
+        // console.log("kicking player: ", person, this.state.players, player);
         this.send_message({
             command: "kick_player",
             player: player,

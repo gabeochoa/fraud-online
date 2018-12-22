@@ -10,7 +10,7 @@ class BadInputField extends React.Component{
 
     onChange(event){
         const response = this.props.onChange(event);
-        console.log("onchange_resp", response)
+        // console.log("onchange_resp", response)
         const success = response[0];
         const err = response[1];
         this.props.set_bad_input(success, err);
