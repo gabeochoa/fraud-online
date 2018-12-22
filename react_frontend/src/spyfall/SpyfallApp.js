@@ -5,6 +5,7 @@ import JoinGame from '../components/JoinGame';
 import Home from '../components/Home';
 import Menu from '../components/Menu';
 import Lobby from '../components/Lobby';
+import LobbySpyfall from "./LobbySpyfall";
 import Footer from '../components/Footer';
 import autobind from "autobind-decorator";
 import "../drawit/drawit.css"

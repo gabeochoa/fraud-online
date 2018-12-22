@@ -102,7 +102,11 @@ class WebSocketComponent extends Component{
         var callbacks = this.callbacks[name];
         // now we need to call these people
         _.forIn(callbacks, function(value, key) {
-            // console.log("calling", key, args);
+            // console.log("calling", key, args, value);
+            if(value === undefined){
+                console.warn("callback ", name, key, "is undef")
+                return;
+            }
             value(args);
         });
     }
@@ -162,7 +166,7 @@ class Menu extends WebSocketComponent {
     }
 
     set_extra_game_state(option_name, option_value, default_value){
-       
+        // console.log("set extra state", option_name, option_value)
         this.setState({
             extra_game_state: {
                 ...this.state.extra_game_state,
@@ -239,6 +243,7 @@ class Menu extends WebSocketComponent {
     }
 
     updateGameStarted(newstate){
+        console.log("game started? ", newstate)
         this.setState({
             is_game_started: newstate,
         })

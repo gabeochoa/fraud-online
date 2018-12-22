@@ -186,7 +186,9 @@ class NewGame extends Component {
       this.props.register_socket_callbacks(CALLBACK_NAME, "onmessage", this.process_message);
 
       this.props.set_extra_game_state("locations", [], []);
+    }
 
+    componentDidMount(){
       // why is this needed tho?
       this.props.send_message({
         command: "start_game"
@@ -212,13 +214,6 @@ class NewGame extends Component {
         const username = message.username;
         const sender = parsedData.sender;
 
-        // if(command == "start_game"){
-        // }
-
-        if(command == "end_game"){
-            this.props.changeLocation("_back");
-        }
-
         {
             let update_players = [...message.players]
             update_players.forEach((item)=>{
@@ -233,19 +228,22 @@ class NewGame extends Component {
                 }
             });
 
-            let locations = this.props.extra_game_state.locations;
-            if(locations && locations.length == 0){
+            let locations = [];
+            if(message.locations){
                 locations = [...message.locations].map((item)=>{return [item, false]})
-            }else{
-                locations = [];
             }
-            
+
             this.props.updateGameStarted(message.is_game_started);
             this.props.updatePlayers(update_players);
 
             this.props.set_extra_game_state("locations", locations);
             this.props.set_extra_game_state("total_time", message.minutes * 60);
         }
+
+        if(command == "end_game"){
+            this.props.changeLocation("_back");
+        }
+
 
     }
 
@@ -274,6 +272,19 @@ class NewGame extends Component {
       const button_ = event.target.getAttribute("name");
 
       console.log("button clicked", button_)
+      switch(button_){
+          case "room_leave":
+            this.props.kill_websocket(this.props.username);
+            this.props.changeLocation("home");
+            this.props.clearGameState();
+          break;
+          case "room_end":
+            this.props.send_message({
+                command: "end_game"
+            })
+            this.props.changeLocation("lobby");
+          break;
+      }
     }
 
     componentWillUnmount() {
@@ -285,7 +296,7 @@ class NewGame extends Component {
       return (
         <React.Fragment>
             <_GameComp 
-                player={{}} // TODO 
+                player={this.state.player || {}} // TODO 
                 locations={this.props.extra_game_state.locations || []}
                 username= {this.props.username}
                 players={this.props.players}
