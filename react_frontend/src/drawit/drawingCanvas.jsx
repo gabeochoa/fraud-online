@@ -73,7 +73,7 @@ class DrawingCanvas extends Component {
       })
       this._my_pencil = PENCIL;
       this._my_eraser = ERASER;
-      console.log("end round", data, sender)
+      // console.log("end round", data, sender)
       if(data.current_player >= data.players.length){
         // ran out of players
         this.props.send_message({
@@ -82,7 +82,7 @@ class DrawingCanvas extends Component {
         return;
       }
 
-      console.log("end_roundish", data.players, data.current_player)
+      // console.log("end_roundish", data.players, data.current_player)
       const player = data.players[data.current_player]
 
       this.setState({
@@ -92,7 +92,7 @@ class DrawingCanvas extends Component {
     }
 
     process_message(parsedData) {
-      console.log("drawing canvas process message", parsedData)
+      // console.log("drawing canvas process message", parsedData)
   
       // dont care what message, just "done loading"
       if(this.state.is_loading){
@@ -148,7 +148,7 @@ class DrawingCanvas extends Component {
         }
         let upscaled_tool = {... parsedData.message.tool}
         upscaled_tool.lineWidth = Math.max(1, upscaled_tool.lineWidth * CANVAS.height);
-        console.log(upscaled_prev, upscaled_cur, upscaled_tool)
+        // console.log(upscaled_prev, upscaled_cur, upscaled_tool)
         this._paint( upscaled_prev, upscaled_cur, upscaled_tool)
       }
     }
