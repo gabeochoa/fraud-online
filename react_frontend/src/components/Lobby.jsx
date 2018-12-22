@@ -80,6 +80,19 @@ class Lobby extends Component{
             this.props.updateGameStarted(is_game_started);
             this.props.changeLocation("game")
         }
+        else if(command == "end_game"){
+            let players = parsedData.message.players;
+            players.forEach(
+                (item) => {
+                    if(item.channel == sender){
+                        item.is_me = true;
+                    }
+                }
+            );
+            const is_game_started = parsedData.message.is_game_started;
+            this.props.updatePlayers(players);
+            this.props.updateGameStarted(is_game_started);
+        }
     }
 
     handleClick(event){

@@ -6,14 +6,13 @@ import JoinGame from '../components/JoinGame';
 import Home from '../components/Home';
 import Menu from '../components/Menu';
 import Lobby from '../components/Lobby';
+import Footer from '../components/Footer';
 import DrawingCanvas from './drawingCanvas';
 import "./drawit.css";
-
-
+import { mdiPen, mdiHeart } from '@mdi/js'
+import Icon from '@mdi/react'
 import 'lodash';
 
-import Icon from '@mdi/react'
-import { mdiPen } from '@mdi/js'
 
 @autobind
 class DrawItApp extends Component {
@@ -52,12 +51,16 @@ class DrawItApp extends Component {
       <React.Fragment>
         <div className="div_set">
           <h4 style={{fontSize: 30}}> <Icon path={mdiPen} size={1.5}/> 
-            Draw My Meme! <sup style={{color: "red", fontSize: 12}}>Beta</sup>
+            Draw My Meme! <sup style={{color: "red", fontSize: 12}}>Alpha</sup>
           </h4>
           <hr className="hrstyle" />
         </div>
       </React.Fragment>
     );
+  }
+
+  render_footer(){
+    return <Footer/>
   }
 
   render(){
@@ -76,9 +79,7 @@ class DrawItApp extends Component {
     );
 
     let create_jsx = (
-      <CreateGame
-        changeLocation={()=>{}}
-      />
+      <CreateGame />
     );
 
     let join_jsx = (
@@ -108,7 +109,8 @@ class DrawItApp extends Component {
           starting_location="home"
           all_locations={location_data}
           header={this.render_header()}
-          footer={<p></p>}
+          footer={this.render_footer()}
+          socket_room="drawit"
           />
       </div>
     );

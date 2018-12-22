@@ -4,18 +4,19 @@ import PropTypes from 'prop-types';
 import {rainbow} from '../drawit/utils';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import "./menu.css"
+import _ from "lodash";
 
 const FIRST_ELEM = "__DEFAULT__";
 
-function generate_websocket_path(room, kwargs){
-    console.log("websocket path, ", room, kwargs)
+function generate_websocket_path(game, room, kwargs){
+    // console.log("websocket path, ", room, kwargs)
     kwargs = kwargs || {};
 
     const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     const host =  window.location.host;
     const extra = "username=" + (kwargs.username || rainbow(20, Math.random() * 10).slice(1));
     //const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
-    const path = (ws_scheme + '://' + host + '/ws/drawit/' + room + '/?' + extra);
+    const path = (ws_scheme + '://' + host + '/ws/' + game + '/' + room + '/?' + extra);
     return path; 
 }
 
@@ -24,17 +25,18 @@ class WebSocketComponent extends Component{
 
     constructor(props){
         super(props);
-
         this.rws = null;
         this.was_open = false;
         this.callbacks = {
             "player_kicked": {},
             "onmessage": {},
+            "onopen": {},
+            "onerror": {},
         };
     }
 
     oncloseHandler(event){
-        console.log("WebSocket closed", event);
+        // console.log("WebSocket closed", event);
         this.was_open = false;
         if(event.code == 1000 && event.reason == "leave_lobby"){
             this.rws = null;
@@ -43,7 +45,7 @@ class WebSocketComponent extends Component{
         }
         if(event.code == 1001){
             // we are being kicked
-            console.log("we are being kicked")
+            // console.log("we are being kicked")
             this.changeRoomCode("")
             this.launch_socket_callback("player_kicked", event);
             this.rws.close(1000, "leave_lobby");
@@ -54,14 +56,14 @@ class WebSocketComponent extends Component{
     }
 
     update_websocket(room, kwargs){
-        let path = generate_websocket_path(room, kwargs)
+        let path = generate_websocket_path(this.props.socket_room, room, kwargs)
         this.rws = new ReconnectingWebSocket(path);
 
         this.rws.onopen = (event) => {
             if(this.was_open){
-                console.log("websocket was already open, and now open again")
+                // console.log("websocket was already open, and now open again")
             }
-            console.log('WebSocket open', event);
+            // console.log('WebSocket open', event);
             this.was_open = true;
             this.launch_socket_callback("onopen", event);
         };
@@ -71,7 +73,7 @@ class WebSocketComponent extends Component{
         };
 
         this.rws.onerror = e => {
-            console.log(e.message);
+            // console.log(e.message);
             this.launch_socket_callback("onerror", e);
         };
 
@@ -100,7 +102,11 @@ class WebSocketComponent extends Component{
         var callbacks = this.callbacks[name];
         // now we need to call these people
         _.forIn(callbacks, function(value, key) {
-            // console.log("calling", key, args);
+            // console.log("calling", key, args, value);
+            if(value === undefined){
+                console.warn("callback ", name, key, "is undef")
+                return;
+            }
             value(args);
         });
     }
@@ -131,19 +137,57 @@ class Menu extends WebSocketComponent {
 
     constructor(props){
         super(props);
-        console.log(props)
-
+        
         this.prev_locations = [FIRST_ELEM, this.props.starting_location]
 
         this.state = {
             location: this.props.starting_location,
             ..._starting_game_state,
+            default_extra_game_state: {},
+            extra_game_state: {},
+            game_options: {},
         }
     }
 
     clearGameState(args){
         this.setState({
             ..._starting_game_state
+        })
+    }
+
+    set_game_option(option_name, option_value){
+        let _new_options = {... this.state.game_options}
+        _new_options[option_name] = option_value
+
+        this.setState({
+            game_options: _new_options
+        });
+    }
+
+    set_extra_game_state(option_name, option_value, default_value){
+        // console.log("set extra state", option_name, option_value)
+        this.setState({
+            extra_game_state: {
+                ...this.state.extra_game_state,
+                [option_name]: option_value
+            }
+        });
+
+        if(default_value != undefined){
+            this.setState({
+                default_extra_game_state: {
+                    ...this.state.default_extra_game_state,
+                    [option_name]: default_value
+                }
+            })
+        }
+    }
+
+    reset_extra_game_state(){
+        this.setState({
+            extra_game_state: {
+                ...this.state.default_extra_game_state
+            }
         })
     }
 
@@ -184,7 +228,7 @@ class Menu extends WebSocketComponent {
     }
 
     changeUsername(username, callback){
-        console.log("changing username")
+        // console.log("changing username")
         this.setState({
           username: username,
         },
@@ -198,6 +242,7 @@ class Menu extends WebSocketComponent {
     }
 
     updateGameStarted(newstate){
+        // console.log("game started? ", newstate)
         this.setState({
             is_game_started: newstate,
         })
@@ -205,7 +250,7 @@ class Menu extends WebSocketComponent {
 
     kickPlayer(person){
         const player = this.state.players.filter(c => c.id == parseInt(person))[0];
-        console.log("kicking player: ", person, this.state.players, player);
+        // console.log("kicking player: ", person, this.state.players, player);
         this.send_message({
             command: "kick_player",
             player: player,
@@ -240,6 +285,8 @@ class Menu extends WebSocketComponent {
             room_code: this.state.room_code,
             players: this.state.players,
             is_game_started: this.state.is_game_started,
+            extra_game_state: this.state.extra_game_state,
+            game_options: this.state.game_options,
             // function props
             changeLocation: this.changeLocation,
             update_websocket: this.update_websocket,
@@ -254,6 +301,9 @@ class Menu extends WebSocketComponent {
             kickPlayer: this.kickPlayer,
             clearGameState: this.clearGameState,
             socket_null: this.socket_null,
+            set_game_option: this.set_game_option,
+            set_extra_game_state: this.set_extra_game_state,
+            reset_extra_game_state: this.reset_extra_game_state,
         }
         const matching_props = child_props;
         return (

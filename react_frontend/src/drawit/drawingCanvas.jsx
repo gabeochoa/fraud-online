@@ -73,7 +73,7 @@ class DrawingCanvas extends Component {
       })
       this._my_pencil = PENCIL;
       this._my_eraser = ERASER;
-      console.log("end round", data, sender)
+      // console.log("end round", data, sender)
       if(data.current_player >= data.players.length){
         // ran out of players
         this.props.send_message({
@@ -82,7 +82,7 @@ class DrawingCanvas extends Component {
         return;
       }
 
-      console.log("end_roundish", data.players, data.current_player)
+      // console.log("end_roundish", data.players, data.current_player)
       const player = data.players[data.current_player]
 
       this.setState({
@@ -92,7 +92,7 @@ class DrawingCanvas extends Component {
     }
 
     process_message(parsedData) {
-      console.log("drawing canvas process message", parsedData)
+      // console.log("drawing canvas process message", parsedData)
   
       // dont care what message, just "done loading"
       if(this.state.is_loading){
@@ -139,16 +139,16 @@ class DrawingCanvas extends Component {
         }
 
         let upscaled_prev = {
-            x: parsedData.message.prev.x * CANVAS.width,//this.props.windowWidth,
-            y: parsedData.message.prev.y * CANVAS.height,//this.props.windowHeight
+            x: parsedData.message.prev.x * CANVAS.width,
+            y: parsedData.message.prev.y * CANVAS.height,
         }
         let upscaled_cur = {
-          x: parsedData.message.cur.x * CANVAS.width,//this.props.windowWidth,
-          y: parsedData.message.cur.y * CANVAS.height,//this.props.windowHeight
+          x: parsedData.message.cur.x * CANVAS.width,
+          y: parsedData.message.cur.y * CANVAS.height,
         }
         let upscaled_tool = {... parsedData.message.tool}
         upscaled_tool.lineWidth = Math.max(1, upscaled_tool.lineWidth * CANVAS.height);
-        console.log(upscaled_prev, upscaled_cur, upscaled_tool)
+        // console.log(upscaled_prev, upscaled_cur, upscaled_tool)
         this._paint( upscaled_prev, upscaled_cur, upscaled_tool)
       }
     }
@@ -229,12 +229,12 @@ class DrawingCanvas extends Component {
       }
       // console.log("paint", prev, cur, this.state._tool)
       let scaled_prev = {
-        x: prev.x / CANVAS.width,//this.props.windowWidth,
-        y: prev.y / CANVAS.height,//this.props.windowHeight,
+        x: prev.x / CANVAS.width,
+        y: prev.y / CANVAS.height,
       }
       let scaled_cur = {
-        x: cur.x / CANVAS.width,//this.props.windowWidth,
-        y: cur.y / CANVAS.height,//this.props.windowHeight,
+        x: cur.x / CANVAS.width,
+        y: cur.y / CANVAS.height,
       }
 
       let scaled_tool = {... this.state._tool}
@@ -599,7 +599,7 @@ class DrawingCanvas extends Component {
   const room_button_holder = {
     position: "fixed",
     left: 0,
-    bottom: 0,
+    bottom: 50,
     width: "100%",
   }
   const room_button_style = {

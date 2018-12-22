@@ -12,7 +12,16 @@ class CreateGame extends Component{
         
         this.state = {
             name: this.props.username || "",
+            bad_input: false,
+            err_msg: null, 
         }
+    }
+
+    set_bad_input(state, err_msg){
+        this.setState({
+            bad_input: state,
+            err_msg: err_msg
+        })
     }
 
     handleChange(event) {
@@ -20,6 +29,13 @@ class CreateGame extends Component{
         this.setState({
           [name]: event.target.value
         });
+        // Example of what to do to stop creation on error
+        // if(name == "name" && event.target.value == ""){
+        //     this.setState({
+        //         bad_input: true,
+        //         err_msg: "Username cannot be blank"
+        //     })
+        // }
     }
 
     handleClick(event){
@@ -30,10 +46,12 @@ class CreateGame extends Component{
         // console.log("button was clicked ", button)
         switch(button){
             case "create_create":
-                this.props.changeUsername(this.state.name, ()=>{});
-                // must happen before location change ? 
-                this.props.changeRoomCode(makeid(), ()=>{});
-                this.props.changeLocation("lobby", ()=>{});
+                if( !this.state.bad_input){
+                    this.props.changeUsername(this.state.name, ()=>{});
+                    // must happen before location change ? 
+                    this.props.changeRoomCode(makeid(), ()=>{});
+                    this.props.changeLocation("lobby", ()=>{});
+                }
             break;
             case "create_back":
                 this.props.changeUsername(this.state.name, ()=>{});
@@ -47,22 +65,57 @@ class CreateGame extends Component{
         }
     }
 
+    render_children(){
+        let props_for_children = {... this.props}
+        // certain elements cant have children;
+        // we also shouldnt give all children to our children
+        delete props_for_children['children']  
+        const children = React.Children.map(this.props.children, (child, index) => {
+            const child_props = {
+                ...props_for_children,
+                set_bad_input: this.set_bad_input,
+            }
+            if (child.props.inherit_create_game_props){
+                return React.cloneElement(child, child_props);}
+            else{return React.cloneElement(child, {});}
+        });
+        return children;
+    }
+
     render(){
         return (
             <React.Fragment>
                 <div className="div_set">
-                    <input name="name" className="input input_style" value={this.state.name} 
-                    onChange={this.handleChange} type="text" placeholder="Name"
+                    <input 
+                        name="name" 
+                        className="input input_style" 
+                        value={this.state.name} 
+                        onChange={this.handleChange} 
+                        type="text" placeholder="Name"
                     />
+                    {this.state.bad_input? 
+                        <p style={{color:"red"}}> {this.state.err_msg}</p>
+                        :
+                        <p></p>
+                    }
+                    {this.render_children()}
                     <hr className="hrstyle" />
-                    <a name="create_create" className="button is-outlined button_style" 
-                    onClick={this.handleClick}
-                    style={button_stretch}
-                    >Create</a>
-                    <a name="create_back" className="button is-outlined button_style" 
-                    onClick={this.handleClick}
-                    style={button_stretch}
-                     >Back</a>
+                    <a 
+                        name="create_create" 
+                        className="button is-outlined button_style" 
+                        onClick={this.handleClick}
+                        style={button_stretch}
+                        >
+                            Create
+                    </a>
+                    <a 
+                        name="create_back" 
+                        className="button is-outlined button_style" 
+                        onClick={this.handleClick}
+                        style={button_stretch}
+                        >
+                            Back
+                    </a>
                 </div>
             </React.Fragment>
         )
