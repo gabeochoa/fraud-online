@@ -1,106 +1,99 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import Container from "../components/Container";
-import MenuButtonBar from "./menu";
-import SpyfallGameParent from "./playing";
+import CreateSpyfallGame from './CreateSpyfallGame';
+import JoinGame from '../components/JoinGame';
+import Home from '../components/Home';
+import Menu from '../components/Menu';
+import Lobby from '../components/Lobby';
+import Footer from '../components/Footer';
+import autobind from "autobind-decorator";
+import "../drawit/drawit.css"
+import "./spyfall.css"
 
+import { mdiHatFedora } from '@mdi/js'
+import Icon from '@mdi/react'
+import NewGame from "./new_game";
+
+
+@autobind
 class SpyfallApp extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      minutes: 5,
-      username: "",
-      room: "", 
-      location_state: "menu",
-      people: [               
-        {
-            id: 1,
-            name: "me",
-            is_me: true,
-        },
-        {
-            id: 2,
-            name: "not me",
-            is_me: false
-        },
-        {
-            id: 3,
-            name: "also not me",
-            is_me: false
-        },
-        {
-            id: 4,
-            name: "might be me",
-            is_me: false
-        },
-    ],
-
-    };
-
-    this.changeUsername = this.changeUsername.bind(this);
-    this.changeLocation = this.changeLocation.bind(this);
-    this.changeTimer = this.changeTimer.bind(this);
   }
 
-  changeTimer(new_time){
-    // console.log("new time" +  new_time)
-    this.setState({
-      minutes: new_time
-    })
-  }
-
-  changeUsername(username, callback){
-    this.setState({
-      username: username,
-    },
-    this.callback)
-  }
-
-  changeLocation(room, newLocation, changeRoom){
-    // console.log("got room " + room + " " + newLocation);
-    this.setState({
-      room: room, 
-      location_state: newLocation,
-    }, changeRoom);
+  render_header(){
+    return (<React.Fragment>
+        <div className="div_set">
+          <h4 style={{fontSize: 30}}> <Icon path={mdiHatFedora} size={1.5}/> 
+            Spyfall! <sup style={{color: "red", fontSize: 12}}>Beta</sup>
+          </h4>
+          <hr className="hrstyle" />
+        </div>
+      </React.Fragment>);
+  } 
+  
+  render_footer(){
+    return <Footer />
   }
 
   render() {
-    let menu_location = this.state.username != ""? "join": "home";
-
-    let content = (
-      <MenuButtonBar
-       changeLocation={this.changeLocation}
-       changeUsername={this.changeUsername}
-       start_location={menu_location}
-       username={this.state.username}
-       room={this.state.room}
-       changeTimer={this.changeTimer}
-       />
+    let home_jsx = (
+      <Home/>
     );
-    switch(this.state.location_state){
-      case "menu":
-        content = content;
-        break;
-      case "waiting":
-      case "game":
-        content = <SpyfallGameParent
-                   room={this.state.room}
-                   username={this.state.username}
-                   changeLocation={this.changeLocation}
-                   waitForSocket={this.waitForSocket}
-                   minutes={this.state.minutes}
-                  /> 
-        break;
-      default:
-        content = content;
-        break;
+    let lobby_jsx = (
+      <Lobby/>
+    );
+
+    let create_jsx = (
+      <CreateSpyfallGame/>
+    );
+
+    let join_jsx = (
+      <JoinGame/>
+    );
+
+    let game_jsx = (
+      <NewGame/> 
+    );
+
+    var location_data = {
+      home: home_jsx,
+      lobby: lobby_jsx,
+      create: create_jsx,
+      join: join_jsx,
+      game: game_jsx,
     }
-    return (
-      <Container>
-        {content}
-      </Container>
-    )
+  
+    return(
+      <div style={top_level}>
+        <Menu
+          starting_location="home"
+          all_locations={location_data}
+          header={this.render_header()}
+          footer={this.render_footer()}
+          socket_room="spyfall"
+          />
+      </div>
+    );
+
+        // content = <SpyfallGameParent
+        //            room={this.state.room}
+        //            username={this.state.username}
+        //            changeLocation={this.changeLocation}
+        //            waitForSocket={this.waitForSocket}
+        //            minutes={this.state.minutes}
+        //           /> 
+ 
   }
+}
+
+const top_level = {
+  display: "block", 
+  justifyContent: "center",
+  margin: "auto",
+  top: "0",
+  width: "100%",
+  height: "100%",
 }
 
 const wrapper = document.getElementById("app");

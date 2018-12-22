@@ -1,0 +1,299 @@
+import React, { Component } from "react";
+import autobind from 'autobind-decorator'
+import Timer from '../components/Timer';
+
+
+import "../drawit/drawit.css";
+import "./spyfall.css";
+
+const column_list = {
+    columnCount: 2,
+    columnGap: "3px",
+    columnRuleColor: "white",
+    columnRuleStyle: "solid",
+    columnRuleWidth: "10px",
+}
+const column_list_item = {
+    padding: "0 0 0 10px",
+    margin: "0 0 4px 0",
+    backgroundColor: "#f0f0f0",
+    columnSpan: "1",
+    wordWrap: "break-word",
+}
+
+function str_pad_left(string,pad,length) {
+    return (new Array(length+1).join(pad)+string).slice(-length);
+}
+
+@autobind
+class _GameComp extends Component {
+    constructor(props){
+        super(props);
+        this.secondsRemaining = this.props.total_time;
+
+        let minutes = Math.floor(this.secondsRemaining / 60);
+        let seconds = this.secondsRemaining - minutes * 60;
+        
+        this.state = {
+            value: str_pad_left(minutes,'0',2),
+            seconds: str_pad_left(seconds,'0',2),
+        }
+
+        this.intervalHandle;
+    }
+
+    componentDidMount(){
+        this.startCountDown();
+    }
+
+    componentWillUnmount(){
+        clearInterval(this.intervalHandle);
+    }
+
+    tick() {
+        let minutes = Math.floor(this.secondsRemaining / 60);
+        let seconds = this.secondsRemaining - minutes * 60;
+
+        this.setState({
+            seconds: str_pad_left(seconds,'0',2),
+            value: str_pad_left(minutes,'0',2),
+        });
+
+        if (minutes === 0 & seconds === 0) {
+            clearInterval(this.intervalHandle);
+        }
+        this.secondsRemaining--
+    }
+
+    startCountDown() {
+        this.intervalHandle = setInterval(this.tick, 1000);
+        this.secondsRemaining = this.props.total_time;
+        this.setState({
+            isClicked : true
+        })
+    }
+
+    renderPlayer(person){
+        if(person.role == null){return}
+        let extra = <p></p>;
+        if(person.is_first){
+            extra = <sup style={{color:"red"}}> 1st</sup>
+        }
+        return (<li key={person.id} style={column_list_item}>
+                    {person.username} {extra}
+                </li>);
+    }
+
+    pretty_location(location){
+        if(location == null || location == undefined || location == ""){return location;}
+        
+        return (
+            location
+            .split("_")
+            .map(   (item) => {
+                return item.charAt(0).toUpperCase() + item.slice(1);
+            })
+            .join(" ")
+        );
+    }
+
+    renderPlace(place){
+        let place_text = null;
+        if(place[1]){
+            place_text =  <p style={{color: "#bbb", textDecoration: "line-through"}}> {this.pretty_location(place[0])} </p>
+        }
+        else{
+            place_text = <p> {this.pretty_location(place[0])} </p>
+        }
+        return (<li key={place[0]} name={place[0]} onClick={this.props.handleClickLocation} style={column_list_item}>
+                    {place_text}
+                </li>);
+    }
+
+    renderRole(player){
+        if(player.is_spy){
+            return <p style={{textAlign:"center"}}> You are the {player.role} </p>
+        }
+        else{
+            return (
+                <React.Fragment>
+                <p style={{textAlign:"center"}}>You are not the spy!</p>
+                <p style={{textAlign:"center"}}>The location: {this.pretty_location(player.location)}</p>
+                <p style={{textAlign:"center"}}>Your role: {player.role}</p>
+                </React.Fragment>
+            );
+        }
+    }
+
+    renderGameHeader(){
+        return (
+            <div style={{textAlign:"center"}}>
+                <Timer minutes={this.state.value} seconds={this.state.seconds} />
+                <hr className="hrstyle"/>
+                {this.renderRole(this.props.player)}
+            </div>
+        );
+    }
+
+    renderGameButtons(){
+        return (
+            <div style={{textAlign:"center"}}>
+                <a name="room_end" className="button is-outlined button_style"
+                    onClick={this.props.handleClick}>End Game</a>           
+                <a name="room_leave" className="button is-outlined button_style" 
+                    onClick={this.props.handleClick}>Leave Game</a>
+            </div>
+        );
+    }
+
+    render(){
+        return (
+            <div>
+                {this.renderGameHeader()}
+
+                <hr className="hrstyle"/>
+
+                <h4>Players:</h4>
+                <ul style={column_list}>
+                    {this.props.players.map( (person) => this.renderPlayer(person))}
+                </ul>
+                <h4>Location Reference: </h4>
+                <ul style={column_list}>
+                    {this.props.locations.map( (place) => this.renderPlace(place))}
+                </ul>
+
+                <hr className="hrstyle"/>
+
+                {this.renderGameButtons()}
+            </div>
+        );
+    }
+}
+
+
+const CALLBACK_NAME = "spyfall_game";
+
+@autobind
+class NewGame extends Component {
+    constructor(props) {
+      super(props);
+
+      this.state = {
+        is_loading: true,
+      }
+
+      this.props.register_socket_callbacks(CALLBACK_NAME, "onopen", this.on_open_handler);
+      this.props.register_socket_callbacks(CALLBACK_NAME, "onmessage", this.process_message);
+
+      this.props.set_extra_game_state("locations", [], []);
+
+      // why is this needed tho?
+      this.props.send_message({
+        command: "start_game"
+      });
+      // same here...
+      this.props.send_message({ command: 'get_room' });
+    }
+
+    on_open_handler(event){
+        this.props.send_message({ command: 'get_room' });
+    }
+
+    process_message(parsedData) {
+        // dont care what message, just "done loading"
+        if(this.state.is_loading){
+            this.setState({
+                is_loading: false
+            })
+        }
+
+        const command = parsedData.command;
+        const message = parsedData.message;
+        const username = message.username;
+        const sender = parsedData.sender;
+
+        // if(command == "start_game"){
+        // }
+
+        if(command == "end_game"){
+            this.props.changeLocation("_back");
+        }
+
+        {
+            let update_players = [...message.players]
+            update_players.forEach((item)=>{
+                if (item.channel == sender){
+                    item.is_me = true;
+                    this.setState({
+                        player: item,
+                    })
+                }
+                else{
+                    item.is_me = false;
+                }
+            });
+
+            let locations = this.props.extra_game_state.locations;
+            if(locations && locations.length == 0){
+                locations = [...message.locations].map((item)=>{return [item, false]})
+            }else{
+                locations = [];
+            }
+            
+            this.props.updateGameStarted(message.is_game_started);
+            this.props.updatePlayers(update_players);
+
+            this.props.set_extra_game_state("locations", locations);
+            this.props.set_extra_game_state("total_time", message.minutes * 60);
+        }
+
+    }
+
+    handleClickLocation(event){
+        while(event.target.getAttribute("name") === null){
+            event.target = event.target.parentNode;
+        }
+        const locations = [...this.props.extra_game_state.locations]
+        // // find the matching object
+        const location = locations.filter(c => c[0] == event.target.getAttribute("name"))[0];
+        // // index in our list 
+        const index = locations.indexOf(location);
+        locations[index] = [location[0], !location[1]];
+        this.props.set_extra_game_state("locations", locations);
+    }
+
+    onClickHandler(event){
+      if (event.target == this.canvas) {
+        event.preventDefault();
+      }
+      
+      // console.log("click event", event, event.target)
+      while(event.target.getAttribute("name") === null){
+        event.target = event.target.parentNode;
+      }
+      const button_ = event.target.getAttribute("name");
+
+      console.log("button clicked", button_)
+    }
+
+    componentWillUnmount() {
+      this.props.unregister_socket_callbacks(CALLBACK_NAME, "onmessage")
+    }
+
+    render() {
+      
+      return (
+        <React.Fragment>
+            <_GameComp 
+                player={{}} // TODO 
+                locations={this.props.extra_game_state.locations || []}
+                username= {this.props.username}
+                players={this.props.players}
+                handleClick={this.onClickHandler}
+                handleClickLocation={this.handleClickLocation}
+            />
+        </React.Fragment>
+      );
+    }
+  }
+  export default NewGame;
