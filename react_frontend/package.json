@@ -48,6 +48,8 @@
     "rc-slider": "^8.6.4",
     "react-bootstrap-sweetalert": "^4.4.1",
     "react-color": "^2.14.1",
+    "react-dropdown": "^1.6.3",
+    "react-select": "^2.1.2",
     "reconnecting-websocket": "^4.1.10",
     "style-loader": "^0.23.1"
   }

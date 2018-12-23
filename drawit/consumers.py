@@ -16,7 +16,7 @@ import time
 from urllib.parse import parse_qs
 import json
 import random
-from drawit.data import WORDS
+from drawit.data import WORDS, NORMAL_WORDS
 from spyfall.data import get_locations, get_roles
 from spyfall.baseconsumer import BaseConsumer
 
@@ -24,10 +24,15 @@ def start_game(cache_key):
     value = cache.get(cache_key)
     print("start game", value)
 
+    if value['word_set'] == "normal_words":
+        words = NORMAL_WORDS
+    else:
+        words = WORDS
+
     # make list of players
     players = []
     for player in (value["players"]):
-        player['word'] = random.choice(WORDS)
+        player['word'] = random.choice(words)
         players.append(player)
 
     random.shuffle(players)
@@ -84,7 +89,16 @@ class DrawItConsumer(BaseConsumer):
             return base_player
         
     def store_extra_in_cache(self):
-        pass
+        self.store_wordset_in_cache()
+
+    def store_wordset_in_cache(self):
+        word_set = self.get_params.get("wordset", ["memes"])[0]
+        value = cache.get(self.room_group_name, default=None)
+        if "word_set" in value:
+            return 
+        self.word_set = word_set
+        value["word_set"] = word_set
+        cache.set(self.room_group_name, value, timeout=None)
 
     def extra_commands(self, command, data):
         if command == "draw":

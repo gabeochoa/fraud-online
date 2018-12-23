@@ -14,9 +14,15 @@ function generate_websocket_path(game, room, kwargs){
 
     const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     const host =  window.location.host;
-    const extra = "username=" + (kwargs.username || rainbow(20, Math.random() * 10).slice(1));
+    let extra = ("username=" + (kwargs.username || rainbow(20, Math.random() * 10).slice(1)));
+
+    let url_options = Object.entries(kwargs.options).map(e => e.join('=')).join('&');
+
+    extra += "&" + url_options
+
     //const path = (ws_scheme + '://' + host + '/ws/drawit/' + this.props.room + '/?' + extra);
     const path = (ws_scheme + '://' + host + '/ws/' + game + '/' + room + '/?' + extra);
+    console.log(path);
     return path; 
 }
 
@@ -156,6 +162,7 @@ class Menu extends WebSocketComponent {
     }
 
     set_game_option(option_name, option_value){
+        console.log("set game option", option_name, option_value)
         let _new_options = {... this.state.game_options}
         _new_options[option_name] = option_value
 
@@ -263,6 +270,14 @@ class Menu extends WebSocketComponent {
     componentWillUnmount(){
         this.unregister_socket_callbacks("_MENU", "player_kicked");
     }
+
+    update_websocket_wrapper(room, kwargs){
+        const o = {
+            ...kwargs,
+            options: this.state.game_options
+        }
+        this.update_websocket(room, o)
+    }
     
 
     render(){
@@ -289,7 +304,7 @@ class Menu extends WebSocketComponent {
             game_options: this.state.game_options,
             // function props
             changeLocation: this.changeLocation,
-            update_websocket: this.update_websocket,
+            update_websocket: this.update_websocket_wrapper,
             kill_websocket: this.kill_websocket,
             register_socket_callbacks: this.register_socket_callbacks,
             unregister_socket_callbacks: this.unregister_socket_callbacks,
