@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ReactDOM from 'react-dom';
 import autobind from "autobind-decorator";
-import CreateGame from '../components/CreateGame';
+import CreateDrawGame from './CreateDraw';
 import JoinGame from '../components/JoinGame';
 import Home from '../components/Home';
 import Menu from '../components/Menu';
@@ -79,7 +79,7 @@ class DrawItApp extends Component {
     );
 
     let create_jsx = (
-      <CreateGame />
+      <CreateDrawGame />
     );
 
     let join_jsx = (

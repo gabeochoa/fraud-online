@@ -8,7 +8,6 @@ import Icon from "@mdi/react";
 import { mdiPencil, mdiEraser, mdiClose, mdiConsoleLine, mdiCalculator } from "@mdi/js";
 import { GithubPicker, SliderPicker, HuePicker, CustomPicker, ChromePicker} from 'react-color';
 import {rainbow} from './utils';
-import MyColorPicker from '../components/ColorPicker';
 import VerticalSlider from '../components/VerticalSlider';
 import SweetAlert from 'react-bootstrap-sweetalert';
 import "./drawit.css";
@@ -51,6 +50,7 @@ class DrawingCanvas extends Component {
         confirm_box: null, 
         _tool: PENCIL,
       }
+
       this._my_pencil = PENCIL
       this._my_eraser = ERASER
 
@@ -62,7 +62,7 @@ class DrawingCanvas extends Component {
 
       // why is this needed tho?
       this.props.send_message({
-        command: "start_game"
+        command: "start_game",
       });
     }
 
