@@ -27,7 +27,6 @@ class BaseConsumer(WebsocketConsumer):
         self.get_username = self.get_params.get("username", [time.time()])[0]
 
         # print(username)
-
         # store this user in our room cache
         self.store_user_in_cache()
         self._store_extra_in_cache()
