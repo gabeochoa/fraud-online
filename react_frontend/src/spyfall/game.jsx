@@ -189,9 +189,9 @@ class Game extends Component {
 
     componentDidMount(){
       // why is this needed tho?
-      this.props.send_message({
-        command: "start_game"
-      });
+    //   this.props.send_message({
+    //     command: "start_game"
+    //   });
       // same here...
       this.props.send_message({ command: 'get_room' });
     }

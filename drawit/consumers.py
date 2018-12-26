@@ -22,19 +22,25 @@ from spyfall.baseconsumer import BaseConsumer
 
 def start_game(cache_key):
     value = cache.get(cache_key)
-    print("start game", value)
+    # print("start game", value)
 
-    if value['word_set'] == "normal_words":
-        words = NORMAL_WORDS
+    if 'remaining_words' in value:
+        words = value['remaining_words']
     else:
-        words = WORDS
-
+        if value['word_set'] == "normal_words":
+            words = NORMAL_WORDS
+        else:
+            words = WORDS
+        random.shuffle(words)
+    
+    # print("preloop", words)
     # make list of players
     players = []
     for player in (value["players"]):
-        player['word'] = random.choice(words)
+        player['word'] = words.pop(0)
         players.append(player)
 
+    # print("after loop", words)
     random.shuffle(players)
 
     # now we can assign them numbers 
@@ -45,8 +51,10 @@ def start_game(cache_key):
     value["players"] = players
     value['current_player'] = 0
     value['is_game_started'] = True
+    value['remaining_words'] = words
     cache.set(cache_key, value, timeout=None)
-    print("start game end", value)
+    # print("start game end", value)
+    # print("len", len(value['remaining_words']))
     return value
 
 def progress_game(cache_key):

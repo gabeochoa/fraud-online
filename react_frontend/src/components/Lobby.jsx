@@ -40,6 +40,8 @@ class Lobby extends Component{
         })
         this.props.register_socket_callbacks("lobby", "onmessage", this.process_message);
         this.props.register_socket_callbacks("lobby", "player_kicked", this.leave_lobby);
+
+        this.props.send_message({ command: 'get_room' });
     }
 
     componentWillUnmount(){
@@ -143,11 +145,11 @@ class Lobby extends Component{
     }
 
     render_person(person){
-        let icon = <SizeZeroIcon name={icon_name} player={person.id} path={mdiDelete} size={1} />
+        let icon = <SizeZeroIcon name={icon_name} player={person.id} path={mdiDelete} size={"0.75em"} />
         let icon_name = "kick_person"
         if(person.is_me){
             icon_name = "edit_name"
-            icon = <SizeZeroIcon name={icon_name} path={mdiPen} size={1}/>
+            icon = <SizeZeroIcon name={icon_name} path={mdiPen} size={"0.75em"}/>
         }
         
         return (

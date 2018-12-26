@@ -103,7 +103,7 @@ class WebSocketComponent extends Component{
     }
 
     send_message(data){
-        // console.log("sending ", data)
+        console.log("sending ", data)
         this.rws.send(JSON.stringify({ ...data }));
     }
 
