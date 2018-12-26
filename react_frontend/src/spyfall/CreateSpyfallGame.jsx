@@ -12,6 +12,9 @@ class CreateSpyfallGame extends React.Component{
         this.state = {
             minutes: 5,
         }
+
+        // set default timer
+        this.props.set_game_option("timer", 5*60)
     }
 
     handleTimerChange(event){

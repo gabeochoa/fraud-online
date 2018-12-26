@@ -12,7 +12,7 @@ import "./spyfall.css"
 
 import { mdiHatFedora } from '@mdi/js'
 import Icon from '@mdi/react'
-import NewGame from "./new_game";
+import Game from "./game";
 
 
 @autobind
@@ -24,8 +24,9 @@ class SpyfallApp extends Component {
   render_header(){
     return (<React.Fragment>
         <div className="div_set">
-          <h4 style={{fontSize: 30}}> <Icon path={mdiHatFedora} size={1.5}/> 
-            Spyfall! <sup style={{color: "red", fontSize: 12}}>Beta</sup>
+          <h4 className="header_font"> 
+            <Icon path={mdiHatFedora} size={"1em"}/> 
+            Spyfall! <sup className="sup_font">Beta</sup>
           </h4>
           <hr className="hrstyle" />
         </div>
@@ -53,7 +54,7 @@ class SpyfallApp extends Component {
     );
 
     let game_jsx = (
-      <NewGame/> 
+      <Game/> 
     );
 
     var location_data = {
@@ -76,14 +77,6 @@ class SpyfallApp extends Component {
       </div>
     );
 
-        // content = <SpyfallGameParent
-        //            room={this.state.room}
-        //            username={this.state.username}
-        //            changeLocation={this.changeLocation}
-        //            waitForSocket={this.waitForSocket}
-        //            minutes={this.state.minutes}
-        //           /> 
- 
   }
 }
 
