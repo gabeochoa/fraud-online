@@ -12,6 +12,7 @@ import "./drawit.css";
 import { mdiPen, mdiHeart } from '@mdi/js'
 import Icon from '@mdi/react'
 import 'lodash';
+import "../components/menu.css";
 
 
 @autobind
@@ -50,8 +51,9 @@ class DrawItApp extends Component {
     return (
       <React.Fragment>
         <div className="div_set">
-          <h4 style={{fontSize: 30}}> <Icon path={mdiPen} size={1.5}/> 
-            Draw My Meme! <sup style={{color: "red", fontSize: 12}}>Alpha</sup>
+          <h4 className="header_font"> 
+            <Icon path={mdiPen} size={"1em"}/> 
+            Draw My Meme! <sup className="sup_font">Alpha</sup>
           </h4>
           <hr className="hrstyle" />
         </div>

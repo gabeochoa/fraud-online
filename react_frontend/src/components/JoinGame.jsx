@@ -58,11 +58,11 @@ class JoinGame extends Component{
                     <input name="room_code" className="input input_style" value={this.state.room_code} 
                         onChange={this.handleChange}  type="text" placeholder="Room Code"/>
                     <hr className="hrstyle" />
-                    <a name="join_join" className="button is-outlined button_style" 
+                    <a name="join_join" className="button is-outlined button_style button_font" 
                     onClick={this.handleClick}
                     style={button_stretch}
                     >Join</a>
-                    <a name="join_back" className="button is-outlined button_style" 
+                    <a name="join_back" className="button is-outlined button_style button_font" 
                     onClick={this.handleClick}
                     style={button_stretch}
                     >Back</a>

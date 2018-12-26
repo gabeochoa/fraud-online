@@ -10,6 +10,7 @@ import { GithubPicker, SliderPicker, HuePicker, CustomPicker, ChromePicker} from
 import {rainbow} from './utils';
 import VerticalSlider from '../components/VerticalSlider';
 import SweetAlert from 'react-bootstrap-sweetalert';
+import "../components/menu.css";
 import "./drawit.css";
 
 const BACKGROUND = 'white'
@@ -360,8 +361,8 @@ class DrawingCanvas extends Component {
       position.y = event.touches[0].clientY; 
       position.x -= parent.offsetLeft - parent.scrollLeft;
       position.y -= parent.offsetTop - parent.scrollTop;
-      position.x -= 25;
-      position.y -= 30;
+      // position.x -= 25;
+      // position.y -= 30;
       return position;
     }
 
@@ -438,21 +439,21 @@ class DrawingCanvas extends Component {
 
     render_tools(){
       return (
-        <div id="button_bar" style={button_bar_style}>
+        <div id="button_bar" className="button_bar_style">
           <Button name={CLEAR}
             onClick={this.onClickHandler} 
             style={tool_button_style}>
-            <Icon path={mdiClose} size={1.5}/>
+            <Icon path={mdiClose} size={"1em"}/>
           </Button>
           <Button name="pencil" onClick={this.onClickHandler} style={tool_button_style}       
               {...(this.state._tool.name == PENCIL.name? {variant:"outlined" }: {})}
               >
-            <Icon path={mdiPencil} size={1.5}/>
+            <Icon path={mdiPencil} size={"1em"}/>
           </Button>
           <Button name="eraser" onClick={this.onClickHandler} style={tool_button_style}       
               {...(this.state._tool.name == ERASER.name? {variant:"outlined" }: {})}
               >
-            <Icon path={mdiEraser} size={1.5}/>
+            <Icon path={mdiEraser} size={"1em"}/>
           </Button>
           <div style={gh_style}>
               <div style={{position: "absolute", top: 5, left:0}}>
@@ -498,21 +499,21 @@ class DrawingCanvas extends Component {
 
     render_bottom_buttons(){
       return (
-        <div style={room_button_holder}>
-          <Button variant="outlined" 
+        <div style={room_button_holder} className="button_font">
+          <Button variant="contained" 
             name="end_round" 
             is_confirm="true"
             confirm_text="Really end round?"
             onClick={this.onClickHandler} style={room_button_style}>
             Someone got it
           </Button>
-          <Button variant="outlined" name="end_game" 
+          <Button variant="contained" name="end_game" 
             is_confirm="true"
             confirm_text="Really end game?"
             onClick={this.onClickHandler} style={room_button_style}>
             End Game
           </Button>
-          <Button variant="outlined" name="exit_room" 
+          <Button variant="contained" name="exit_room" 
             is_confirm="true"
             confirm_text="Really exit room?"
             onClick={this.onClickHandler} style={room_button_style}>
@@ -581,25 +582,15 @@ class DrawingCanvas extends Component {
   }
   export default windowSize(DrawingCanvas);
 
-  const button_bar_style = {
-    display: "block",
-    position: "absolute",
-    zIndex: "2",
-    top: 120,
-    left: -10,
-    pointerEvents: "None",
-    touchAction: "None",
-    width: "100%",
-  }
   const tool_button_style = {
     touchAction: "auto",
     pointerEvents: "auto",
   }
 
   const room_button_holder = {
-    position: "fixed",
+    position: "absolute",
     left: 0,
-    bottom: 50,
+    bottom: "2em",
     width: "100%",
   }
   const room_button_style = {
@@ -609,6 +600,7 @@ class DrawingCanvas extends Component {
     margin: "5px",
     maxWidth: "150px",
     boxSizing:"border-box",
+    fontSize: "0.75em",
   }
 
   const gh_style = {

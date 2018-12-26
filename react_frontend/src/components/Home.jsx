@@ -34,12 +34,12 @@ class Home extends Component{
         return (
             <React.Fragment>
                 <div className="div_set">
-                    <a name="home_create" className="button is-outlined button_style"
+                    <a name="home_create" className="button is-outlined button_style button_font"
                     style={{width:"40%"}}
                     onClick={this.handleClick}>
                     New Game
                     </a>           
-                    <a name="home_join" className="button is-outlined button_style" 
+                    <a name="home_join" className="button is-outlined button_style button_font" 
                     style={{width:"40%"}}
                     onClick={this.handleClick}>
                     Join Game

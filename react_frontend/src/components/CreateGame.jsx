@@ -102,7 +102,7 @@ class CreateGame extends Component{
                     <hr className="hrstyle" />
                     <a 
                         name="create_create" 
-                        className="button is-outlined button_style" 
+                        className="button is-outlined button_style button_font" 
                         onClick={this.handleClick}
                         style={button_stretch}
                         >
@@ -110,7 +110,7 @@ class CreateGame extends Component{
                     </a>
                     <a 
                         name="create_back" 
-                        className="button is-outlined button_style" 
+                        className="button is-outlined button_style button_font" 
                         onClick={this.handleClick}
                         style={button_stretch}
                         >

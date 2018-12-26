@@ -39,10 +39,24 @@ class Lobby extends Component{
             is_loaded: true
         })
         this.props.register_socket_callbacks("lobby", "onmessage", this.process_message);
+        this.props.register_socket_callbacks("lobby", "player_kicked", this.leave_lobby);
     }
 
     componentWillUnmount(){
         this.props.unregister_socket_callbacks("lobby", "onmessage");
+        this.props.unregister_socket_callbacks("lobby", "player_kicked");
+    }
+
+    leave_lobby(){
+        try {
+            this.props.changeLocation("home");
+        } catch (error) {console.warn(error, "failed to change location")}
+        try {
+            this.props.clearGameState();
+        } catch (error) { console.warn(error, "failed to clear state ")}
+        try{
+            this.props.kill_websocket(this.props.username);
+        } catch (error) { console.warn(error, "failed to kill")}
     }
 
     process_message(parsedData){
@@ -111,9 +125,7 @@ class Lobby extends Component{
                 }
             break;
             case "lobby_leave":
-                this.props.kill_websocket(this.props.username);
-                this.props.clearGameState();
-                this.props.changeLocation("home");
+                this.leave_lobby()
             break;
             case "edit_name":
                 this.props.kill_websocket(this.props.username);
@@ -154,13 +166,13 @@ class Lobby extends Component{
     render(){
         let header = "Game is already in progress";
         if(!this.props.is_game_started){
-            header = "Waiting for players....";
+            header = "Waiting for players...";
         }
 
         return (
             <React.Fragment>
                 <div className="div_set">
-                    <h4 style={{fontSize: 30}}>{header}</h4>
+                    <h4 className="lobby_font">{header}</h4>
                     <h5>Room Code: {this.props.room_code}</h5>
                     <hr className="hrstyle"/>
                     <div>
@@ -169,12 +181,12 @@ class Lobby extends Component{
                         </ol>
                     </div>
                     <hr className="hrstyle"/>
-                    <div className="field is-centered button_bar_style" >
-                        <a name="lobby_start" className="button is-outlined button_style"
+                    <div className="field is-centered" >
+                        <a name="lobby_start" className="button is-outlined button_style button_font"
                             onClick={this.handleClick}
                             style={button_stretch}
                             >Start Game</a>           
-                        <a name="lobby_leave" className="button is-outlined button_style" 
+                        <a name="lobby_leave" className="button is-outlined button_style button_font" 
                             onClick={this.handleClick}
                             style={button_stretch}
                             >Leave Game</a>

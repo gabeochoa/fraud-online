@@ -54,9 +54,12 @@ class WebSocketComponent extends Component{
             // console.log("we are being kicked")
             this.changeRoomCode("")
             this.launch_socket_callback("player_kicked", event);
+            if(this.rsw == null){
+                return; 
+            }
             this.rws.close(1000, "leave_lobby");
             this.rws = null;
-            return 
+            return;
         }
         this.rws.reconnect();
     }
@@ -322,7 +325,7 @@ class Menu extends WebSocketComponent {
         }
         const matching_props = child_props;
         return (
-            <div id="menu" className="field is-centered button_bar_style">
+            <div id="menu" className="field is-centered">
                 {this.props.header}
                 {React.cloneElement(content, matching_props)}
                 {this.props.footer}

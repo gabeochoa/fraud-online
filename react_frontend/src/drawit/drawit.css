@@ -1,11 +1,5 @@
+/* we assume the font size was set in menu ?  */
 
-.button_bar_style {
-    display: block;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 10px;
-}
 
 .hrstyle {
     margin-top: 1em;
@@ -71,9 +65,25 @@
     padding-right: 28%;
 }
 
+
+.button_bar_style {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    top: 6em;
+    left: -10px;
+    pointer-events: none;
+    touch-action: none;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+}
+
 @media only screen and (max-width: 480px) { 
     .canvas_wrapper_wrapper {
-        padding: 0;
-        width: 90%;
+        padding-left: 5%;
+        padding-right: 5%;
     }
 }

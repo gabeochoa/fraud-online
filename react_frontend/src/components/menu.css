@@ -1,16 +1,62 @@
+.section {
+    padding: 2.5rem 1.5rem;
+    font-size: 15px;
+}
+
+@media only screen and (max-width: 580px) { 
+    .section {
+        padding: 1rem 0.5rem;
+        font-size: 20px;
+    }
+
+}
+
+@media only screen and (max-width: 380px) { 
+    .section {
+        padding: 1rem 0.5rem;
+        font-size: 10px;
+    }
+
+}
+
+.button_font {
+    font-size: 1em;
+}
+
 .div_set {
     width: 50%;
     min-width: 300px;
     margin: auto;
+    text-align: center;
 }
 
 #menu {
     width: 100%;
     height: 100%;
     margin: auto;
+    text-align: center;
 }
 
 .aspect {
     width: 100%;
     padding-bottom: 56.25%;
 }
+
+
+.header_font {
+    font-size: 1.75em;
+}
+
+.sup_font {
+    font-size: 0.5em;
+    color: red;
+}
+
+.lobby_font {
+    font-size: 1em;
+}
+
+.footer_font {
+    font-size: 0.75em;
+}
+
