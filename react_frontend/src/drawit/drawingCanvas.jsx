@@ -15,8 +15,8 @@ import "./drawit.css";
 
 const BACKGROUND = 'white'
 
-const COLOR_CHOICES = ['#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
-'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#8B4513', 'white', '#C0C0C0', 'black'];//'#BED3F3', '#D4C4FB'];
+const COLOR_CHOICES = ['black', '#C0C0C0', 'white', '#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
+'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#8B4513'];//'#BED3F3', '#D4C4FB'];
 
 const CLEAR = "__CLEAR"
 
