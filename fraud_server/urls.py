@@ -24,6 +24,7 @@ urlpatterns = [
 
     url('^spyfall/', include('spyfall.urls')),
     url('^drawit/', include('drawit.urls')),
+    url('^fakeartist/', include('fakeartist.urls')),
 
     url('^$', include('react_frontend.urls')),
 ]
