@@ -144,7 +144,7 @@ class TouchableCanvas extends Component{
                     prev: null,
                     cur: null,
                     tool: CLEAR,
-                    }
+                }
             });
         }
     }
@@ -176,6 +176,10 @@ class TouchableCanvas extends Component{
     }
 
     upscale_paint(prev, cur, tool){
+        if(tool == CLEAR){
+            this.clear_canvas();
+            return;
+        }
         let upscaled_prev = this._upscale_coord(prev);
         let upscaled_cur = this._upscale_coord(cur);
         let upscaled_tool = {...tool}

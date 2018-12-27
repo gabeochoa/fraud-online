@@ -73,7 +73,7 @@ class TooledTouchableCanvas extends Component{
             break;
         case CLEAR:
             // console.log("clearing canvas")
-            this.touchable_canvas.clear_canvas();
+            this.clear_canvas(true);
         break;
         default:
             console.warn("button clicked but no handler", button_)
