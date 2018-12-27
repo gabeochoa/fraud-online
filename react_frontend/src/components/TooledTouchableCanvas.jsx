@@ -43,6 +43,19 @@ class TooledTouchableCanvas extends Component{
         this.touchable_canvas = React.createRef();
     }
 
+    // FUNCTIONS TO FORWARD TO CHILD REF
+    upscale_paint(a,b,c){
+        this.touchable_canvas.upscale_paint(a,b,c);
+    }
+
+    clear_canvas(send_message){
+        if(send_message == undefined){
+            send_message = true;
+        }
+        this.touchable_canvas.clear_canvas(send_message);
+    }
+    /////////////////////////////////////
+
     resetTools(){
         this._my_eraser = ERASER;
         this._my_pencil = PENCIL;
@@ -69,12 +82,7 @@ class TooledTouchableCanvas extends Component{
     }
 
     onClickHandler(event){
-        // if (event.target == this.canvas) {
-        //     event.preventDefault();
-        // }
-        
-        // console.log("click event", event, event.target)
-            while(event.target.getAttribute("name") === null){
+        while(event.target.getAttribute("name") === null){
             event.target = event.target.parentNode;
         }
         const button_ = event.target.getAttribute("name");
@@ -182,7 +190,7 @@ class TooledTouchableCanvas extends Component{
     render(){
         return (
             <React.Fragment>
-                {this.render_tools()}
+                {this.props.is_local_player_artist && this.render_tools()}
                 <TouchableCanvas
                     ref={this.setTouchableRef} 
                     is_local_player_artist={this.props.is_local_player_artist}

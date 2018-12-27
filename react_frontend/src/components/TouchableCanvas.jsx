@@ -24,14 +24,14 @@ class TouchableCanvas extends Component{
     }
 
     componentDidMount(){
-          this.canvas.height = this.canvas.clientHeight;
-          this.canvas.width = this.canvas.clientWidth;
-          CANVAS.width = this.canvas.width;
-          CANVAS.height = this.canvas.height;
-          this.ctx = this.canvas.getContext('2d');
-          this.ctx.lineJoin = 'round';
-          this.ctx.lineCap = 'round';
-          this.ctx.lineWidth = this.props.tool.lineWidth;
+        this.canvas.height = this.canvas.clientHeight;
+        this.canvas.width = this.canvas.clientWidth;
+        CANVAS.width = this.canvas.width;
+        CANVAS.height = this.canvas.height;
+        this.ctx = this.canvas.getContext('2d');
+        this.ctx.lineJoin = 'round';
+        this.ctx.lineCap = 'round';
+        this.ctx.lineWidth = this.props.tool.lineWidth;
     }
 
     onEventBegin(x,y){
@@ -44,15 +44,15 @@ class TouchableCanvas extends Component{
     }
   
     onEventMove(x,y){     
-    if(this.mouse_clicked){
-        let previous_position = this.past_positions.slice(-1)[0]
-        // add to the list to send our boy
-        this.past_positions.push({x:x,y:y})
-        if(previous_position == undefined){
-            previous_position = {x:x,y:y}   
+        if(this.mouse_clicked){
+            let previous_position = this.past_positions.slice(-1)[0]
+            // add to the list to send our boy
+            this.past_positions.push({x:x,y:y})
+            if(previous_position == undefined){
+                previous_position = {x:x,y:y}   
+            }
+            this.paint(previous_position, {x:x,y:y})
         }
-        this.paint(previous_position, {x:x,y:y})
-    }
     }
   
     onEventEnd(){
@@ -127,18 +127,26 @@ class TouchableCanvas extends Component{
             y: coord.y / CANVAS.height
         }
     }
+    _upscale_coord(coord){
+        return {
+            x: coord.x * CANVAS.width,
+            y: coord.y * CANVAS.height
+        }
+    }
 
-    clear_canvas(){
+    clear_canvas(send_message){
         // clear ourselves, and then send the clear on the bus
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.props.send_message({
-          command: "draw",
-          message:{
-              prev: null,
-              cur: null,
-              tool: CLEAR,
-            }
-        });
+        if(send_message){
+            this.props.send_message({
+                command: "draw",
+                message:{
+                    prev: null,
+                    cur: null,
+                    tool: CLEAR,
+                    }
+            });
+        }
     }
 
     _paint(prev, cur, tool){
@@ -165,6 +173,14 @@ class TouchableCanvas extends Component{
         this.ctx.arc(x, y, tool.lineWidth / 2, 0, 2 * Math.PI);
         this.ctx.fillStyle = tool.stroke;
         this.ctx.fill();
+    }
+
+    upscale_paint(prev, cur, tool){
+        let upscaled_prev = this._upscale_coord(prev);
+        let upscaled_cur = this._upscale_coord(cur);
+        let upscaled_tool = {...tool}
+        upscaled_tool.lineWidth = Math.max(1, upscaled_tool.lineWidth * CANVAS.height);
+        this._paint(upscaled_prev, upscaled_cur, upscaled_tool)
     }
 
     paint(prev, cur){
