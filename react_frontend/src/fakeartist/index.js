@@ -10,7 +10,7 @@ import Lobby from '../components/Lobby';
 import Footer from '../components/Footer';
 import { mdiEarth } from "@mdi/js";
 import Icon from '@mdi/react'
-import MyCanvas from "../components/MyCanvas";
+import FakeArtistCanvas from './FakeArtistCanvas'
 
 function FakeArtistHeader(props){
     return (
@@ -36,7 +36,7 @@ function FakeArtistApp(props){
         game: <FakeArtistGame/>,
     }
 
-    location_data["home"] = <MyCanvas/>
+    location_data["home"] = <FakeArtistCanvas/>
 
     return(
         <div className="top_level">

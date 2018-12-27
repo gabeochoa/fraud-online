@@ -1,10 +1,9 @@
 import React, { Component } from "react";
-import Button from '@material-ui/core/Button';
 import autobind from 'autobind-decorator'
 import SweetAlert from 'react-bootstrap-sweetalert';
 import "./menu.css";
 import "../drawit/drawit.css";
-
+import ConfirmableButton from './ConfirmableButton';
 
 @autobind
 class BottomGameButtons extends Component{
@@ -48,58 +47,47 @@ class BottomGameButtons extends Component{
         this.setState({confirm_box: null})
     }
 
-    onClickHandler(event){
-        if (event.target == this.canvas) {
-            event.preventDefault();
-        }
-          
-        console.log("click event", event, event.target)
-
-        while(event.target.getAttribute("name") === null){
-            event.target = event.target.parentNode;
-        }
-        const button_ = event.target.getAttribute("name");
-        const confirm_text = event.target.getAttribute("confirm_text");
-        this.setState({
-            confirm_box: (
-                <SweetAlert
-                    warning
-                    showCancel
-                    confirmBtnText={"Yes"}
-                    confirmBtnBsStyle="warning"
-                    cancelBtnBsStyle="default"
-                    title="Are you sure?"
-                    onConfirm={() => { this.onClickStringHandler(button_); this.closeConfirmBox() }}
-                    onCancel={ () => {this.closeConfirmBox()}}
-                    closeOnClickOutside={true}
-                    >
-                    {confirm_text}
-                </SweetAlert>
-            ),
-        });
-    }
-
     render(){
+        let allButtonProps = {
+            variant: "contained",
+            style: room_button_style
+        }
         return (
             <React.Fragment>
             {this.state.confirm_box != null && this.state.confirm_box}
             <div style={room_button_holder} className="button_font">
-                <Button variant="contained" 
-                    name="end_round" 
-                    confirm_text="Really end round?"
-                    onClick={this.onClickHandler} style={room_button_style}>
+                <ConfirmableButton
+                    name="end_round"
+                    onClick={this.onClickStringHandler}
+                    buttonProps={{
+                        ...allButtonProps, 
+                        confirm_text:"Really end round?"
+                    }}
+                >
                     Someone got it
-                </Button>
-                <Button variant="contained" name="end_game" 
-                    confirm_text="Really end game?"
-                    onClick={this.onClickHandler} style={room_button_style}>
+                </ConfirmableButton>
+
+                <ConfirmableButton
+                    name="end_game"
+                    onClick={this.onClickStringHandler}
+                    buttonProps={{
+                        ...allButtonProps, 
+                        confirm_text:"Really end game?"
+                    }}
+                >
                     End Game
-                </Button>
-                <Button variant="contained" name="exit_room" 
-                    confirm_text="Really exit room?"
-                    onClick={this.onClickHandler} style={room_button_style}>
+                </ConfirmableButton>
+
+                <ConfirmableButton
+                    name="exit_room"
+                    onClick={this.onClickStringHandler}
+                    buttonProps={{
+                        ...allButtonProps, 
+                        confirm_text:"Really exit room?"
+                    }}
+                >
                     Leave Game
-                </Button>
+                </ConfirmableButton>
             </div>
             </React.Fragment>
         );

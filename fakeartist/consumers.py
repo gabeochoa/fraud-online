@@ -16,8 +16,7 @@ import time
 from urllib.parse import parse_qs
 import json
 import random
-from drawit.data import WORDS, NORMAL_WORDS
-from spyfall.data import get_locations, get_roles
+from spyfall.data import get_locations
 from spyfall.baseconsumer import BaseConsumer
 
 def start_game(cache_key):
@@ -27,10 +26,7 @@ def start_game(cache_key):
     if 'remaining_words' in value:
         words = value['remaining_words']
     else:
-        if value['word_set'] == "normal_words":
-            words = NORMAL_WORDS
-        else:
-            words = WORDS
+        words = get_locations()
         random.shuffle(words)
     
     # print("preloop", words)
@@ -53,7 +49,7 @@ def start_game(cache_key):
     value['is_game_started'] = True
     value['remaining_words'] = words
     cache.set(cache_key, value, timeout=None)
-    # print("start game end", value)
+    print("start game end", value)
     # print("len", len(value['remaining_words']))
     return value
 
