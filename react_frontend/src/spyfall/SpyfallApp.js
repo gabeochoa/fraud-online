@@ -7,6 +7,7 @@ import Menu from '../components/Menu';
 import Lobby from '../components/Lobby';
 import Footer from '../components/Footer';
 import autobind from "autobind-decorator";
+import SpyfallAbout from './SpyfallAbout';
 import "../drawit/drawit.css"
 import "./spyfall.css"
 
@@ -63,6 +64,7 @@ class SpyfallApp extends Component {
       create: create_jsx,
       join: join_jsx,
       game: game_jsx,
+      about: <SpyfallAbout/>,
     }
   
     return(

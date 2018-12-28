@@ -8,6 +8,7 @@ import Menu from '../components/Menu';
 import Lobby from '../components/Lobby';
 import Footer from '../components/Footer';
 import DrawingCanvas from './drawingCanvas';
+import DrawitAbout from './DrawitAbout';
 import "./drawit.css";
 import { mdiPen, mdiHeart } from '@mdi/js'
 import Icon from '@mdi/react'
@@ -103,6 +104,7 @@ class DrawItApp extends Component {
       create: create_jsx,
       join: join_jsx,
       game: game_jsx,
+      about: <DrawitAbout/>,
     }
 
     return (

@@ -24,6 +24,9 @@ class Home extends Component{
             case "home_join":
                 this.props.changeLocation("join");
             break;
+            case "home_about":
+                this.props.changeLocation("about");
+            break;
             default:
                 console.log("default case");
             break
@@ -43,6 +46,11 @@ class Home extends Component{
                     style={{width:"40%"}}
                     onClick={this.handleClick}>
                     Join Game
+                    </a>       
+                    <a name="home_about" className="button is-outlined button_style button_font" 
+                    style={{width:"40%"}}
+                    onClick={this.handleClick}>
+                    About/Rules
                     </a>
                 </div>
             </React.Fragment>

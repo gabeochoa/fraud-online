@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import CreateFakeArtistGame from './CreateFakeArtistGame';
 import JoinGame from '../components/JoinGame';
-import FakeArtistGame from "./FakeArtistGame";
+import FakeArtistAbout from "./FakeArtistAbout";
 import Home from '../components/Home';
 import Menu from '../components/Menu';
 import Lobby from '../components/Lobby';
@@ -32,11 +32,14 @@ function FakeArtistApp(props){
     
     var location_data = {
         home: <Home/>,
+        about: <FakeArtistAbout/>,
         lobby: <Lobby/>,
         create: <CreateFakeArtistGame/>,
         join: <JoinGame/>,
         game: <FakeArtistCanvas/>,
     }
+
+    // location_data['home'] = <FakeArtistAbout/>
 
     return(
         <div className="top_level">
