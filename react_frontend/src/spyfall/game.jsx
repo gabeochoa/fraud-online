@@ -25,51 +25,6 @@ const column_list_item = {
 class _GameComp extends Component {
     constructor(props){
         super(props);
-        console.log(this.props.total_time);
-        this.secondsRemaining = this.props.total_time;
-
-        let minutes = Math.floor(this.secondsRemaining / 60);
-        let seconds = this.secondsRemaining - minutes * 60;
-
-        console.log(minutes, seconds)
-        
-        this.state = {
-            value: minutes.toString().padStart(2, '0'),
-            seconds: seconds.toString().padStart(2, '0'),
-        }
-
-        this.intervalHandle;
-    }
-
-    componentDidMount(){
-        this.startCountDown();
-    }
-
-    componentWillUnmount(){
-        clearInterval(this.intervalHandle);
-    }
-
-    tick() {
-        let minutes = Math.floor(this.secondsRemaining / 60);
-        let seconds = this.secondsRemaining - minutes * 60;
-
-        this.setState({
-            seconds: seconds.toString().padStart(2, '0'),
-            value: minutes.toString().padStart(2, '0'),
-        });
-
-        if (minutes === 0 & seconds === 0) {
-            clearInterval(this.intervalHandle);
-        }
-        this.secondsRemaining--
-    }
-
-    startCountDown() {
-        this.intervalHandle = setInterval(this.tick, 1000);
-        this.secondsRemaining = this.props.total_time;
-        this.setState({
-            isClicked : true
-        })
     }
 
     renderPlayer(person){
@@ -127,7 +82,7 @@ class _GameComp extends Component {
     renderGameHeader(){
         return (
             <div style={{textAlign:"center"}}>
-                <Timer minutes={this.state.value} seconds={this.state.seconds} />
+                <Timer total_time={this.props.total_time}/>
                 <hr className="hrstyle"/>
                 {this.renderRole(this.props.player)}
             </div>

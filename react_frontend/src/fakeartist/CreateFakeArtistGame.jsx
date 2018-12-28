@@ -10,15 +10,13 @@ class CreateFakeArtistGame extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            minutes: 5,
+            rounds: 2,
         }
 
-        // set default timer
-        this.props.set_game_option("timer", 5*60)
+        this.props.set_game_option("rounds", 2)
     }
 
-    handleTimerChange(event){
-        console.log("timer change", event)
+    handleStrChange(event){
         if(event.target === undefined){
             console.log(event)
             return [false, null];
@@ -28,7 +26,7 @@ class CreateFakeArtistGame extends React.Component{
             return [true, "Not a valid number"];
         }
         else{
-            this.props.set_game_option("timer", parseInt(event.target.value)*60)
+            this.props.set_game_option("rounds", parseInt(event.target.value))
             return [false, null];
         }
     }
@@ -38,13 +36,13 @@ class CreateFakeArtistGame extends React.Component{
             // im a little concerned about infinite props
             // but theres like 30 things in there so i dont wanna type it
             <CreateGame {...this.props}>
-                <p>Round Length (minutes): </p>
+                <p>Number of Rounds: </p>
                 <BadInputField
                     inherit_create_game_props={true}
-                    name="minutes" 
-                    value={this.state.minutes} 
-                    onChange={this.handleTimerChange} 
-                    type="text" placeholder="5"
+                    name="rounds" 
+                    value={this.state.rounds} 
+                    onChange={this.handleStrChange} 
+                    type="text" placeholder="2"
                 />
             </CreateGame>
         );

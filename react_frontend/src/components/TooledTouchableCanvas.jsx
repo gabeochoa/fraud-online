@@ -120,11 +120,13 @@ class TooledTouchableCanvas extends Component{
     render_tool_bar(){
         return(
             <React.Fragment>
+                {! this.props.hideClearButton && 
             <Button name={CLEAR}
                 onClick={this.onClickHandler} 
                 style={tool_button_style}>
                 <Icon path={mdiClose} size={"1em"}/>
             </Button>
+                }
             <Button name="pencil" onClick={this.onClickHandler} style={tool_button_style}       
                 {...(this.state.tool.name == PENCIL.name? {variant:"outlined" }: {})}
                 >
