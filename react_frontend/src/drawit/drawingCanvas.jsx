@@ -106,14 +106,9 @@ class DrawingCanvas extends Component {
             this.props.changeLocation("_back");
         }
         if(command == "draw"){
-            // TODO move to paint or something 
-            if(parsedData.message.tool == "_CLEAR"){
-                this.touchable_canvas.clear_canvas(false);
-                return; 
-            }
-            this.touchable_canvas.upscale_paint(parsedData.message.prev, 
-                                                parsedData.message.cur, 
-                                                parsedData.message.tool)
+          this.touchable_canvas.upscale_paint(parsedData.message.prev, 
+                                              parsedData.message.cur, 
+                                              parsedData.message.tool)
         }
     }
 
