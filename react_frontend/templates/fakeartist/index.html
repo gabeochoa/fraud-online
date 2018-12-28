@@ -8,23 +8,28 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
   <title>FakeArtist</title>
   <style>
-    body, html, section, .container, #app {
+    
+    body {
       height:100%;
       width: 100%;
+      position: fixed;
+      overflow: hidden;
     }
-    div.wrap {
-      height:100%; 
+
+    .container, section, #app {
+      height:100%;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <div class=wrap>
+  <!-- <div class=wrap> -->
   <section class="section">
     <div class="container">
         <div id="app" class="columns"><!-- React --></div>
     </div>
   </section>
-  </div>
+  <!-- </div> -->
 </body>
 {% load static %}
 <script src="{% static "fakeartist/main.js" %}"></script>

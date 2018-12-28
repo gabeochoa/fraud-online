@@ -12,6 +12,8 @@ import { mdiEarth } from "@mdi/js";
 import Icon from '@mdi/react'
 import FakeArtistCanvas from './FakeArtistCanvas'
 
+import "./fakeartist.css"
+
 function FakeArtistHeader(props){
     return (
         <React.Fragment>
@@ -33,14 +35,13 @@ function FakeArtistApp(props){
         lobby: <Lobby/>,
         create: <CreateFakeArtistGame/>,
         join: <JoinGame/>,
-        game: <FakeArtistGame/>,
+        game: <FakeArtistCanvas/>,
     }
-
-    location_data["home"] = <FakeArtistCanvas/>
 
     return(
         <div className="top_level">
             <Menu
+            disable_scroll={true}
             starting_location="home"
             all_locations={location_data}
             header={<FakeArtistHeader/>}

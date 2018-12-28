@@ -5,6 +5,7 @@ import {rainbow} from '../drawit/utils';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import "./menu.css"
 import _ from "lodash";
+import { enableBodyScroll, disableBodyScroll } from 'body-scroll-lock';
 
 const FIRST_ELEM = "__DEFAULT__";
 
@@ -103,7 +104,7 @@ class WebSocketComponent extends Component{
     }
 
     send_message(data){
-        console.log("sending ", data)
+        // console.log("sending ", data)
         this.rws.send(JSON.stringify({ ...data }));
     }
 
@@ -165,7 +166,7 @@ class Menu extends WebSocketComponent {
     }
 
     set_game_option(option_name, option_value){
-        console.log("set game option", option_name, option_value)
+        // console.log("set game option", option_name, option_value)
         let _new_options = {... this.state.game_options}
         _new_options[option_name] = option_value
 
@@ -205,7 +206,7 @@ class Menu extends WebSocketComponent {
         if(callback == undefined){
             callback = ()=>{};
         }
-        console.log("change location", this.state.location, new_location);
+        // console.log("change location", this.state.location, new_location);
 
         if(new_location == "_back"){
             // user wants to go back from here 
