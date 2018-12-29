@@ -114,6 +114,7 @@ class FakeArtistCanvas extends Component {
             true
         ],
         show_location_modal: false,
+        player: null,
       }
 
       this.showing_toast = {
@@ -202,7 +203,8 @@ class FakeArtistCanvas extends Component {
         }
         else{
             // otherwise the new round needs to be set
-            if(this.props.extra_game_state.round != data.round){
+            if(this.props.extra_game_state.round != data.round
+                && data.round < this.props.game_options.num_rounds){
                 this.props.set_extra_game_state("round", 
                                                 data.round,
                                                 this.notify_round());
@@ -251,6 +253,7 @@ class FakeArtistCanvas extends Component {
                     true, 
                 ],
             })
+            this.showing_toast['artist'] = true
             if(!this.showing_toast['voting']){
                 this.notify_voting()
                 this.showing_toast['voting'] = true
@@ -267,6 +270,9 @@ class FakeArtistCanvas extends Component {
                 (item) => {
                     if(item.channel == sender){
                         item.is_me = true;
+                        this.setState({
+                            "player": item
+                        })
                     }
                 }
             );
@@ -406,7 +412,14 @@ class FakeArtistCanvas extends Component {
     }
 
     render_player_text(){
-      return this.render_text(this.state.current_artist.username + " is drawing")
+        return this.render_text(this.state.current_artist.username + 
+                                " is drawing a " + 
+                                this.state.player.location)
+    }
+      
+    render_artist_text(){
+        return this.render_text(this.state.current_artist.username + 
+                                " is drawing")
     }
 
     render_word_text(){
@@ -454,11 +467,20 @@ class FakeArtistCanvas extends Component {
         }
         else{
             // im not drawing, so lets just say someone else is 
-            return (
-                <React.Fragment>
-                    {this.render_player_text() }
-                </React.Fragment>
-            );
+            if(this.state.current_artist.is_spy){
+                return (
+                    <React.Fragment>
+                        {this.render_player_text() }
+                    </React.Fragment>
+                );
+            }
+            else{
+                return (
+                    <React.Fragment>
+                        {this.render_artist_text() }
+                    </React.Fragment>
+                );
+            }
         }
     }
 
