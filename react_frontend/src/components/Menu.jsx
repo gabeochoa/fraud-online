@@ -175,14 +175,23 @@ class Menu extends WebSocketComponent {
         });
     }
 
-    set_extra_game_state(option_name, option_value){
+    set_default_game_state(option_name, default_value){
+        let _new_state = { ... this.state.default_extra_game_state}
+        _new_state[option_name] = default_value
+
+        this.setState({
+            default_extra_game_state: _new_state
+        });
+    }
+
+    set_extra_game_state(option_name, option_value, callback){
         console.log("set extra state", option_name, option_value, this.state.extra_game_state)
         let _new_state = { ... this.state.extra_game_state}
         _new_state[option_name] = option_value
 
         this.setState({
             extra_game_state: _new_state
-        });
+        }, callback);
     }
 
     reset_extra_game_state(){
@@ -312,6 +321,7 @@ class Menu extends WebSocketComponent {
             clearGameState: this.clearGameState,
             socket_null: this.socket_null,
             set_game_option: this.set_game_option,
+            set_default_game_state: this.set_default_game_state,
             set_extra_game_state: this.set_extra_game_state,
             reset_extra_game_state: this.reset_extra_game_state,
         }

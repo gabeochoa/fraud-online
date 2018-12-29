@@ -116,39 +116,52 @@ class FakeArtistCanvas extends Component {
         show_location_modal: false,
       }
 
-      this.showing_artist_toast = false;
-      this.showing_round_toast = false;
+      this.showing_toast = {
+          artist: false,
+          round: false, 
+          voting: false,
+      }
 
       this.touchable_canvas = React.createRef();
       this.bottom_buttons = React.createRef();
 
+      this.props.set_default_game_state("round", 1)
+      this.props.set_default_game_state("locations", [])
     }
 
     
     notify_voting(){
         toast("Time for Voting!", {
-            position: toast.POSITION.BOTTOM_CENTER,
+            position: 'top-center',
+            onClose: () => this.showing_toast['voting'] = false,
         });
     }
-    
-    notify_round(){
+
+    _actual_round_toast(){
         let cur_round =  this.props.extra_game_state.round || 0
-        cur_round += 1
-        toast.info("Round " + cur_round + " of " 
+        toast.info("Round " + (cur_round + 1) + " of " 
                             + this.props.game_options.num_rounds + "!", {
-            onClose: () => this.showing_round_toast = false,
+            onClose: () => this.showing_toast['round'] = false,
             position: "top-center",
             closeOnClick: true,
             pauseOnHover: false,
             draggable: true,
         });
     }
+    
+    notify_round(){
+        this.props.set_extra_game_state("round", 
+                                        this.props.extra_game_state.round + 1,
+                                        () => {
+                                            this._actual_round_toast()
+                                        })   
+    }
 
     notify_artist(){
         toast.info("Time for Drawing; One stroke only please!", {
             position: toast.POSITION.BOTTOM_CENTER,
-            onOpen: () => this.showing_artist_toast = true,
-            onClose: () => this.showing_artist_toast = false,
+            onOpen: () => this.showing_toast['artist'] = true,
+            onClose: () => this.showing_toast['artist'] = false,
         },
         );
     }
@@ -158,9 +171,7 @@ class FakeArtistCanvas extends Component {
         this.props.send_message({ command: 'start_game' });
         this.props.send_message({ command: 'get_room' });
 
-        this.props.set_extra_game_state("round", 1);
-        this.props.set_extra_game_state("locations", []);
-        console.log("extra game", this.props.extra_game_state)
+        this.props.reset_extra_game_state()
     }
 
     componentWillUnmount() {
@@ -177,33 +188,34 @@ class FakeArtistCanvas extends Component {
     }
 
     end_round(data, sender){
-        // console.log("end round", data, sender)
+        console.log("end round", data, sender)
 
+        // when a person is done drawing....
 
-        if(data.round > (this.props.game_options.rounds-1)){
-            // ran out of players
+        // check if the new round is more than all rounds ever 
+        if(data.round >= (this.props.game_options.rounds)){
+            // done with rounds, lets vote
             this.props.send_message({
                 command: "voting"
             })
             return;
         }
-
-        if(this.props.extra_game_state.round != data.round + 1){
-            if(!this.showing_round_toast){
-                this.notify_round()
-                this.showing_round_toast = true
+        else{
+            // otherwise the new round needs to be set
+            if(this.props.extra_game_state.round != data.round){
+                this.props.set_extra_game_state("round", 
+                                                data.round,
+                                                this.notify_round());
             }
         }
-        this.props.set_extra_game_state("round", data.round + 1);
-
         // console.log("end_roundish", data.players, data.current_player)
         const player = data.players[data.current_player] || data.players[0];
 
         const is_local = (player.channel == sender);
 
-        if(is_local && !this.showing_artist_toast){
+        if(is_local && !this.showing_toast['artist']){
             this.notify_artist()
-            this.showing_artist_toast = true
+            this.showing_toast['artist'] = true
         }
 
         this.setState({
@@ -239,7 +251,10 @@ class FakeArtistCanvas extends Component {
                     true, 
                 ],
             })
-            this.notify_voting()
+            if(!this.showing_toast['voting']){
+                this.notify_voting()
+                this.showing_toast['voting'] = true
+            }
             return 
         }
 
@@ -263,7 +278,7 @@ class FakeArtistCanvas extends Component {
         let locations = parsedData.message.locations
         if(locations){
             // console.log(parsedData.message.locations)
-            if(this.props.extra_game_state.locations.length == 0){
+            if(this.props.extra_game_state.locations && this.props.extra_game_state.locations.length == 0){
                 locations = [...parsedData.message.locations].map((item)=>{return [item, false]}) 
                 this.props.set_extra_game_state("locations", locations);
             }
@@ -287,6 +302,7 @@ class FakeArtistCanvas extends Component {
         }
 
         if(command == "end_game"){
+            this.props.reset_extra_game_state()
             this.touchable_canvas.clear_canvas(false);
             this.bottom_buttons.closeConfirmBox();
             this.props.updateGameStarted(false);
