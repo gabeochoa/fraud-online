@@ -10,6 +10,8 @@ import { Button } from "@material-ui/core";
 import { mdiMapMarker, mdiToolbox, mdiBorderAll } from "@mdi/js";
 import Icon from '@mdi/react'
 import SweetAlert from "react-bootstrap-sweetalert/lib/dist/SweetAlert";
+import 'react-toastify/dist/ReactToastify.min.css';
+import { ToastContainer, toast } from 'react-toastify';
 
 const column_list = {
     columnCount: 2,
@@ -111,15 +113,18 @@ class FakeArtistCanvas extends Component {
             true, 
             true
         ],
-        locations: [],
         show_location_modal: false,
       }
 
-
-      this.props.update_websocket("defaultroom");
-
       this.touchable_canvas = React.createRef();
       this.bottom_buttons = React.createRef();
+    }
+
+    
+    notify_voting(){
+        toast.info("Time for Voting!", {
+            position: toast.POSITION.BOTTOM_CENTER
+        });
     }
 
     componentDidMount(){
@@ -143,10 +148,10 @@ class FakeArtistCanvas extends Component {
 
     end_round(data, sender){
         // console.log("end round", data, sender)
-        if(data.round >= (this.props.game_options.rounds-1)){
-        // ran out of players
+        if(data.round > (this.props.game_options.rounds-1)){
+            // ran out of players
             this.props.send_message({
-                command: "end_game"
+                command: "voting"
             })
             return;
         }
@@ -176,6 +181,21 @@ class FakeArtistCanvas extends Component {
         }
 
         const command = parsedData.command;
+
+
+        if(command == "voting"){
+            this.setState({
+                is_local_player_artist: false,
+                hideButtonState: [
+                    false, 
+                    true,
+                    true, 
+                ],
+            })
+            this.notify_voting()
+            return 
+        }
+
         const username = parsedData.message.username;
         const sender = parsedData.sender;
 
@@ -193,15 +213,13 @@ class FakeArtistCanvas extends Component {
             this.props.updateGameStarted(is_game_started);
         }
 
-        if(parsedData.message.locations){
-            let locations = this.state.locations;
+        let locations = parsedData.message.locations
+        if(locations){
+            // console.log(parsedData.message.locations)
             if(locations.length == 0){
                 locations = [...parsedData.message.locations].map((item)=>{return [item, false]}) 
-                
             }
-            this.setState({
-                locations: locations,
-            })
+            this.props.set_extra_game_state("locations", locations);
         }
 
         if(command == "get_room_response"){
@@ -290,17 +308,13 @@ class FakeArtistCanvas extends Component {
         }
         // console.log( event.target.getAttribute("name"), "was clicked")
 
-        const locations = [...this.state.locations]//this.props.extra_game_state.locations]
+        const locations = [...this.props.extra_game_state.locations]
         // // find the matching object
         const location = locations.filter(c => c[0] == event.target.getAttribute("name"))[0];
         // // index in our list 
         const index = locations.indexOf(location);
         locations[index] = [location[0], !location[1]];
-        
-        this.setState({
-            locations: locations
-        })
-        // this.props.set_extra_game_state("locations", locations);
+        this.props.set_extra_game_state("locations", locations);
     }
 
     render_text(text){
@@ -384,11 +398,12 @@ class FakeArtistCanvas extends Component {
     render() {
       return (
         <React.Fragment>
+        <ToastContainer />
         {/* <Timer total_time={this.state.total_time}/> */}
         {this.state.location_modal}
         <LocationReference
             show_modal={this.state.show_location_modal}
-            locations={this.state.locations}
+            locations={this.props.extra_game_state.locations || []}
             onConfirm={this.closeLocationReference}
             handleClickLocation={this.handleClickLocation}
         />

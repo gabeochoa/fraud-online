@@ -35,7 +35,7 @@ class TooledTouchableCanvas extends Component{
     constructor(props){
         super(props);
         this.state = {
-            tool: PENCIL
+            tool: PENCIL,
         }
 
         this.resetTools();
@@ -192,7 +192,9 @@ class TooledTouchableCanvas extends Component{
     render(){
         return (
             <React.Fragment>
-                {this.props.is_local_player_artist && this.render_tools()}
+                {this.props.is_local_player_artist && 
+                 this.props.render_tools != false && 
+                 this.render_tools()}
                 <TouchableCanvas
                     ref={this.setTouchableRef} 
                     is_local_player_artist={this.props.is_local_player_artist}

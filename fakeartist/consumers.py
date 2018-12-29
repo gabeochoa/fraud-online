@@ -65,20 +65,20 @@ def start_game(cache_key):
     value['remaining_words'] = words
     value['locations'] = get_locations()[:MAX_LOCATIONS]
     cache.set(cache_key, value, timeout=None)
-    print("start game end", value)
+    # print("start game end", value)
     return value
 
 def progress_game(cache_key):
     value = cache.get(cache_key)
-    print("progress game", value)
+    # print("progress game", value)
     value['current_player'] += 1
 
-    if(value['current_player'] > len(value['players'])):
+    if(value['current_player'] >= len(value['players'])):
         value['round'] += 1
         value['current_player'] = 0
 
     cache.set(cache_key, value, timeout=None)
-    print("progress game end", value)
+    # print("progress game end", value)
     return value
 
 def end_game(cache_key):
@@ -116,16 +116,11 @@ class FakeArtistConsumer(BaseConsumer):
             return base_player
         
     def store_extra_in_cache(self):
-        self.store_wordset_in_cache()
-
-    def store_wordset_in_cache(self):
-        word_set = self.get_params.get("wordset", ["memes"])[0]
-        value = cache.get(self.room_group_name, default=None)
-        if "word_set" in value:
-            return 
-        self.word_set = word_set
-        value["word_set"] = word_set
-        cache.set(self.room_group_name, value, timeout=None)
+        pass
+    
+    def remove_before_returning(self, value):
+        value.pop('remaining_words', None)
+        return value
 
     def extra_commands(self, command, data):
         if command == "draw":
@@ -136,6 +131,23 @@ class FakeArtistConsumer(BaseConsumer):
                 "tool": data['message']['tool'],
                 "username": self.get_username
             })
+            return
+        if command == "voting":
+            self.send_voting_command()
+            return 
+
+    def send_voting_command(self, data=None):
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'voting',
+                'message': data,
+            }
+        )
+
+    def voting(self, event):
+        message = event['message']
+        self.send_command('voting', message)
 
     def send_draw_command(self, data):
         async_to_sync(self.channel_layer.group_send)(
@@ -154,10 +166,13 @@ class FakeArtistConsumer(BaseConsumer):
         return player['is_in_game']
     
     def start_game_message(self):
-        return start_game(self.room_group_name)
+        value = start_game(self.room_group_name)
+        return self.remove_before_returning(value)
     
     def end_round_message(self):
-        return progress_game(self.room_group_name)
+        value =  progress_game(self.room_group_name)
+        return self.remove_before_returning(value)
 
     def end_game_message(self):
-        return end_game(self.room_group_name)
+        value =  end_game(self.room_group_name)
+        return self.remove_before_returning(value)

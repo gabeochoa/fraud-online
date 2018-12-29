@@ -244,12 +244,18 @@ class BaseConsumer(WebsocketConsumer):
         message = event['message']
         self.send_command("new_user", message)
     
+    def remove_before_returning(self, value):
+        print("this one is getting called")
+        return value
+
     def _send_get_room_response(self):
+        value = cache.get(self.room_group_name)
+        value = self.remove_before_returning(value)
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 'type': 'get_room_response',
-                'message': cache.get(self.room_group_name)
+                'message': value
             }
         )
 

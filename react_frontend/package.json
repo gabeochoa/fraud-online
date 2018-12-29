@@ -50,6 +50,7 @@
     "react-color": "^2.14.1",
     "react-dropdown": "^1.6.3",
     "react-select": "^2.1.2",
+    "react-toastify": "^4.5.1",
     "reconnecting-websocket": "^4.1.10",
     "style-loader": "^0.23.1"
   }
