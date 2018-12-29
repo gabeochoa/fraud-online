@@ -116,8 +116,12 @@ class FakeArtistCanvas extends Component {
         show_location_modal: false,
       }
 
+      this.showing_toast = false;
+
       this.touchable_canvas = React.createRef();
       this.bottom_buttons = React.createRef();
+
+      this.props.set_extra_game_state("locations", []);
     }
 
     
@@ -125,6 +129,15 @@ class FakeArtistCanvas extends Component {
         toast.info("Time for Voting!", {
             position: toast.POSITION.BOTTOM_CENTER
         });
+    }
+
+    notify_artist(){
+        toast.info("Time for Drawing; One stroke only please!", {
+            position: toast.POSITION.BOTTOM_CENTER,
+            onOpen: () => this.showing_toast = true,
+            onClose: () => this.showing_toast = false,
+        },
+        );
     }
 
     componentDidMount(){
@@ -159,11 +172,19 @@ class FakeArtistCanvas extends Component {
         // console.log("end_roundish", data.players, data.current_player)
         const player = data.players[data.current_player] || data.players[0];
 
+
+        const is_local = (player.channel == sender);
+
+        if(is_local && !this.showing_toast){
+            this.notify_artist()
+            this.showing_toast = true
+        }
+
         this.setState({
             current_artist: player,
-            is_local_player_artist: (player.channel == sender),
+            is_local_player_artist: is_local,
             hideButtonState: [
-                    (player.channel == sender), 
+                    is_local, 
                     true,
                     true, 
                 ],
@@ -216,10 +237,10 @@ class FakeArtistCanvas extends Component {
         let locations = parsedData.message.locations
         if(locations){
             // console.log(parsedData.message.locations)
-            if(locations.length == 0){
+            if(this.props.extra_game_state.locations.length == 0){
                 locations = [...parsedData.message.locations].map((item)=>{return [item, false]}) 
+                this.props.set_extra_game_state("locations", locations);
             }
-            this.props.set_extra_game_state("locations", locations);
         }
 
         if(command == "get_room_response"){
@@ -403,7 +424,7 @@ class FakeArtistCanvas extends Component {
         {this.state.location_modal}
         <LocationReference
             show_modal={this.state.show_location_modal}
-            locations={this.props.extra_game_state.locations || []}
+            locations={this.props.extra_game_state.locations}
             onConfirm={this.closeLocationReference}
             handleClickLocation={this.handleClickLocation}
         />
