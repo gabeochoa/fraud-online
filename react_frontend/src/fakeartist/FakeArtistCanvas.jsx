@@ -116,26 +116,39 @@ class FakeArtistCanvas extends Component {
         show_location_modal: false,
       }
 
-      this.showing_toast = false;
+      this.showing_artist_toast = false;
+      this.showing_round_toast = false;
 
       this.touchable_canvas = React.createRef();
       this.bottom_buttons = React.createRef();
 
-      this.props.set_extra_game_state("locations", []);
     }
 
     
     notify_voting(){
-        toast.info("Time for Voting!", {
-            position: toast.POSITION.BOTTOM_CENTER
+        toast("Time for Voting!", {
+            position: toast.POSITION.BOTTOM_CENTER,
+        });
+    }
+    
+    notify_round(){
+        let cur_round =  this.props.extra_game_state.round || 0
+        cur_round += 1
+        toast.info("Round " + cur_round + " of " 
+                            + this.props.game_options.num_rounds + "!", {
+            onClose: () => this.showing_round_toast = false,
+            position: "top-center",
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
         });
     }
 
     notify_artist(){
         toast.info("Time for Drawing; One stroke only please!", {
             position: toast.POSITION.BOTTOM_CENTER,
-            onOpen: () => this.showing_toast = true,
-            onClose: () => this.showing_toast = false,
+            onOpen: () => this.showing_artist_toast = true,
+            onClose: () => this.showing_artist_toast = false,
         },
         );
     }
@@ -144,6 +157,10 @@ class FakeArtistCanvas extends Component {
         this.props.register_socket_callbacks("drawingCanvas", "onmessage", this.process_message)
         this.props.send_message({ command: 'start_game' });
         this.props.send_message({ command: 'get_room' });
+
+        this.props.set_extra_game_state("round", 1);
+        this.props.set_extra_game_state("locations", []);
+        console.log("extra game", this.props.extra_game_state)
     }
 
     componentWillUnmount() {
@@ -161,6 +178,8 @@ class FakeArtistCanvas extends Component {
 
     end_round(data, sender){
         // console.log("end round", data, sender)
+
+
         if(data.round > (this.props.game_options.rounds-1)){
             // ran out of players
             this.props.send_message({
@@ -169,15 +188,22 @@ class FakeArtistCanvas extends Component {
             return;
         }
 
+        if(this.props.extra_game_state.round != data.round + 1){
+            if(!this.showing_round_toast){
+                this.notify_round()
+                this.showing_round_toast = true
+            }
+        }
+        this.props.set_extra_game_state("round", data.round + 1);
+
         // console.log("end_roundish", data.players, data.current_player)
         const player = data.players[data.current_player] || data.players[0];
 
-
         const is_local = (player.channel == sender);
 
-        if(is_local && !this.showing_toast){
+        if(is_local && !this.showing_artist_toast){
             this.notify_artist()
-            this.showing_toast = true
+            this.showing_artist_toast = true
         }
 
         this.setState({
@@ -241,6 +267,10 @@ class FakeArtistCanvas extends Component {
                 locations = [...parsedData.message.locations].map((item)=>{return [item, false]}) 
                 this.props.set_extra_game_state("locations", locations);
             }
+        }
+
+        if(parsedData.message.num_rounds){
+            this.props.set_game_option("num_rounds", parsedData.message.num_rounds)
         }
 
         if(command == "get_room_response"){

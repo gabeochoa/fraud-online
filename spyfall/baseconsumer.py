@@ -94,6 +94,9 @@ class BaseConsumer(WebsocketConsumer):
             if player['channel'] == channel: continue
             players.append(player) 
 
+        if len(players) == 0:
+            self._send_end_game()
+
         self._store_is_game_started()
 
         value['players'] = players
@@ -245,7 +248,6 @@ class BaseConsumer(WebsocketConsumer):
         self.send_command("new_user", message)
     
     def remove_before_returning(self, value):
-        print("this one is getting called")
         return value
 
     def _send_get_room_response(self):

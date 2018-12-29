@@ -139,7 +139,7 @@ class Game extends Component {
       this.props.register_socket_callbacks(CALLBACK_NAME, "onopen", this.on_open_handler);
       this.props.register_socket_callbacks(CALLBACK_NAME, "onmessage", this.process_message);
 
-      this.props.set_extra_game_state("locations", [], []);
+      this.props.set_extra_game_state("locations", []);
     }
 
     componentDidMount(){

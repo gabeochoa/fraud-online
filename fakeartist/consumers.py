@@ -116,7 +116,15 @@ class FakeArtistConsumer(BaseConsumer):
             return base_player
         
     def store_extra_in_cache(self):
-        pass
+        self.store_num_rounds()
+    
+    def store_num_rounds(self):
+        num_rounds = self.get_params.get("rounds", [2])[0]
+        value = cache.get(self.room_group_name, default=None)
+        if 'num_rounds' in value:
+            return 
+        value['num_rounds'] = num_rounds
+        cache.set(self.room_group_name, value, timeout=None)
     
     def remove_before_returning(self, value):
         value.pop('remaining_words', None)
