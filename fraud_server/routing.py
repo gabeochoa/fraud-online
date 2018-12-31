@@ -3,6 +3,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 import spyfall.routing
 import drawit.routing
 import fakeartist.routing
+import corp.routing
 
 from django.conf.urls import url, include
 
@@ -12,7 +13,8 @@ application = ProtocolTypeRouter({
         URLRouter(
             spyfall.routing.websocket_urlpatterns + 
             drawit.routing.websocket_urlpatterns + 
-            fakeartist.routing.websocket_urlpatterns
+            fakeartist.routing.websocket_urlpatterns + 
+            corp.routing.websocket_urlpatterns
         )
     ),
 })
