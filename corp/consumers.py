@@ -10,123 +10,144 @@ from json import JSONEncoder
 from spyfall.data import get_locations, get_roles
 from spyfall.baseconsumer import BaseConsumer
 
-class MyActionEncoder(JSONEncoder):
+from . import logic
+import pickle
 
-        def encode(self, o):
-            return {
-                "apc": o.action_cost,
-                "mc": o.monetary_cost,
-                "name": o.name, 
-                "dname": o.display_name
-            }
+def pickle_value(value):
+    return value#pickle.dumps(value)
 
+def unpickle_value(pickle_value):
+    return pickle_value#pickle.loads(pickle_value)
 
-class BaseAction(object):
+def deck_dict_to_obj(o):
+    d = logic.Deck()
+    d.ALL_CARDS = o['all_cards']
+    d.draw_pile = o['draw_pile']
+    d.in_hand = o['hand']
+    d.discard_pile = o['discard']
+    return d
 
-    def __init__(self, ap_cost=1, m_cost=0, name="default", display_name=None):
-        self.action_cost = ap_cost
-        self.monetary_cost = m_cost
-        self.name = name
-        self.display_name = name if display_name is None else display_name
-
-    def __str__(self):
-        return self.display_name
-    
-    def action(self):
-        raise NotImplementedError("implement action")
-    
-class SideEffect(object):
-
-    def __init__(self, )
-
-class StockMarket(BaseAction):
-    def __init__(self):
-        kwargs = {
-            "ap_cost": 0,
-            "m_cost": 0,
-            "name": "stock_market",
-            "display_name": "Play the Stock Market",
-        }
-        super(StockMarket, self).__init__(**kwargs)
-
-    def action(self):
-        pass
+def player_dict_to_obj(o):
+    p = logic.Player()
+    p.money = o['money']
+    p.action_points = o['ap']
+    p.employees = o['emp']
+    p.max_employees = o['maxemp']
+    return p
 
 
 def start_game(cache_key):
-    value = cache.get(cache_key)
+    pvalue = cache.get(cache_key)
+    value = unpickle_value(pvalue)
+
     print("start game", value)
-    # set the rest to random jobs for that location
+
+    print("deck", repr(value['deck']))
+    deck = deck_dict_to_obj(value['deck'])
+    deck.reshuffle()
+    print(deck)
+
     players = []
-    for player in (value["players"]):
+    for player in value['players']:
+        player['obj'] = player_dict_to_obj(player['obj'])
+        player['obj'].employees = deck.draw(num_cards=2)
+        player['in_game'] = True
         players.append(player)
+
+    random.shuffle(players)
+
+    # now we can assign them numbers 
+    for i, player in enumerate(players):
+        player['order'] = i
+
+    value['current_player'] = 0
 
     # then generate first player and spy
     # get a random person and assign them as spy
     first_person = random.randrange(len(players))
     players[first_person]['is_first'] = True
 
+    print("players", players)
     # set cache
-    value["players"] = players
-    cache.set(cache_key, value, timeout=None)
+    serialized_players = []
+    for player in players:
+        player['obj'] = json.dumps(player['obj'], cls=logic.MyPlayerEncoder)
+        serialized_players.append(player)
+    value["players"] = serialized_players
+
+    value['cards'] = json.dumps(logic.CARD_MAP, cls=logic.MyActionEncoder)
+
+    pvalue = pickle_value(value)
+    cache.set(cache_key, pvalue, timeout=None)
     print("start game end", value)
-    return value
+    return pvalue
+
+def end_turn(cache_key):
+    pvalue = cache.get(cache_key)
+    value = unpickle_value(pvalue)
+
+    pvalue = pickle_value(value)
+    cache.set(cache_key, pvalue, timeout=None)
+    return {}
 
 def end_game(cache_key):
+    pvalue = cache.get(cache_key)
+    value = unpickle_value(pvalue)
 
-    value = cache.get(cache_key)
     players = []
     for player in (value["players"]):
         player['is_first'] = False
+        player['in_game'] = False
         players.append(player)
     value["players"] = players
-    cache.set(cache_key, value, timeout=None)
-    return value
+
+    pvalue = pickle_value(value)
+    cache.set(cache_key, pvalue, timeout=None)
+    return {}
 
 
 class CorpConsumer(BaseConsumer):
 
     def get_user(self, players=None):
+        player_s = json.dumps(logic.Player(), cls=logic.MyPlayerEncoder)
         base_player = {
             "username": self.get_username,
             "id": 0,
             "channel": self.channel_name,
-            "role": None,
-            "location": None,
-            "is_spy": False,
+            "obj": player_s,
+            "in_game": False,
         }
         if players is None or len(players) == 0:
             return base_player
         else:
             # players is not empty
-            print(players, len(players))
+            # print(players, len(players))
             base_player['id'] = players[-1]['id']+1
             return base_player
-        
-    def store_extra_in_cache(self):
-        self.store_timer_amount_in_cache()
-        self.store_locations_in_cache()
-
-    def store_timer_amount_in_cache(self):
-        local_time = self.get_params.get("minutes", [5])[0]
-        value = cache.get(self.room_group_name, default=None)
-        if 'minutes' in value:
-            # time already set
-            return 
-        self.get_total_time = local_time
-        value['minutes'] = self.get_total_time
-        cache.set(self.room_group_name, value, timeout=None)
-
-    def store_locations_in_cache(self):
-        value = cache.get(self.room_group_name, default=None)
-        value['locations'] = get_locations()
-        cache.set(self.room_group_name, value, timeout=None)
 
     def player_in_game(self, player):
-        return player['role'] is not None
+        return player['in_game']
+        
+    def store_extra_in_cache(self):
+        self.store_deck_in_cache()
+
+    def store_deck_in_cache(self):
+        value = self.cache_get(self.room_group_name)
+        if 'deck' in value:
+            return 
+        deck = logic.Deck()
+        value['deck'] = json.dumps(deck, cls=logic.MyDeckEncoder)
+        self.cache_set(self.room_group_name, value)
     
+    def remove_before_returning(self, value):
+        del value['deck']
+        return value
+
     def start_game_message(self):
         return start_game(self.room_group_name)
+    
+    def end_turn_message(self):
+        return end_turn(self.room_group_name)
 
     def end_game_message(self):
         return end_game(self.room_group_name)

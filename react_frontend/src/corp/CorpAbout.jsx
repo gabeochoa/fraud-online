@@ -75,7 +75,14 @@ class CorpAbout extends Component{
                 <div className="empdesc">
                 <img src="https://fakeimg.pl/64x64/"/> 
                     <p>
-                    <b>The Con-Man</b>: They can steal up to $2 million from any other player.
+                    <b>The Con-Man</b>: They can steal up to $2 million from any other player, but can be blocked by Police or Govt
+                    </p>
+                </div>
+                <br/>
+                <div className="empdesc">
+                <img src="https://fakeimg.pl/64x64/"/> 
+                    <p>
+                    <b>The Insider Trader</b>: They can steal $3 million from the bank, but can be blocked by the govt.
                     </p>
                 </div>
                 <br/>
