@@ -82,6 +82,56 @@ def start_game(cache_key):
     print("start game end", value)
     return pvalue
 
+
+def play_card(cache_key, username, card, target_username):
+    pvalue = cache.get(cache_key)
+    value = unpickle_value(pvalue)
+
+    cur_p_index, current_player = -1, None
+    tar_index, target = -1, None
+    for i, player in enumerate(value['players']):
+        if current_player is None and player['username'] == username:
+            current_player = player
+            cur_p_index = i
+            continue
+        if target is None and player['username'] == target_username:
+            target = player
+            tar_index = i
+            continue
+    
+    if current_player is None:
+        print("player with bad username is playing? ", username, card)
+        return {}
+
+    p_obj = player_dict_to_obj(current_player['obj'])
+    t_obj = None if target is None else player_dict_to_obj(target)
+    print("playing ", username, card)
+    # we need to check for global actions
+    if card in ['stock_market', 'frame']:
+        action_card = logic.CARD_MAP[card]
+        try:
+            p_obj.play_action(action_card, other_player=t_obj)
+        except Exception as e:
+            print("Action Exception: ", str(e))
+            return {}
+    else:
+        try:
+            c_index = p_obj.employees.index(card)
+        except ValueError as e:
+            print("trying to play card that player doesnt have", str(e))
+            return {}
+        p_obj.play_employee_action(c_index, other_player=t_obj)
+    # now the card has been played
+
+    if tar_index != -1:
+        value['players'][tar_index]['obj'] = json.dumps(t_obj, cls=logic.MyPlayerEncoder)
+    value['players'][cur_p_index]['obj'] = json.dumps(p_obj, cls=logic.MyPlayerEncoder)
+    
+    pvalue = pickle_value(value)
+    cache.set(cache_key, pvalue, timeout=None)
+    return {}
+
+
 def end_turn(cache_key):
     pvalue = cache.get(cache_key)
     value = unpickle_value(pvalue)
@@ -89,6 +139,7 @@ def end_turn(cache_key):
     pvalue = pickle_value(value)
     cache.set(cache_key, pvalue, timeout=None)
     return {}
+
 
 def end_game(cache_key):
     pvalue = cache.get(cache_key)
@@ -124,6 +175,30 @@ class CorpConsumer(BaseConsumer):
             # print(players, len(players))
             base_player['id'] = players[-1]['id']+1
             return base_player
+
+    def extra_commands(self, command, data):
+        if command == "play_card":
+            print(command, data['card'])
+            play_card(self.room_group_name, self.get_username, data['card'], data['target'])
+            self.send_played_command({
+                "card": data['card'],
+                "username": self.get_username
+            })
+            self._send_get_room_response()
+
+
+    def send_played_command(self, data):
+        async_to_sync(self.channel_layer.group_send)(
+            self.room_group_name,
+            {
+                'type': 'play',
+                'message': data,
+            }
+        )
+
+    def play(self, event):
+        message = event['message']
+        self.send_command('play', message)
 
     def player_in_game(self, player):
         return player['in_game']

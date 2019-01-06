@@ -66,18 +66,36 @@ class Game extends Component {
 
     }
 
+    card_play_handler(card){
+        console.log(card)
+
+        // certain cards have a target that they are played against. 
+        // for right now we assume target is always None
+        const target = null;
+
+        if (this.props.extra_game_state.cards[card] == undefined){
+            console.warn("this card ", card, "doesnt exist");
+            return
+        }
+        this.props.send_message({
+            "command": "play_card",
+            "card": card,
+            "target": target,
+        })
+    }
+
     onClickHandler(event){
       if (event.target == this.canvas) {
         event.preventDefault();
       }
       
-      console.log("click event", event, event.target)
+    //   console.log("click event", event, event.target)
       while(event.target.getAttribute("name") === null){
         event.target = event.target.parentNode;
       }
       const button_ = event.target.getAttribute("name");
 
-      console.log("button clicked", button_)
+    //   console.log("button clicked", button_)
       switch(button_){
           case "room_leave":
             this.props.kill_websocket(this.props.username);
@@ -90,6 +108,10 @@ class Game extends Component {
             })
             this.props.changeLocation("lobby");
           break;
+          default:
+            // we need to check if its a card
+            this.card_play_handler(button_)
+          break
       }
     }
 
@@ -98,7 +120,7 @@ class Game extends Component {
     }
 
     render_player(player, i){
-        console.log(player)
+        // console.log(player)
         return(
             <span key={player.username + i}>
             <p> Username: {player.username}</p>
@@ -122,15 +144,18 @@ class Game extends Component {
         if(!this.props.extra_game_state.cards){
             return <p key={emp + i}>{emp}</p>
         }
-        console.log(this.props.extra_game_state.cards)
+        // console.log(this.props.extra_game_state.cards)
         const card = this.props.extra_game_state.cards[emp]
         
         return (
-            <button key={emp + i} name={emp} disabled={!this.player_can_play(card)}style={{
-                padding: "10px",
-                margin: "auto",
-                width: "50%",
-            }}>
+            <button key={emp + i} name={emp} disabled={!this.player_can_play(card)}
+                onClick={this.onClickHandler}
+                style={{
+                    padding: "10px",
+                    margin: "auto",
+                    width: "50%",
+                }}
+            >
             <p key={emp + i}>
                 {card.dname} <br/>AP: {card.apc} $: {card.mc}
             </p>
@@ -142,7 +167,7 @@ class Game extends Component {
         if(!this.state.player || this.state.player == null){
             return;
         }
-        console.log(this.props.extra_game_state.cards)
+        // console.log(this.props.extra_game_state.cards)
         // apc: 1
         // attr: {}
         // dname: "Use Con-Man to steal from another company"
