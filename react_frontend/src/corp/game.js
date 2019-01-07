@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import autobind from 'autobind-decorator'
 import Icon from "@mdi/react";
-import { mdiCurrencyUsd } from "@mdi/js";
+import { mdiCurrencyUsd, mdiArrowRight } from "@mdi/js";
 
 const CALLBACK_NAME = "corp_game";
 
@@ -11,9 +11,11 @@ class Game extends Component {
       super(props);
 
       this.state = {
+          player: null,
+          current_player: null,
       }
 
-      this.props.update_websocket("fakeroom", {username: "yeyeye"})
+      this.props.update_websocket("fakeroom2", {username: "yeyeye"})
       this.props.register_socket_callbacks(CALLBACK_NAME, "onopen", this.on_open_handler);
       this.props.register_socket_callbacks(CALLBACK_NAME, "onmessage", this.process_message);
     }
@@ -50,6 +52,11 @@ class Game extends Component {
                         item.is_me = true;
                         this.setState({
                             "player": item
+                        })
+                    }
+                    if(message.current_player == item.order){
+                        this.setState({
+                            current_player: item
                         })
                     }
                 }
@@ -120,13 +127,22 @@ class Game extends Component {
     }
 
     render_player(player, i){
-        // console.log(player)
+        console.log(player)
+        let bg_color = 'white';
+        if(this.state.current_player && player.id == this.state.current_player.id){
+            bg_color = 'aliceblue'
+        }
         return(
-            <span key={player.username + i}>
-            <p> Username: {player.username}</p>
-            <p><Icon path={mdiCurrencyUsd} size={"1em"}/>{player.obj.money} million
-            </p>
-            </span>
+            <div key={player.username + i} style={{
+                background: bg_color
+            }}>
+                <p> 
+                { this.state.current_player && player.id == this.state.current_player.id && 
+                    <Icon path={mdiArrowRight} color="red" size={"1em"}/>
+                }
+                Username: {player.username}<Icon path={mdiCurrencyUsd} size={"1em"}/>{player.obj.money} million
+                </p>
+            </div>
         );
     }
 
@@ -140,6 +156,7 @@ class Game extends Component {
         // also check if player played stock market before
         return true
     }
+
     render_employee(emp, i=0){
         if(!this.props.extra_game_state.cards){
             return <p key={emp + i}>{emp}</p>
@@ -167,6 +184,10 @@ class Game extends Component {
         if(!this.state.player || this.state.player == null){
             return;
         }
+        if(this.state.player && this.state.current_player && this.state.player.id != this.state.current_player.id){
+            console.log("current player is not the player on this screen ")
+            return
+        }
         // console.log(this.props.extra_game_state.cards)
         // apc: 1
         // attr: {}
@@ -175,8 +196,8 @@ class Game extends Component {
         // name: "conman"
         return (
             <>
-            <p>Unused Action Points: {this.state.player.obj.ap}</p>
             <h2> Your Current Employee{this.state.player.obj.maxemp == 2? "s": ""}</h2>
+            <p>Unused Action Points: {this.state.player.obj.ap}</p>
             <div style={{
                 display: "grid",
                 justifyContent: "center",
