@@ -12,6 +12,7 @@ class BaseConsumer(WebsocketConsumer):
     # def __init__(self, *args, **kwargs):
     #     super(BaseConsumer, self).__init__(self, *args, **kwargs)
     def cache_set(self, key, value, timeout=None):
+        # DO NOT UNCOMMENT THIS UNLESS YOU CHANGE ALL CHILD CONSUMERS
         # cache.set(key, pickle.dumps(value), timeout=timeout)
         cache.set(key, (value), timeout=timeout)
 
