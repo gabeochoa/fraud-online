@@ -243,6 +243,7 @@ class MyPlayerEncoder(JSONEncoder):
             "money": o.money,
             "ap": o.action_points,
             "emp": o.employees,
+            "next": o.next_turn,
             "maxemp": o.max_employees,
         }
 
@@ -253,6 +254,7 @@ class MyPlayerEncoder(JSONEncoder):
         p.money = o['money']
         p.action_points = o['ap']
         p.employees = o['emp']
+        p.next_turn = o['next']
         p.max_employees = o['maxemp']
         return p
 
@@ -264,6 +266,7 @@ class Player(object):
         self.money = 0
         self.action_points = 2
         self.employees = []
+        self.next_turn = []
         self.max_employees = 2
 
     def apply_side_effect(self, side_effect):
@@ -350,6 +353,7 @@ class Player(object):
     
     def __str__(self):
         return str(self.__dict__)
+
 import random
 
 class MyDeckEncoder(JSONEncoder):

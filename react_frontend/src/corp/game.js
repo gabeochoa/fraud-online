@@ -15,7 +15,7 @@ class Game extends Component {
           current_player: null,
       }
 
-      this.props.update_websocket("fakeroom2", {username: "yeyeye"})
+      this.props.update_websocket("fakeroom3", {username: "yeyeye"})
       this.props.register_socket_callbacks(CALLBACK_NAME, "onopen", this.on_open_handler);
       this.props.register_socket_callbacks(CALLBACK_NAME, "onmessage", this.process_message);
     }
@@ -101,6 +101,7 @@ class Game extends Component {
         event.target = event.target.parentNode;
       }
       const button_ = event.target.getAttribute("name");
+      console.log(event.target.getAttribute("disabled"));
 
     //   console.log("button clicked", button_)
       switch(button_){
@@ -130,7 +131,7 @@ class Game extends Component {
         console.log(player)
         let bg_color = 'white';
         if(this.state.current_player && player.id == this.state.current_player.id){
-            bg_color = 'aliceblue'
+            bg_color = 'white'
         }
         return(
             <div key={player.username + i} style={{
@@ -138,7 +139,7 @@ class Game extends Component {
             }}>
                 <p> 
                 { this.state.current_player && player.id == this.state.current_player.id && 
-                    <Icon path={mdiArrowRight} color="red" size={"1em"}/>
+                    <Icon path={mdiArrowRight} color="red" size={"1.5em"}/>
                 }
                 Username: {player.username}<Icon path={mdiCurrencyUsd} size={"1em"}/>{player.obj.money} million
                 </p>
@@ -146,36 +147,58 @@ class Game extends Component {
         );
     }
 
-    player_can_play(card){
-        if(!this.state.player || this.state.player == null){
-            return false;
+    player_can_play(card, force_bad=false){
+        if(!this.state.player || this.state.player == null || force_bad){
+            return "bad";
         }
-        if(this.state.player.obj.ap < card.apc){return false;}
-        if(this.state.player.obj.money < card.mc){return false;}
-
+        if(this.state.player.obj.ap < card.apc){return "ap";}
+        if(this.state.player.obj.money < card.mc){return "money";}
         // also check if player played stock market before
-        return true
+        return "good"
     }
 
-    render_employee(emp, i=0){
+    render_employee_disabled(emp, i=0, array, force_disabled=true){
+        return this.render_employee(emp, i, array, force_disabled);
+    }
+    render_employee(emp, i=0, array, force_disabled=false){
         if(!this.props.extra_game_state.cards){
             return <p key={emp + i}>{emp}</p>
         }
         // console.log(this.props.extra_game_state.cards)
         const card = this.props.extra_game_state.cards[emp]
-        
+        const can_play = this.player_can_play(card, force_disabled)
+
+        let ap_can_play = 'black'
+        let mc_can_play = 'black'
+        let text_can_play = 'black'
+        if(can_play == "ap" || can_play == "money" || can_play == "bad"){
+            ap_can_play = can_play == "ap"? 'red': 'graytext'
+            mc_can_play = can_play == "money"? 'red': 'graytext'
+            text_can_play = 'graytext'
+        }
+
+        const ap_style = {color: ap_can_play}
+        const mc_style = {color: mc_can_play}
+        const text_style = {color: text_can_play}
+        const button_style = {padding: "10px", margin: "auto", width: "50%"}
+
+    
+        let ap_cost_text = <span style={ap_style}>AP: {card.apc}</span>;
+        let money_cost_text = <span style={mc_style}>$: {card.mc}</span>;
+        if(card.apc == 999){ 
+            ap_cost_text = <span style={ap_style}>Card not offensive</span>;
+            money_cost_text = <span></span>;
+        }
+        const button_text = <span style={text_style}>{card.dname}</span>
+        const text_container = <p key={emp + i}> {button_text} <br/> {ap_cost_text} {money_cost_text}</p>
+        // const button_disabled = true if should be disabled
+        const button_disabled = force_disabled || can_play != "good"
         return (
-            <button key={emp + i} name={emp} disabled={!this.player_can_play(card)}
-                onClick={this.onClickHandler}
-                style={{
-                    padding: "10px",
-                    margin: "auto",
-                    width: "50%",
-                }}
+            <button key={emp + i} name={emp} disabled={button_disabled}
+                onClick={!button_disabled? this.onClickHandler: null}
+                style={button_style}
             >
-            <p key={emp + i}>
-                {card.dname} <br/>AP: {card.apc} $: {card.mc}
-            </p>
+            {text_container}
             </button>
         );
     }
@@ -202,9 +225,16 @@ class Game extends Component {
                 display: "grid",
                 justifyContent: "center",
             }}>
-                {this.render_employee("stock_market", 0)}
-                {this.render_employee("frame", 0)}
+                {this.render_employee("stock_market", 0, false)}
+                {this.render_employee("frame", 0, false)}
                 {this.state.player.obj.emp.map(this.render_employee)}
+            </div>
+            <h2> Newly Drawn Cards</h2>
+            <div style={{
+                display: "grid",
+                justifyContent: "center",
+            }}>
+                {this.state.player.obj.next.map(this.render_employee_disabled)}
             </div>
             </>
         )

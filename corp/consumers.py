@@ -32,6 +32,7 @@ def player_dict_to_obj(o):
     p.money = o['money']
     p.action_points = o['ap']
     p.employees = o['emp']
+    p.next_turn = o['next']
     p.max_employees = o['maxemp']
     return p
 
@@ -42,10 +43,10 @@ def start_game(cache_key):
 
     print("start game", value)
 
-    print("deck", repr(value['deck']))
+    # print("deck", repr(value['deck']))
     deck = deck_dict_to_obj(value['deck'])
     deck.reshuffle()
-    print(deck)
+    # print(deck)
 
     players = []
     for player in value['players']:
@@ -87,6 +88,8 @@ def play_card(cache_key, username, card, target_username):
     pvalue = cache.get(cache_key)
     value = unpickle_value(pvalue)
 
+    deck = deck_dict_to_obj(value['deck'])
+
     cur_p_index, current_player = -1, None
     tar_index, target = -1, None
     for i, player in enumerate(value['players']):
@@ -120,13 +123,23 @@ def play_card(cache_key, username, card, target_username):
         except ValueError as e:
             print("trying to play card that player doesnt have", str(e))
             return {}
-        p_obj.play_employee_action(c_index, other_player=t_obj)
+        try:
+            p_obj.play_employee_action(c_index, other_player=t_obj)
+        except Exception as e:
+            print("Action Exception: ", str(e))
+            return {}
     # now the card has been played
+
+    # next is to draw cards
+    p_to_draw = p_obj.max_employees - len(p_obj.employees)
+    p_obj.next_turn = deck.draw(num_cards=p_to_draw)
 
     if tar_index != -1:
         value['players'][tar_index]['obj'] = json.dumps(t_obj, cls=logic.MyPlayerEncoder)
     value['players'][cur_p_index]['obj'] = json.dumps(p_obj, cls=logic.MyPlayerEncoder)
     
+    value['deck'] = json.dumps(deck, cls=logic.MyDeckEncoder)
+
     pvalue = pickle_value(value)
     cache.set(cache_key, pvalue, timeout=None)
     return {}
