@@ -1,10 +1,8 @@
-import React, { Component } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Button from '@material-ui/core/Button';
-import autobind from 'autobind-decorator'
-
 import Icon from "@mdi/react";
-import { mdiPencil, mdiEraser, mdiClose} from "@mdi/js";
-import { GithubPicker} from 'react-color';
+import { mdiPencil, mdiEraser, mdiClose } from "@mdi/js";
+import { GithubPicker } from 'react-color';
 import VerticalSlider from '../components/VerticalSlider';
 import "../components/menu.css";
 import "../drawit/drawit.css";
@@ -12,198 +10,134 @@ import "../drawit/drawit.css";
 import TouchableCanvas from './TouchableCanvas';
 
 const BACKGROUND = 'white'
-
-const COLOR_CHOICES = ['black', '#C0C0C0', 'white', '#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
-'#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#8B4513'];
-
+const COLOR_CHOICES = [
+    'black', '#C0C0C0', 'white', '#B80000', '#DB3E00', '#FCCB00', '#008B02', '#006B76', '#1273DE', '#004DCF', '#5300EB',
+    '#EB9694', '#FAD0C3', '#FEF3BD', '#C1E1C5', '#8B4513'];
 const CLEAR = "__CLEAR"
-
 let PENCIL = {
-  name: "PENCIL",
-  stroke: COLOR_CHOICES[0],
-  lineWidth: 10,
+    name: "PENCIL",
+    stroke: COLOR_CHOICES[0],
+    lineWidth: 10,
 }
-
 const ERASER = {
-  name: "ERASE",
-  stroke: BACKGROUND,
-  lineWidth: 15,
+    name: "ERASE",
+    stroke: BACKGROUND,
+    lineWidth: 15,
 }
 
-@autobind
-class TooledTouchableCanvas extends Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            tool: PENCIL,
-        }
+const ToolBar = ({
+    hideClearButton,
+    onClickHandler,
+    toolName,
+}) => {
+    const buttons = [
+        { show: !hideClearButton, name: CLEAR, icon: mdiClose, },
+        { show: true, name: "pencil", icon: mdiPencil, matchingName: PENCIL.name, },
+        { show: true, name: "eraser", icon: mdiEraser, matchingName: ERASER.name, },
+    ]
+    return buttons.map(({ show, name, icon, matchingName }) => {
+        if (!show) { return null; }
+        return (
+            <Button
+                key={name}
+                name={name}
+                onClick={onClickHandler}
+                style={tool_button_style}
+                {...(toolName == matchingName ? { variant: "outlined" } : {})}
+            >
+                <Icon path={icon} size={"1em"} />
+            </Button>
+        );
+    });
+}
 
-        this.resetTools();
-
-        this.touchable_canvas = React.createRef();
-    }
+const TooledTouchableCanvas = (props) => {
+    const [myPencil, setMyPencil] = useState(PENCIL);
+    const [myEraser, setMyEraser] = useState(ERASER);
+    const [tool, setTool] = useState(PENCIL);
+    const touchable_canvas = useRef();
 
     // FUNCTIONS TO FORWARD TO CHILD REF
-    upscale_paint(a,b,c){
-        this.touchable_canvas.upscale_paint(a,b,c);
+    const upscale_paint = (a, b, c) => {
+        touchable_canvas.current.upscale_paint(a, b, c);
     }
-
-    clear_canvas(send_message){
-        if(send_message == undefined){
-            send_message = true;
-        }
-        this.touchable_canvas.clear_canvas(send_message);
+    const clear_canvas = (send_message) => {
+        if (send_message == undefined) { send_message = true; }
+        touchable_canvas.current.clear_canvas(send_message);
     }
+    useEffect(() => {
+        props.sendFunctions({ upscale_paint, clear_canvas })
+    }, []);
     /////////////////////////////////////
 
-    resetTools(){
-        this._my_eraser = ERASER;
-        this._my_pencil = PENCIL;
-    }
-
-    onToolChanged(button_){
-      switch(button_){
-        case "pencil":
-            // console.log("tool is now pencil")
-            this.setState({tool:this._my_pencil});
-            break;
-        case "eraser":
-            // console.log("tool is now eraser")
-            this.setState({tool:this._my_eraser});
-            break;
-        case CLEAR:
-            // console.log("clearing canvas")
-            this.clear_canvas(true);
-        break;
-        default:
-            console.warn("button clicked but no handler", button_)
-        break;
-      }
-    }
-
-    onClickHandler(event){
-        while(event.target.getAttribute("name") === null){
+    const onClickHandler = useCallback((event) => {
+        while (event.target.getAttribute("name") === null) {
             event.target = event.target.parentNode;
         }
         const button_ = event.target.getAttribute("name");
-
-        this.onToolChanged(button_);
-    }
-
-    handleColorChange(color){
-        //auto matically change to pencil and then change color
-        // we dont want to keep on eraser and overwrite the black
-        this._my_pencil.stroke = color.hex;
-        this.setState({
-            tool: this._my_pencil
-        });
-    }
-
-    sliderChange(args){
-        let my_tool = null;
-        switch(this.state.tool.name){
-          case PENCIL.name:
-            this._my_pencil.lineWidth = args;
-            my_tool = this._my_pencil;
-          break;
-          case ERASER.name:
-            this._my_eraser.lineWidth = args;
-            my_tool = this._my_eraser;
-          break;
+        switch (button_) {
+            case "pencil": setTool(myPencil); break;
+            case "eraser": setTool(myEraser); break;
+            case CLEAR: clear_canvas(true); break;
+            default: console.warn("button clicked but no handler", button_); break;
         }
-  
-        this.setState({
-          tool: my_tool
-        });
+    }, [myPencil, myEraser, setTool, clear_canvas])
+
+    const handleColorChange = (color) => {
+        const newPencil = { ...myPencil, stroke: color.hex, };
+        setMyPencil(newPencil)
+        // automatically change to pencil and then change color
+        // we dont want to keep on eraser and overwrite the black
+        setTool(newPencil);
     }
 
-    render_tool_bar(){
-        return(
-            <React.Fragment>
-                {! this.props.hideClearButton && 
-            <Button name={CLEAR}
-                onClick={this.onClickHandler} 
-                style={tool_button_style}>
-                <Icon path={mdiClose} size={"1em"}/>
-            </Button>
-                }
-            <Button name="pencil" onClick={this.onClickHandler} style={tool_button_style}       
-                {...(this.state.tool.name == PENCIL.name? {variant:"outlined" }: {})}
-                >
-                <Icon path={mdiPencil} size={"1em"}/>
-            </Button>
-            <Button name="eraser" onClick={this.onClickHandler} style={tool_button_style}       
-                {...(this.state.tool.name == ERASER.name? {variant:"outlined" }: {})}
-                >
-                <Icon path={mdiEraser} size={"1em"}/>
-            </Button>
-            </React.Fragment>
-        );   
+    const sliderChange = (args) => {
+        switch (tool.name) {
+            case PENCIL.name: setMyPencil({ ...myPencil, lineWidth: args, }); break;
+            case ERASER.name: setMyEraser({ ...myEraser, lineWidth: args, }); break;
+        }
     }
 
-    render_color_picker(){
-        return(
-            <React.Fragment>
-            <div style={{position: "absolute", top: 5, right:0}}>
-               <GithubPicker
-                  width={40}
-                  color={ this.state.tool.stroke }
-                  colors={COLOR_CHOICES}
-                  onChangeComplete={ this.handleColorChange }
-                  triangle={"hide"}
-                /> 
-            </div>
-            </React.Fragment>
-        );   
-    }
-
-    render_slider(){
-        return(
-            <React.Fragment>
-            <div style={{position: "absolute", top: 5, left:0}}>
-                <VerticalSlider
-                  min={2}
-                  max={50}
-                  step={2}
-                  value={this.state.tool.lineWidth}
-                  onChange={this.sliderChange}
-                /> 
-            </div>
-            </React.Fragment>
-        );   
-    }
-
-    render_tools(){
-        return (
-          <div id="button_bar" className="button_bar_style">
-            {this.render_tool_bar()}
-            <div style={gh_style}>
-                {this.render_slider()}
-                {this.render_color_picker()}
-            </div> 
-          </div>
-        );
-    }
-
-    setTouchableRef(tref){
-        this.touchable_canvas = tref;
-    }
-
-    render(){
-        return (
-            <React.Fragment>
-                {this.props.is_local_player_artist && 
-                 this.props.render_tools != false && 
-                 this.render_tools()}
-                <TouchableCanvas
-                    ref={this.setTouchableRef} 
-                    is_local_player_artist={this.props.is_local_player_artist}
-                    tool={this.state.tool}
-                    send_message={this.props.send_message}
-                />
-            </React.Fragment>
-        );
-    }
+    return (
+        <>
+            {props.is_local_player_artist &&
+                props.render_tools != false &&
+                <div id="button_bar" className="button_bar_style">
+                    <ToolBar
+                        hideClearButton={props.hideClearButton}
+                        onClickHandler={onClickHandler}
+                        toolName={tool.name}
+                    />
+                    <div style={gh_style}>
+                        <div style={{ position: "absolute", top: 5, left: 0 }}>
+                            <VerticalSlider
+                                min={2}
+                                max={50}
+                                step={2}
+                                value={tool.lineWidth}
+                                onChange={sliderChange}
+                            />
+                        </div>
+                        <div style={{ position: "absolute", top: 5, right: 0 }}>
+                            <GithubPicker
+                                width={40}
+                                color={tool.stroke}
+                                colors={COLOR_CHOICES}
+                                onChangeComplete={handleColorChange}
+                                triangle={"hide"}
+                            />
+                        </div>
+                    </div>
+                </div>
+            }
+            <TouchableCanvas
+                ref={touchable_canvas}
+                is_local_player_artist={props.is_local_player_artist}
+                tool={tool}
+                send_message={props.send_message}
+            />
+        </>
+    );
 }
 
 export default TooledTouchableCanvas;

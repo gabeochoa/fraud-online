@@ -26,7 +26,7 @@ const ConfirmableButton = (props) => {
     }
     return (
         <>
-            {confirmBox}
+            {!props.closeConfirmBox && confirmBox}
             <Button
                 {...props.buttonProps}
                 onClick={openConfirmBox}

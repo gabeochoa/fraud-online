@@ -1,6 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
-import autobind from 'autobind-decorator';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from "react";
 import Icon from '@mdi/react'
 import { mdiDelete, mdiPen } from '@mdi/js'
 import "./menu.css";
@@ -34,6 +32,31 @@ const LobbyPerson = ({
     );
 }
 
+const process_message = (
+    parsedData,
+    changeLocation,
+    isLoaded,
+    setIsLoaded,
+    updatePlayers,
+    updateGameStarted
+) => {
+    console.log("Lobby process_message", parsedData);
+    if (!isLoaded) { setIsLoaded(true) }
+    switch (parsedData.command) {
+        case "get_room_response":
+        case "end_game":
+            break;
+        case "start_game":
+            changeLocation("game");
+            break;
+    }
+    const sender = parsedData.sender;
+    let players = parsedData.message.players;
+    players.forEach((item) => { if (item.channel == sender) { item.is_me = true; } });
+    updatePlayers(players);
+    updateGameStarted(parsedData.message.is_game_started);
+}
+
 const Lobby = ({
     changeLocation,
     room_code,
@@ -50,21 +73,6 @@ const Lobby = ({
     username,
 }) => {
     const [isLoaded, setIsLoaded] = useState(false)
-
-    const process_message = (parsedData) => {
-        console.log("Lobby process_message", parsedData);
-        if (!isLoaded) { setIsLoaded(true) }
-        const command = parsedData.command;
-        const sender = parsedData.sender;
-        const is_game_started = parsedData.message.is_game_started;
-        let players = parsedData.message.players;
-        players.forEach((item) => { if (item.channel == sender) { item.is_me = true; } });
-        if (command == "get_room_response") { }
-        else if (command == "start_game") { changeLocation("game") }
-        else if (command == "end_game") { }
-        updatePlayers(players);
-        updateGameStarted(is_game_started);
-    }
 
     const leave_lobby = () => {
         try { changeLocation("home"); } catch (error) { console.warn(error, "failed to change location") }
@@ -101,7 +109,12 @@ const Lobby = ({
             update_websocket(room_code, { username });
         }
         setIsLoaded(true)
-        register_socket_callbacks("lobby", "onmessage", process_message);
+        register_socket_callbacks("lobby", "onmessage",
+            (msg) => process_message(
+                msg, changeLocation,
+                isLoaded, setIsLoaded,
+                updatePlayers, updateGameStarted)
+        );
         register_socket_callbacks("lobby", "player_kicked", leave_lobby);
         send_message({ command: 'get_room' });
         return () => {

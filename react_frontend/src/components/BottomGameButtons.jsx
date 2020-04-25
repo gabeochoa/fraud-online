@@ -38,6 +38,7 @@ const BottomGameButtons = (props) => {
         <>
             <div style={room_button_holder} className="button_font">
                 <ConfirmableButton
+                    closeConfirm={props.closeConfirm}
                     name="end_round"
                     onClick={onClickStringHandler}
                     buttonProps={{ ...allButtonProps, confirm_text: "Really end round?" }}
@@ -45,6 +46,7 @@ const BottomGameButtons = (props) => {
                     Someone got it
                 </ConfirmableButton>
                 <ConfirmableButton
+                    closeConfirm={props.closeConfirm}
                     name="end_game"
                     onClick={onClickStringHandler}
                     buttonProps={{ ...allButtonProps, confirm_text: "Really end game?" }}
@@ -52,6 +54,7 @@ const BottomGameButtons = (props) => {
                     End Game
                 </ConfirmableButton>
                 <ConfirmableButton
+                    closeConfirm={props.closeConfirm}
                     name="exit_room"
                     onClick={onClickStringHandler}
                     buttonProps={{ ...allButtonProps, confirm_text: "Really exit room?" }}
