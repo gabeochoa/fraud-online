@@ -55,20 +55,15 @@ const TooledTouchableCanvas = (props) => {
     const [myPencil, setMyPencil] = useState(PENCIL);
     const [myEraser, setMyEraser] = useState(ERASER);
     const [tool, setTool] = useState(PENCIL);
+    const [functions, setFunctions] = useState({});
     const touchable_canvas = useRef();
 
-    // FUNCTIONS TO FORWARD TO CHILD REF
-    const upscale_paint = (a, b, c) => {
-        touchable_canvas.current.upscale_paint(a, b, c);
+    console.log("tool: ", tool)
+
+    const storeFunctions = (funcs) => {
+        setFunctions(funcs);
+        props.sendFunctions(funcs);
     }
-    const clear_canvas = (send_message) => {
-        if (send_message == undefined) { send_message = true; }
-        touchable_canvas.current.clear_canvas(send_message);
-    }
-    useEffect(() => {
-        props.sendFunctions({ upscale_paint, clear_canvas })
-    }, []);
-    /////////////////////////////////////
 
     const onClickHandler = useCallback((event) => {
         while (event.target.getAttribute("name") === null) {
@@ -78,10 +73,10 @@ const TooledTouchableCanvas = (props) => {
         switch (button_) {
             case "pencil": setTool(myPencil); break;
             case "eraser": setTool(myEraser); break;
-            case CLEAR: clear_canvas(true); break;
+            case CLEAR: functions.clear_canvas(true); break;
             default: console.warn("button clicked but no handler", button_); break;
         }
-    }, [myPencil, myEraser, setTool, clear_canvas])
+    }, [myPencil, myEraser, setTool, functions])
 
     const handleColorChange = (color) => {
         const newPencil = { ...myPencil, stroke: color.hex, };
@@ -132,6 +127,7 @@ const TooledTouchableCanvas = (props) => {
             }
             <TouchableCanvas
                 ref={touchable_canvas}
+                sendFunctions={storeFunctions}
                 is_local_player_artist={props.is_local_player_artist}
                 tool={tool}
                 send_message={props.send_message}
