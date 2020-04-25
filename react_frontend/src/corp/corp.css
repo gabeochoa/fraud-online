@@ -1,0 +1,37 @@
+table {
+    border-collapse: collapse;
+}
+  
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 5px;
+}
+
+img {
+    float: left;
+}
+
+h2 {
+    font-size: 2em;
+}
+
+div.wrap {
+    max-width: 600px;
+    margin: 5% 0;
+}
+
+div.empdesc {
+    display: inline-block;
+}
+
+.empdesc>img {
+    margin: 1em;
+}
+@media only screen and (max-width: 600px) { 
+    div.wrap {
+        width: 100%;
+    }
+}
