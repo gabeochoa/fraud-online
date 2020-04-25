@@ -1,6 +1,3 @@
-import autobind from "autobind-decorator";
-
-
 export function rainbow(numOfSteps, step) {
     // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
     // Adam Cole, 2011-Sept-14
@@ -32,16 +29,13 @@ const SPECIAL_PROPS = [
 const defaultTester = document.createElement("div")
 export function filterBadProps(props, tester = defaultTester) {
     if(process.env.NODE_ENV !== 'development') { return props; }
-
     // filter out any keys which don't exist in reacts special props, or the tester.
     const out = {};
     Object.keys(props).filter((propName) => 
         (propName in tester) || (propName.toLowerCase() in tester) || SPECIAL_PROPS.includes(propName)
     ).forEach((key) => out[key] = props[key]);
-
     return out;
 }
-
 
 // TODO at some point we need to check if the game already is existing
 // we cant just create randomly....

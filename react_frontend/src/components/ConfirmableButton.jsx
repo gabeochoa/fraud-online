@@ -31,7 +31,7 @@ const ConfirmableButton = (props) => {
                 {...props.buttonProps}
                 onClick={openConfirmBox}
             >
-                {this.props.children}
+                {props.children}
             </Button>
         </>
     );
