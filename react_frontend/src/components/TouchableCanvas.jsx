@@ -47,7 +47,7 @@ const TouchableCanvas = (props) => {
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.lineWidth = props.tool.lineWidth;
-    });
+    }, [ctx, canvas]);
 
     const onEventMove = (x,y) => {     
         if(mouse_clicked){
@@ -177,7 +177,11 @@ const TouchableCanvas = (props) => {
     }
 
     const clear_canvas = (send_message) => {
-        if (send_message == undefined) { send_message = true; }
+        if (send_message == undefined) { 
+            // this was in our parent comp but do we need it? 
+            console.warn("SEND MESSAGE undef? ")
+            // send_message = true; 
+        }
         // clear ourselves, and then send the clear on the bus
         ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
         if (send_message) {

@@ -83,7 +83,7 @@ const Lobby = ({
     const handleClick = (event) => {
         while (event.target.getAttribute("name") === null) { event.target = event.target.parentNode; }
         let button = event.target.getAttribute("name");
-        console.log("button was clicked : " + button);
+        // console.log("button was clicked : " + button);
         switch (button) {
             case "lobby_start":
                 if ((!is_game_started) && isLoaded) {

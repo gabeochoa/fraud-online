@@ -58,8 +58,6 @@ const TooledTouchableCanvas = (props) => {
     const [functions, setFunctions] = useState({});
     const touchable_canvas = useRef();
 
-    console.log("tool: ", tool)
-
     const storeFunctions = (funcs) => {
         setFunctions(funcs);
         props.sendFunctions(funcs);
@@ -70,10 +68,17 @@ const TooledTouchableCanvas = (props) => {
             event.target = event.target.parentNode;
         }
         const button_ = event.target.getAttribute("name");
+        console.log("button was clicked: ", button_)
         switch (button_) {
-            case "pencil": setTool(myPencil); break;
-            case "eraser": setTool(myEraser); break;
-            case CLEAR: functions.clear_canvas(true); break;
+            case "pencil": 
+                setTool(myPencil); 
+                break;
+            case "eraser": 
+                setTool(myEraser); 
+                break;
+            case CLEAR: 
+                functions.clear_canvas(true); 
+                break;
             default: console.warn("button clicked but no handler", button_); break;
         }
     }, [myPencil, myEraser, setTool, functions])
