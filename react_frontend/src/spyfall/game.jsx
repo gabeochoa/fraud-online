@@ -80,6 +80,7 @@ class _GameComp extends Component {
     }
 
     renderGameHeader(){
+        console.log("i am the game header, ", this.props.total_time);
         return (
             <div style={{textAlign:"center"}}>
                 <Timer total_time={this.props.total_time}/>

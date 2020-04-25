@@ -5,7 +5,7 @@ uvicorn
 django
 djangorestframework
 whitenoise
-psycopg2
+# psycopg2
 dj-database-url
 dj-redis-url
 ipython
