@@ -1,8 +1,6 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Slider from '@material-ui/lab/Slider';
-import autobind from 'autobind-decorator';
 
 const styles = {
   root: {
@@ -14,42 +12,25 @@ const styles = {
   },
 };
 
-@autobind
-class VerticalSlider extends Component {
-
-    constructor(props){
-        super(props)
-
-        this.state = {
-            value: this.props.value || this.props.min || 3,
-        }
-    }
-
-    handleChange(event, value) {
-        var name = event.target.name;
-        this.setState({ value });
-        this.props.onChange(value)
-    }
-
-    render(){
-        return (
-            <div className={this.props.classes.root}>
-                <Slider
-                    min={this.props.min}
-                    max={this.props.max}
-                    step={this.props.step}
-                    classes={{container: this.props.classes.slider}}
-                    onChange={this.handleChange}
-                    value={this.props.value}
-                    vertical
-                />
-            </div>
-        );
-    }
+const VerticalSlider = (props) => {
+  const [value, setValue] = useState(props.value || props.min || 3);
+  const handleChange = (_event, value) => {
+    setValue(value)
+    props.onChange(value)
+  };
+  return (
+    <div className={props.classes.root}>
+      <Slider
+        min={props.min}
+        max={props.max}
+        step={props.step}
+        classes={{ container: props.classes.slider }}
+        onChange={handleChange}
+        value={value}
+        vertical
+      />
+    </div>
+  );
 }
-
-VerticalSlider.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
 export default withStyles(styles)(VerticalSlider);
