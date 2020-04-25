@@ -4,195 +4,135 @@ import SpyfallWaitingRoom from './room';
 import SpyfallGame from './game';
 import "./spyfall.css"
 
+const SpyfallGameParent = (props) => {
+    const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    const host = window.location.host;
+    const extra = ("username=" + props.username + "&" + "minutes=" + props.minutes);
+    const path = (ws_scheme + '://' + host + '/ws/spyfall/' + props.room + '/?' + extra);
 
-class SpyfallGameParent extends Component {
-    constructor(props) {
-        super(props);
+    const [inLobby, setInLobby] = useState(true);
+    const [locationState, setLocationState] = useState("menu");
+    const [username, setUsername] = useState(props.username);
+    const [player, setPlayer] = useState({
+        username: props.username,
+        role: "",
+        location: "",
+        is_spy: false,
+    });
+    const [players, setPlayers] = useState([]);
+    const [rws, setRws] = useState(new ReconnectingWebSocket(path));
+    const [locations, setLocations] = useState([]);
+    const [totalTime, setTotalTime] = useState(props.minutes * 60);
+    const [isGameStarted, setIsGameStarted] = useState(false);
 
-        const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        const host = window.location.host;
-        const extra = ("username=" + this.props.username +
-            "&" + "minutes=" + this.props.minutes
-        );
-        const path = (ws_scheme + '://' + host + '/ws/spyfall/' + this.props.room + '/?' + extra);
+    rws.onopen = (event) => {
+        console.log('WebSocket open', event);
+        this.send_message({ command: 'get_room' });
+    };
+    rws.onmessage = e => {
+        console.log("websocket on message", e.data);
+        this.process_message(e.data)
+    };
+    rws.onerror = e => {
+        console.log(e.message);
+    };
 
-        this.state = {
-            in_lobby: true,
-            location_state: "menu",
-            player: {
-                username: this.props.username,
-                role: "",
-                location: "",
-                is_spy: false,
-            },
-            players: [],
-            rws: new ReconnectingWebSocket(path),
-            locations: [],
-            total_time: this.props.minutes * 60,
-        };
+    rws.onclose = (event) => {
+        console.log("WebSocket closed", event);
+        if (event.code == 1000 && event.reason == "leave_lobby") { // we are leaving 
+            return
+        }
+        if (event.code == 1001) { // we are being kicked
+            this.changeLocationWrapper("", "menu");
+            return
+        }
+        rws.reconnect();
+    };
 
-        this.changeUsername = this.changeUsername.bind(this);
-        this.process_message = this.process_message.bind(this);
-        this.send_message = this.send_message.bind(this);
-        this.changeLocationWrapper = this.changeLocationWrapper.bind(this);
-        this.handleClickLocation = this.handleClickLocation.bind(this);
-        this.kickPerson = this.kickPerson.bind(this);
-
-        this.state.rws.onopen = (event) => {
-            console.log('WebSocket open', event);
-            this.send_message({ command: 'get_room' });
-        };
-        this.state.rws.onmessage = e => {
-            console.log("websocket on message", e.data);
-            this.process_message(e.data)
-        };
-
-        this.state.rws.onerror = e => {
-            console.log(e.message);
-        };
-
-        this.state.rws.onclose = (event) => {
-            console.log("WebSocket closed", event);
-            if (event.code == 1000 && event.reason == "leave_lobby") {
-                return // we are leaving 
-            }
-            if (event.code == 1001) {
-                // we are being kicked
-                this.changeLocationWrapper("", "menu");
-                return
-            }
-            this.state.rws.reconnect();
-        };
-    }
-
-    send_message(data) {
-        this.state.rws.send(JSON.stringify({ ...data }));
-    }
-
-    process_message(data) {
+    const send_message = (data) => { rws.send(JSON.stringify({ ...data })); }
+    const process_message = (data) => {
         const parsedData = JSON.parse(data);
-
         const command = parsedData.command;
         const message = parsedData.message;
         const sender = parsedData.sender;
         console.log("react recivied new message", command, message)
-
-        if (command == "start_game") {
-            this.setState({
-                in_lobby: false
-            })
-        }
-
-        if (command == "end_game") {
-            this.setState({
-                in_lobby: true
-            })
-        }
-
+        if (command == "start_game") { setInLobby(false); }
+        if (command == "end_game") { setInLobby(true); }
         //all commands
         {
             let update_players = [...message.players]
             update_players.forEach((item) => {
                 if (item.channel == sender) {
                     item.is_me = true;
-                    this.setState({
-                        player: item,
-                    })
-                }
-                else {
+                    setPlayer(item);
+                } else {
                     item.is_me = false;
                 }
             });
-
-            let locations = this.state.locations;
             if (locations.length == 0) {
                 locations = [...message.locations].map((item) => { return [item, false] })
             }
-
-            this.setState({
-                players: update_players,
-                locations: locations,
-                is_game_started: message.is_game_started,
-                total_time: (message.minutes * 60)
-            });
+            setPlayers(update_players);
+            setLocations(locations);
+            setIsGameStarted(message.is_game_started);
+            setTotalTime(message.minutes * 60);
         }
     }
 
-    changeUsername(username) {
-        this.setState({
-            username: username,
-        },
-            this.joinRoom)
+    const changeUsername = (username) => {
+        setUsername(username);
+        this.joinRoom();
     }
 
-    kickPerson(person) {
-        const player = this.state.players.filter(c => c.id == parseInt(person))[0];
-        this.send_message({
-            command: "kick_player",
-            player: player,
-        })
+    const kickPerson = (person) => {
+        const player = players.filter(c => c.id == parseInt(person))[0];
+        send_message({ command: "kick_player", player: player, });
     }
-
-    handleClickLocation(event) {
+    const handleClickLocation = (event) => {
         while (event.target.getAttribute("name") === null) {
             event.target = event.target.parentNode;
         }
-        const locations = [...this.state.locations]
-        // // find the matching object
-        const location = this.state.locations.filter(c => c[0] == event.target.getAttribute("name"))[0];
-        // // index in our list 
-        const index = this.state.locations.indexOf(location);
+        // find the matching object
+        const location = locations.filter(c => c[0] == event.target.getAttribute("name"))[0];
+        // index in our list 
+        const index = locations.indexOf(location);
         locations[index] = [location[0], !location[1]];
-        this.setState({ locations });
+        setLocations(locations)
     }
-
-    changeLocationWrapper(room, location) {
-        if (location == "game") {
-            //user wants to start the game
-            // send the start_game message to all clients
-            this.send_message({
-                command: "start_game"
+    const changeLocationWrapper = (room, location) => {
+        if (location == "game") { // user wants to start the game; // send the start_game message to all clients
+            send_message({ command: "start_game" });
+        } else if (location == "lobby") {
+            send_message({ command: "end_game" })
+        } else { //otherwise its probably someone leaving the room to go back to the menu
+            props.changeLocation(room, location, () => {
+                send_message({ command: "leave_lobby", username });
+                rws.close(1000, "leave_lobby");
             });
         }
-        else if (location == "lobby") {
-            this.send_message({
-                command: "end_game"
-            })
-        }
-        else {
-            //otherwise its probably someone leaving the room to go back to the menu
-            this.props.changeLocation(room, location, () => {
-                this.send_message({ command: "leave_lobby", username: this.props.username });
-                this.state.rws.close(1000, "leave_lobby")
-            })
-        }
     }
-
-    render() {
-        if (this.state.in_lobby) {
-            return (
-                <SpyfallWaitingRoom
-                    access_code={this.props.room}
-                    username={this.props.username}
-                    players={this.state.players}
-                    changeLocation={this.changeLocationWrapper}
-                    kickPerson={this.kickPerson}
-                    is_game_started={this.state.is_game_started}
-                />)
-        }
-        else {
-            return (
-                <SpyfallGame
-                    players={this.state.players}
-                    player={this.state.player}
-                    locations={this.state.locations}
-                    handleClickLocation={this.handleClickLocation}
-                    changeLocation={this.changeLocationWrapper}
-                    total_time={this.state.total_time}
-                />
-            );
-        }
-    }
+    return inLobby? 
+        (
+            <SpyfallWaitingRoom
+                access_code={props.room}
+                username={username}
+                players={players}
+                changeLocation={changeLocationWrapper}
+                kickPerson={kickPerson}
+                is_game_started={isGameStarted}
+            />
+        )
+        :
+        (
+            <SpyfallGame
+                players={players}
+                player={player}
+                locations={locations}
+                handleClickLocation={handleClickLocation}
+                changeLocation={changeLocationWrapper}
+                total_time={totalTime}
+            />
+        );
 }
 
 export default SpyfallGameParent

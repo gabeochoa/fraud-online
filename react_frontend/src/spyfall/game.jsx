@@ -1,7 +1,5 @@
-import React, { Component, useState, useEffect } from "react";
-import autobind from 'autobind-decorator'
+import React, { useState, useEffect } from "react";
 import Timer from '../components/Timer';
-
 
 import "../drawit/drawit.css";
 import "./spyfall.css";
@@ -22,14 +20,15 @@ const column_list_item = {
 }
 
 const pretty_location = (location) => {
-    if (location == null || location == undefined || location == "") { return location; }
     return (
-        location
-            .split("_")
-            .map((item) => {
-                return item.charAt(0).toUpperCase() + item.slice(1);
-            })
-            .join(" ")
+        location == null || location == undefined || location == ""
+            ? location :
+            (
+                location
+                    .split("_")
+                    .map((item) => { return item.charAt(0).toUpperCase() + item.slice(1); })
+                    .join(" ")
+            )
     );
 }
 
@@ -134,9 +133,6 @@ const Game = (props) => {
     }
 
     const onClickHandler = (event) => {
-        if (event.target == this.canvas) {
-            event.preventDefault();
-        }
         while (event.target.getAttribute("name") === null) {
             event.target = event.target.parentNode;
         }
