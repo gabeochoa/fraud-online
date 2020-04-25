@@ -25,31 +25,6 @@ const SpyfallGameParent = (props) => {
     const [totalTime, setTotalTime] = useState(props.minutes * 60);
     const [isGameStarted, setIsGameStarted] = useState(false);
 
-    rws.onopen = (event) => {
-        console.log('WebSocket open', event);
-        this.send_message({ command: 'get_room' });
-    };
-    rws.onmessage = e => {
-        console.log("websocket on message", e.data);
-        this.process_message(e.data)
-    };
-    rws.onerror = e => {
-        console.log(e.message);
-    };
-
-    rws.onclose = (event) => {
-        console.log("WebSocket closed", event);
-        if (event.code == 1000 && event.reason == "leave_lobby") { // we are leaving 
-            return
-        }
-        if (event.code == 1001) { // we are being kicked
-            this.changeLocationWrapper("", "menu");
-            return
-        }
-        rws.reconnect();
-    };
-
-    const send_message = (data) => { rws.send(JSON.stringify({ ...data })); }
     const process_message = (data) => {
         const parsedData = JSON.parse(data);
         const command = parsedData.command;
@@ -78,6 +53,32 @@ const SpyfallGameParent = (props) => {
             setTotalTime(message.minutes * 60);
         }
     }
+
+    rws.onopen = (event) => {
+        console.log('WebSocket open', event);
+        this.send_message({ command: 'get_room' });
+    };
+    rws.onmessage = e => {
+        console.log("websocket on message", e.data);
+        process_message(e.data)
+    };
+    rws.onerror = e => {
+        console.log(e.message);
+    };
+
+    rws.onclose = (event) => {
+        console.log("WebSocket closed", event);
+        if (event.code == 1000 && event.reason == "leave_lobby") { // we are leaving 
+            return
+        }
+        if (event.code == 1001) { // we are being kicked
+            this.changeLocationWrapper("", "menu");
+            return
+        }
+        rws.reconnect();
+    };
+
+    const send_message = (data) => { rws.send(JSON.stringify({ ...data })); }
 
     const changeUsername = (username) => {
         setUsername(username);

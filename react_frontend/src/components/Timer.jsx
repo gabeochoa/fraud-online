@@ -1,75 +1,50 @@
-import React, { Component } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "../spyfall/spyfall.css";
-import autobind from "autobind-decorator";
 
-function TimerDisplay(props){
-    if(props.minutes == 0 && parseInt(props.seconds) < 30){
-        return (
-            <div style={{textAlign:"center"}} className="blinking">
-                <h1>{props.minutes}:{props.seconds}</h1>
-            </div>
-        );
-    }
+function TimerDisplay({
+    minutes, seconds
+}) {
+    const timerUnder30 = parseInt(minutes) == 0 && parseInt(seconds) < 30;
     return (
-        <div style={{textAlign:"center"}}>
-            <h1>{props.minutes}:{props.seconds}</h1>
+        <div 
+            style={{ textAlign: "center" }} 
+            className={`${timerUnder30? "blinking" : ""}`}
+        >
+            <h1>{minutes}:{seconds}</h1>
         </div>
     );
 }
 
-@autobind
-class Timer extends Component{
-    constructor(props){
-        super(props)
+const convertToMinSec = (total) => {
+    const minutes = Math.floor(total / 60).toString().padStart(2, '0');
+    const seconds = (total - minutes * 60).toString().padStart(2, '0');
+    return [minutes, seconds]
+}
 
-        this.secondsRemaining = this.props.total_time;
-        let minutes = Math.floor(this.secondsRemaining / 60);
-        let seconds = this.secondsRemaining - minutes * 60;
-        this.state = {
-            value: minutes.toString().padStart(2, '0'),
-            seconds: seconds.toString().padStart(2, '0'),
-        }
-        this.intervalHandle;
-    }
+const Timer = ({
+    total_time
+}) => {
+    const [timeRemaining, setTimeRemaining] = useState(total_time);
+    let intervalHandle;
+    const tick = useCallback(
+        () => {
+            if (timeRemaining <= 0) { 
+                clearInterval(intervalHandle); 
+            } else {
+                setTimeRemaining(timeRemaining - 1)
+            }
+        },
+        [timeRemaining]
+    );
+    useEffect(() => {
+        intervalHandle = setInterval(tick, 1000);
+        return () => { clearInterval(intervalHandle); }
+    }, [tick]);
 
-
-    componentDidMount(){
-        this.startCountDown();
-    }
-
-    componentWillUnmount(){
-        clearInterval(this.intervalHandle);
-    }
-
-    tick() {
-        let minutes = Math.floor(this.secondsRemaining / 60);
-        let seconds = this.secondsRemaining - minutes * 60;
-
-        this.setState({
-            seconds: seconds.toString().padStart(2, '0'),
-            value: minutes.toString().padStart(2, '0'),
-        });
-
-        if (minutes === 0 & seconds === 0) {
-            clearInterval(this.intervalHandle);
-        }
-        this.secondsRemaining--
-    }
-
-    startCountDown() {
-        this.intervalHandle = setInterval(this.tick, 1000);
-        this.secondsRemaining = this.props.total_time;
-        this.setState({
-            isClicked : true
-        })
-    }
-
-    render(){
-        return (
-            <TimerDisplay minutes={this.state.value} seconds={this.state.seconds} />
-        );
-    }
-
+    const [m, s] = convertToMinSec(timeRemaining);
+    return (
+        <TimerDisplay minutes={m} seconds={s} />
+    );
 }
 
 export default Timer;

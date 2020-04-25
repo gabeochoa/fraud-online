@@ -1,4 +1,4 @@
-import React, {Component}  from "react";
+import React, { Component, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import DataProvider from "./DataProvider";
 import Table from "./Table";
@@ -21,40 +21,27 @@ const list = [
   }
 ];
 
-class BaseApplication extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { 
-      loaded: false, 
-      placeholder: "Loading..."
-     };
-
-  }
-  componentDidMount() {
-    this.setState({ loaded: true });
-  }
-
-  render() {
-    const { loaded, placeholder } = this.state;
-    if(loaded){
-      return (
-        <div>
-          <DataProvider endpoint="api/package/" 
-            render={data => <Table data={data} />} />
-          <DataProvider endpoint="api/game/" 
-            render={data => <Table data={data} />} />
-        </div>
-      );
-    }
-    else{
-      return <p>{placeholder}</p>
-    }
-  }
+const BaseApplication = (props) => {
+  const [loaded, setLoaded] = useState(false);
+  const [placeholder, setPlaceholder] = useState("Loading...");
+  useEffect(() => {
+    setLoaded(true)
+  }, []);
+  return (
+    !loaded
+      ? <p>{placeholder}</p>
+      :
+      <div>
+        <DataProvider endpoint="api/package/"
+          render={data => <Table data={data} />} />
+        <DataProvider endpoint="api/game/"
+          render={data => <Table data={data} />} />
+      </div>
+  );
 }
 
 const App = () => (
-  <BaseApplication 
-    render={data => <Table data={data} /> } />
+  <BaseApplication render={data => <Table data={data} />} />
 );
 
 const wrapper = document.getElementById("app");

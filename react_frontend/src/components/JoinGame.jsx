@@ -1,88 +1,74 @@
-import React, {Component} from "react";
-import autobind from 'autobind-decorator';
-import PropTypes from 'prop-types';
+import React, { useState } from "react";
 import "./menu.css";
 
-@autobind
-class JoinGame extends Component{
-
-    constructor(props){
-        super(props);
-        
-        this.state = {
-            name: this.props.username || "",
-            room_code: this.props.room_code || "",
-        }
-    }
-
-    handleChange(event) {
-        // console.log("handle change", event, event.target.name, event.target.value);
+const JoinGame = ({
+    changeLocation,
+    changeUsername,
+    changeRoomCode,
+    username = "",
+    room_code = "",
+}) => {
+    const [name, setName] = useState(username);
+    const [roomCode, setRoomCode] = useState(room_code);
+    const handleChange = (event) => {
+        console.log("handle change", event, event.target.name, event.target.value);
         var name = event.target.name;
-        this.setState({
-          [name]: event.target.value
-        });
+        if (name == "name") { setName(event.target.value); }
+        if (name == "room_code") { setRoomCode(event.target.value) }
     }
-
-    handleClick(event){
-        while(event.target.getAttribute("name") === null){
-            event.target = event.target.parentNode;
-        }
+    const handleClick = (event) => {
+        while (event.target.getAttribute("name") === null) { event.target = event.target.parentNode; }
         let button = event.target.getAttribute("name");
         // console.log("button was clicked : " + button);
-        switch(button){
+        switch (button) {
             case "join_join":
-                this.props.changeUsername(this.state.name, ()=>{});
+                changeUsername(name, () => { });
                 // must happen before location change ? 
-                this.props.changeRoomCode(this.state.room_code, ()=>{});
-                this.props.changeLocation("lobby", ()=>{});
-            break;
+                changeRoomCode(roomCode, () => { });
+                changeLocation("lobby", () => { });
+                break;
             case "join_back":
-                this.props.changeUsername(this.state.name, ()=>{});
-                this.props.changeLocation("_back", () => {
+                changeUsername(name, () => { });
+                changeLocation("_back", () => {
                     // console.log("Change location menu")
                 });
-            break;
+                break;
             default:
                 console.log("button was clicked : " + button);
-            break
+                break
         }
     }
-
-    render(){
-        return (
-            <React.Fragment>  
-                <div className="div_set">
-                    <input name="name" className="input input_style" value={this.state.name} 
-                        onChange={this.handleChange} type="text" placeholder="Name"/>
-                    <div className="vspace10"/>
-                    <input name="room_code" className="input input_style" value={this.state.room_code} 
-                        onChange={this.handleChange}  type="text" placeholder="Room Code"/>
-                    <hr className="hrstyle" />
-                    <a name="join_join" className="button is-outlined button_style button_font" 
-                    onClick={this.handleClick}
+    return (
+        <>
+            <div className="div_set">
+                <input 
+                    name="name" className="input input_style" 
+                    value={name} onChange={handleChange} 
+                    type="text" placeholder="Name" 
+                />
+                <div className="vspace10" />
+                <input 
+                    name="room_code" className="input input_style" 
+                    value={roomCode} onChange={handleChange} 
+                    type="text" placeholder="Room Code" 
+                />
+                <hr className="hrstyle" />
+                <a name="join_join" className="button is-outlined button_style button_font"
+                    onClick={handleClick}
                     style={button_stretch}
-                    >Join</a>
-                    <a name="join_back" className="button is-outlined button_style button_font" 
-                    onClick={this.handleClick}
+                >Join</a>
+                <a name="join_back" className="button is-outlined button_style button_font"
+                    onClick={handleClick}
                     style={button_stretch}
-                    >Back</a>
-                </div>
-            </React.Fragment>
-        )
-    }
+                >Back</a>
+            </div>
+        </>
+    );
 }
 
 
 const button_stretch = {
     width: "40%", // 1/X where x is num of buttons
-}
-
-
-JoinGame.propTypes = {
-    changeLocation: PropTypes.func,
-    changeUsername: PropTypes.func,
-    username: PropTypes.string,
-    room_code: PropTypes.string,
 }
 
 export default JoinGame;

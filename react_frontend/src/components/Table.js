@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import key from "weak-key";
 
 const Table = ({ data }) =>
@@ -26,7 +25,5 @@ const Table = ({ data }) =>
       </table>
     </div>
   );
-Table.propTypes = {
-  data: PropTypes.array.isRequired
-};
+
 export default Table;
