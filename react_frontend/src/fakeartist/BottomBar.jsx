@@ -1,115 +1,81 @@
-import React, { Component } from "react";
-import autobind from 'autobind-decorator'
+import React, { useEffect } from "react";
 import "../components/menu.css";
 import "../drawit/drawit.css";
 import ConfirmableButton from '../components/ConfirmableButton';
 import 'lodash';
 
-@autobind
-class BottomBar extends Component{
-    constructor(props){
-        super(props);
-        //current_artist, kill_websocket, changeLocation, clearGameState, send_message
-        this.allButtonProps = {
-            variant: "contained",
-            style: room_button_style
-        }
+const BottomBar = (props) => {
+    //current_artist, kill_websocket, changeLocation, clearGameState, send_message
+    const allButtonProps = {
+        variant: "contained",
+        style: room_button_style
     }
 
-    onClickStringHandler(button_){
-        switch(button_){
+    const onClickStringHandler = (button_) => {
+        switch (button_) {
             case "end_round":
-                if(this.props.current_artist != undefined){
-                    this.props.send_message({
-                        command: "end_round"
-                    })
+                if (props.current_artist != undefined) {
+                    props.send_message({ command: "end_round" })
                 }
-            break;
+                break;
             case "end_game":
-                if(this.props.current_artist != undefined){
-                    this.props.send_message({
-                        command: "end_game"
-                    })
-                    this.props.changeLocation("lobby");
+                if (props.current_artist != undefined) {
+                    props.send_message({ command: "end_game" })
+                    props.changeLocation("lobby");
                 }
-            break;
+                break;
             case "exit_room":
-                this.props.kill_websocket(this.props.username);
-                this.props.changeLocation("home");
-                this.props.clearGameState();
-            break;
-            default: 
+                props.kill_websocket(props.username);
+                props.changeLocation("home");
+                props.clearGameState();
+                break;
+            default:
                 console.log("button clicked but not handled", button_);
-            break;
+                break;
         }
     }
 
-    closeConfirmBox(){
-        _.forEach(this.refs, (item) => {
-            item.closeConfirmBox();
-        })
-    }
+    const buttons = [
+        {
+            show: props.hideState[0],
+            name: "end_round",
+            buttonProps:{ confirm_text: "Are you really done?" },
+            text: "I'm done",
+        },
+        {
+            show: props.hideState[1],
+            name: "end_game",
+            buttonProps:{ confirm_text: "Really end game?" },
+            text: "End Game",
+        },
+        {
+            show: props.hideState[2],
+            name: "exit_room",
+            buttonProps:{ confirm_text: "Really exit room?"},
+            text: "Leave Game",
+        },
+    ];
 
-    render_button_1(){
-        return (
-            <ConfirmableButton
-                ref={"button1"}
-                name="end_round"
-                onClick={this.onClickStringHandler}
-                buttonProps={{
-                    ...this.allButtonProps, 
-                    confirm_text:"Are you really done?"
-                }}
-            >
-                I'm done
-            </ConfirmableButton>
-        );
-    }
-
-    render_button_2(){
-        return (
-            <ConfirmableButton
-                ref={"button2"}
-                name="end_game"
-                onClick={this.onClickStringHandler}
-                buttonProps={{
-                    ...this.allButtonProps, 
-                    confirm_text:"Really end game?"
-                }}
-            >
-                End Game
-            </ConfirmableButton>
-        );
-    }
-
-    render_button_3(){
-        return (
-            <ConfirmableButton
-                ref={"button3"}
-                name="exit_room"
-                onClick={this.onClickStringHandler}
-                buttonProps={{
-                    ...this.allButtonProps, 
-                    confirm_text:"Really exit room?"
-                }}
-            >
-                Leave Game
-            </ConfirmableButton>
-        );
-    }
-
-    render(){
-        
-        return (
-            <React.Fragment>
-            <div style={room_button_holder} className="button_font">
-            {this.props.hideState[0] && this.render_button_1()}
-            {this.props.hideState[1] && this.render_button_2()}
-            {this.props.hideState[2] && this.render_button_3()}
-            </div>
-            </React.Fragment>
-        );
-    }
+    return (
+        <div style={room_button_holder} className="button_font">
+            {buttons.map(({
+                show, ref, name, buttonProps, text
+            }) => {
+                return ( !show
+                        ? null
+                        : <ConfirmableButton
+                            key={name}
+                            name={name}
+                            onClick={onClickStringHandler}
+                            buttonProps={{ ...allButtonProps, ...buttonProps }}
+                        >
+                            {text}
+                        </ConfirmableButton>
+                )
+            }
+            )}
+        </div>
+    );
 }
 
 export default BottomBar;
@@ -127,7 +93,7 @@ const room_button_style = {
     width: "23.33%",
     margin: "5px",
     maxWidth: "150px",
-    boxSizing:"border-box",
+    boxSizing: "border-box",
     fontSize: "0.75em",
 }
 

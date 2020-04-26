@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 import ReactDOM from 'react-dom';
 
 import CreateFakeArtistGame from './CreateFakeArtistGame';
@@ -14,42 +14,32 @@ import FakeArtistCanvas from './FakeArtistCanvas'
 
 import "./fakeartist.css"
 
-function FakeArtistHeader(props){
+function FakeArtistApp(props) {
+
     return (
-        <React.Fragment>
-        <div className="div_set">
-            <h4 className="header_font"> 
-            <Icon path={mdiEarth} size={"1em"}/> 
-            Fake Artist! <sup className="sup_font">Alpha</sup>
-            </h4>
-            <hr className="hrstyle" />
-        </div>
-        </React.Fragment>
-    );
-}
-
-function FakeArtistApp(props){
-    
-    var location_data = {
-        home: <Home/>,
-        about: <FakeArtistAbout/>,
-        lobby: <Lobby/>,
-        create: <CreateFakeArtistGame/>,
-        join: <JoinGame/>,
-        game: <FakeArtistCanvas/>,
-    }
-
-    // location_data['home'] = <FakeArtistAbout/>
-
-    return(
         <div className="top_level">
             <Menu
-            disable_scroll={true}
-            starting_location="home"
-            all_locations={location_data}
-            header={<FakeArtistHeader/>}
-            footer={<Footer/>}
-            socket_room="fakeartist"
+                disable_scroll={true}
+                starting_location="home"
+                all_locations={{
+                    home: <Home />,
+                    about: <FakeArtistAbout />,
+                    lobby: <Lobby />,
+                    create: <CreateFakeArtistGame />,
+                    join: <JoinGame />,
+                    game: <FakeArtistCanvas />,
+                }}
+                header={
+                    <div className="div_set">
+                        <h4 className="header_font">
+                            <Icon path={mdiEarth} size={"1em"} />
+                            Fake Artist! <sup className="sup_font">Alpha</sup>
+                        </h4>
+                        <hr className="hrstyle" />
+                    </div>
+                }
+                footer={<Footer />}
+                socket_room="fakeartist"
             />
         </div>
     );

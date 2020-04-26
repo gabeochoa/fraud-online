@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import windowSize from '../components/windowSize';
 import { enableBodyScroll, disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 import autobind from 'autobind-decorator'
@@ -28,53 +28,33 @@ const column_list_item = {
     wordWrap: "break-word",
 }
 
-function pretty_location(location){
-    if(location == null || location == undefined || location == ""){return location;}
-    
+const pretty_location = (location) => {
     return (
-        location
-        .split("_")
-        .map(   (item) => {
-            return item.charAt(0).toUpperCase() + item.slice(1);
-        })
-        .join(" ")
+        location == null || location == undefined || location == ""
+            ? location :
+            (
+                location
+                    .split("_")
+                    .map((item) => { return item.charAt(0).toUpperCase() + item.slice(1); })
+                    .join(" ")
+            )
     );
 }
 
-
-@autobind
-class LocationReference extends Component{
-    constructor(props){
-        super(props);
-    }
-
-    renderPlace(place){
-        let place_text = null;
-        if(place[1]){
-            place_text =  <p style={{color: "#bbb", textDecoration: "line-through"}}> {pretty_location(place[0])} </p>
-        }
-        else{
-            place_text = <p> {pretty_location(place[0])} </p>
-        }
-        return (<li key={place[0]} name={place[0]} onClick={this.props.handleClickLocation} style={column_list_item}>
-                    {place_text}
-                </li>);
-    }
-
-    render_locations(){
+const LocationReference = (props) => {
+    const renderPlace = (place) => {
+        const place_text = place[1]
+            ? <p style={{ color: "#bbb", textDecoration: "line-through" }}> {pretty_location(place[0])} </p>
+            : <p> {pretty_location(place[0])} </p>;
         return (
-            <React.Fragment>
-            <ul style={column_list}>
-                {this.props.locations.map( (place) => this.renderPlace(place))}
-            </ul>
-            </React.Fragment>
+            <li key={place[0]} name={place[0]} onClick={props.handleClickLocation} style={column_list_item}>
+                {place_text}
+            </li>
         );
     }
-
-    render(){
-        if(this.props.show_modal){
-            return (
-                
+    return (
+        !props.show_modal ? null :
+            (
                 <SweetAlert
                     title={"Locations"}
                     style={{
@@ -86,427 +66,296 @@ class LocationReference extends Component{
                         pointerEvents: "auto",
                     }}
                     confirmBtnText={"close locations"}
-                    onConfirm={this.props.onConfirm}
-                    onCancel={this.props.onConfirm}
+                    onConfirm={props.onConfirm}
+                    onCancel={props.onConfirm}
 
                 >
-                    {this.render_locations()}
+                    <ul style={column_list}>
+                        {props.locations.map((place) => renderPlace(place))}
+                    </ul>
                 </SweetAlert>
-            );
-        }
-        return (<React.Fragment></React.Fragment>);
-    }
+            )
+    );
 }
 
-@autobind
-class FakeArtistCanvas extends Component {
-    constructor(props) {
-      super(props);
+const FakeArtistCanvas = (props) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLobby, setIsLobby] = useState(false);
+    const [currentArtist, setCurrentArtist] = useState(null);
+    const [isLocalPlayerArtist, setIsLocalPlayerArtist] = useState(false);
+    const [hideButtonState, setHideButtonState] = useState([true, true, true]);
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [player, setPlayer] = useState(null);
+    const showing_toast = { artist: false, round: false, voting: false, }
+    const [functions, setFunctions] = useState({});
 
-      this.state = {
-        is_loading: true,
-        in_lobby: false,
-        current_artist: null,
-        is_local_player_artist: false,
-        hideButtonState: [
-            true, 
-            true, 
-            true
-        ],
-        show_location_modal: false,
-        player: null,
-      }
-
-      this.showing_toast = {
-          artist: false,
-          round: false, 
-          voting: false,
-      }
-
-      this.touchable_canvas = React.createRef();
-      this.bottom_buttons = React.createRef();
-
-      this.props.set_default_game_state("round", 1)
-      this.props.set_default_game_state("locations", [])
+    const storeFunctions = (funcs) => {
+        setFunctions(funcs)
     }
 
-    
-    notify_voting(){
+    const touchable_canvas = React.createRef();
+
+    props.set_default_game_state("round", 1)
+    props.set_default_game_state("locations", [])
+
+    const notify_voting = (props) => {
         toast("Time for Voting!", {
             position: 'top-center',
-            onClose: () => this.showing_toast['voting'] = false,
+            onClose: () => showing_toast['voting'] = false,
         });
-    }
+    };
 
-    _actual_round_toast(){
-        let cur_round =  this.props.extra_game_state.round || 0
-        toast.info("Round " + (cur_round + 1) + " of " 
-                            + this.props.game_options.num_rounds + "!", {
-            onClose: () => this.showing_toast['round'] = false,
+    const _actual_round_toast = () => {
+        let cur_round = props.extra_game_state.round || 0
+        toast.info("Round " + (cur_round + 1) + " of "
+            + props.game_options.num_rounds + "!", {
+            onClose: () => showing_toast['round'] = false,
             position: "top-center",
             closeOnClick: true,
             pauseOnHover: false,
             draggable: true,
         });
-    }
-    
-    notify_round(){
-        this.props.set_extra_game_state("round", 
-                                        this.props.extra_game_state.round + 1,
-                                        () => {
-                                            this._actual_round_toast()
-                                        })   
+    };
+
+    const notify_round = () => {
+        props.set_extra_game_state("round",
+            props.extra_game_state.round + 1,
+            () => { _actual_round_toast() }
+        )
     }
 
-    notify_artist(){
+    const notify_artist = () => {
         toast.info("Time for Drawing; One stroke only please!", {
             position: toast.POSITION.BOTTOM_CENTER,
-            onOpen: () => this.showing_toast['artist'] = true,
-            onClose: () => this.showing_toast['artist'] = false,
-        },
-        );
+            onOpen: () => showing_toast['artist'] = true,
+            onClose: () => showing_toast['artist'] = false,
+        });
     }
 
-    componentDidMount(){
-        this.props.register_socket_callbacks("drawingCanvas", "onmessage", this.process_message)
-        this.props.send_message({ command: 'start_game' });
-        this.props.send_message({ command: 'get_room' });
+    useEffect(() => {
+        props.register_socket_callbacks("drawingCanvas", "onmessage", process_message)
+        props.send_message({ command: 'start_game' });
+        props.send_message({ command: 'get_room' });
+        props.reset_extra_game_state()
+        return () => {
+            clearAllBodyScrollLocks();
+            props.unregister_socket_callbacks("drawingCanvas", "onmessage")
+        }
+    });
 
-        this.props.reset_extra_game_state()
-    }
-
-    componentWillUnmount() {
-      clearAllBodyScrollLocks();
-      this.props.unregister_socket_callbacks("drawingCanvas", "onmessage")
-    }
-
-    setTouchableRef(tref){
-        this.touchable_canvas = tref;
-    }
-
-    setBottomRef(tref){
-        this.bottom_buttons = tref;
-    }
-
-    end_round(data, sender){
+    const end_round = (data, sender) => {
         console.log("end round", data, sender)
-
         // when a person is done drawing....
-
         // check if the new round is more than all rounds ever 
-        if(data.round >= (this.props.game_options.rounds)){
+        if (data.round >= (props.game_options.rounds)) {
             // done with rounds, lets vote
-            this.props.send_message({
-                command: "voting"
-            })
+            props.send_message({ command: "voting" })
             return;
         }
-        else{
+        else {
             // otherwise the new round needs to be set
-            if(this.props.extra_game_state.round != data.round
-                && data.round < this.props.game_options.num_rounds){
-                this.props.set_extra_game_state("round", 
-                                                data.round,
-                                                this.notify_round());
+            if (props.extra_game_state.round != data.round
+                && data.round < props.game_options.num_rounds) {
+                props.set_extra_game_state("round", data.round, notify_round());
             }
         }
         // console.log("end_roundish", data.players, data.current_player)
         const player = data.players[data.current_player] || data.players[0];
-
         const is_local = (player.channel == sender);
-
-        if(is_local && !this.showing_toast['artist']){
-            this.notify_artist()
-            this.showing_toast['artist'] = true
+        if (is_local && !showing_toast['artist']) {
+            notify_artist()
+            showing_toast['artist'] = true
         }
-
-        this.setState({
-            current_artist: player,
-            is_local_player_artist: is_local,
-            hideButtonState: [
-                    is_local, 
-                    true,
-                    true, 
-                ],
-        })
+        setCurrentArtist(player);
+        setIsLocalPlayerArtist(is_local);
+        setHideButtonState([is_local, true, true])
     }
 
-    process_message(parsedData) {
+    const process_message = (parsedData) => {
         // console.log("drawing canvas process message", parsedData)
-
         // dont care what message, just "done loading"
-        if(this.state.is_loading){
-            this.setState({
-                is_loading: false
-            })
-        }
-
+        if (isLoading) { setIsLoading(false) }
         const command = parsedData.command;
-
-
-        if(command == "voting"){
-            this.setState({
-                is_local_player_artist: false,
-                hideButtonState: [
-                    false, 
-                    true,
-                    true, 
-                ],
-            })
-            this.showing_toast['artist'] = true
-            if(!this.showing_toast['voting']){
-                this.notify_voting()
-                this.showing_toast['voting'] = true
+        if (command == "voting") {
+            setIsLocalPlayerArtist(false)
+            setHideButtonState([ false, true, true, ])
+            showing_toast['artist'] = true
+            if (!showing_toast['voting']) {
+                notify_voting();
+                showing_toast['voting'] = true
             }
-            return 
+            return
         }
 
-        const username = parsedData.message.username;
         const sender = parsedData.sender;
-
         let players = parsedData.message.players;
-        if(players){
+        if (players) {
             players.forEach(
                 (item) => {
-                    if(item.channel == sender){
+                    if (item.channel == sender) {
                         item.is_me = true;
-                        this.setState({
-                            "player": item
-                        })
+                        setPlayer(item);
                     }
                 }
             );
             const is_game_started = parsedData.message.is_game_started;
-            this.props.updatePlayers(players);
-            this.props.updateGameStarted(is_game_started);
+            props.updatePlayers(players);
+            props.updateGameStarted(is_game_started);
         }
 
         let locations = parsedData.message.locations
-        if(locations){
+        if (locations) {
             // console.log(parsedData.message.locations)
-            if(this.props.extra_game_state.locations && this.props.extra_game_state.locations.length == 0){
-                locations = [...parsedData.message.locations].map((item)=>{return [item, false]}) 
-                this.props.set_extra_game_state("locations", locations);
+            if (props.extra_game_state.locations &&
+                props.extra_game_state.locations.length == 0) {
+                locations = [...parsedData.message.locations].map((item) => { return [item, false] })
+                props.set_extra_game_state("locations", locations);
             }
         }
 
-        if(parsedData.message.num_rounds){
-            this.props.set_game_option("num_rounds", parsedData.message.num_rounds)
+        if (parsedData.message.num_rounds) {
+            props.set_game_option("num_rounds", parsedData.message.num_rounds)
         }
 
-        if(command == "get_room_response"){
-            this.end_round(parsedData.message, sender)
-        }
-
-        if(command == "start_game"){
-            // start of game is kinda like switching rounds
-            
-            this.end_round(parsedData.message, sender)
-        }
-        if(command == "end_round"){
-            this.end_round(parsedData.message, sender)
-        }
-
-        if(command == "end_game"){
-            this.props.reset_extra_game_state()
-            this.touchable_canvas.clear_canvas(false);
-            this.bottom_buttons.closeConfirmBox();
-            this.props.updateGameStarted(false);
-            this.props.changeLocation("_back");
-        }
-        if(command == "draw"){
-            this.touchable_canvas.upscale_paint(parsedData.message.prev, 
-                                                parsedData.message.cur, 
-                                                parsedData.message.tool)
+        switch (command) {
+            case "get_room_response": //fall through
+            case "start_game": // fall through
+            case "end_round":
+                end_round(parsedData.message, sender)
+                break;
+            case "end_game":
+                props.reset_extra_game_state()
+                props.updateGameStarted(false);
+                props.changeLocation("_back");
+                touchable_canvas.clear_canvas(false);
+                setHideButtonState([false, false, false])
+                break
+            case "draw":
+                const msg = parsedData.message;
+                touchable_canvas.upscale_paint(msg.prev, msg.cur, msg.tool)
+                break
         }
     }
 
-    onClickHandler(event){
-        if (event.target == this.canvas) {
-            event.preventDefault();
-        }
-        
-        // console.log("click event", event, event.target)
-        while(event.target.getAttribute("name") === null){
+    const onClickHandler = (event) => {
+        if (event.target == canvas) { event.preventDefault(); }
+        while (event.target.getAttribute("name") === null) {
             event.target = event.target.parentNode;
         }
         const button_ = event.target.getAttribute("name");
-        // console.log(button_, "was clicked")
-        switch(button_){
-            case "mapmarker":
-                this.openLocationReference()
-            break;
-            case "toolbox":
-                this.closeLocationReference()
-            break;
-            default:
-            break;
+        switch (button_) {
+            case "mapmarker": openLocationReference(); break;
+            case "toolbox": closeLocationReference(); break;
+            default: break;
         }
     }
 
-    disableSingleScrollLock(element){
+    const disableSingleScrollLock = (element) => {
         element.style.position = "static";
         element.style.overflow = "scroll";
     }
-    disableGlobalScrollLock(){
-        this.disableSingleScrollLock(document.body)
+
+    const disableGlobalScrollLock = () => {
+        disableSingleScrollLock(document.body)
     }
 
-    enableSingleScrollLock(element){
+    const enableSingleScrollLock = (element) => {
         element.style.position = "fixed";
         element.style.overflow = "hidden";
     }
-    enableGlobalScrollLock(){
-        this.enableSingleScrollLock(document.body)
+
+    const enableGlobalScrollLock = () => {
+        enableSingleScrollLock(document.body)
     }
 
-    openLocationReference(){
-        this.disableGlobalScrollLock();
-        this.setState({
-            show_location_modal: true,
-        })
+    const openLocationReference = () => {
+        disableGlobalScrollLock();
+        setShowLocationModal(true)
     }
-    closeLocationReference(){
-        this.enableGlobalScrollLock();
+
+    const closeLocationReference = () => {
+        enableGlobalScrollLock();
         document.body.scrollTop = 0;
-        this.setState({
-            show_location_modal: false
-        })
+        setShowLocationModal(false)
     }
 
-
-    handleClickLocation(event){
-        while(event.target.getAttribute("name") === null){
+    const handleClickLocation = (event) => {
+        while (event.target.getAttribute("name") === null) {
             event.target = event.target.parentNode;
         }
-        // console.log( event.target.getAttribute("name"), "was clicked")
-
-        const locations = [...this.props.extra_game_state.locations]
-        // // find the matching object
+        const locations = [...props.extra_game_state.locations]
         const location = locations.filter(c => c[0] == event.target.getAttribute("name"))[0];
-        // // index in our list 
         const index = locations.indexOf(location);
         locations[index] = [location[0], !location[1]];
-        this.props.set_extra_game_state("locations", locations);
+        props.set_extra_game_state("locations", locations);
     }
 
-    render_text(text){
-      return (
-        <div style={{position: "inherit", display: "-webkit-inline-box", left: 40, margin: 3}}>
-            <h1 style={{color: '#4a4a4a'}}>
-                {pretty_location(text)}
-            </h1>
-            <Button 
-                name="mapmarker"
-                onClick={this.onClickHandler}
-                style={{
-                    top: "-0.75em",
-                    margin: 0,
-                    padding: 0,
-                }}
-            > 
-                <Icon path={mdiMapMarker} size={"1em"}/> 
-            </Button>
-        </div>
-      );
+    const render_text = (text) => {
+        return (
+            <div style={{ position: "inherit", display: "-webkit-inline-box", left: 40, margin: 3 }}>
+                <h1 style={{ color: '#4a4a4a' }}> {pretty_location(text)} </h1>
+                <Button
+                    name="mapmarker"
+                    onClick={onClickHandler}
+                    style={{
+                        top: "-0.75em",
+                        margin: 0,
+                        padding: 0,
+                    }}
+                >
+                    <Icon path={mdiMapMarker} size={"1em"} />
+                </Button>
+            </div>
+        );
     }
 
-    render_player_text(){
-        return this.render_text(this.state.current_artist.username + 
-                                " is drawing a " + 
-                                this.state.player.location)
-    }
-      
-    render_artist_text(){
-        return this.render_text(this.state.current_artist.username + 
-                                " is drawing")
-    }
-
-    render_word_text(){
-      return this.render_text("The location is: " + this.state.current_artist.location);
-    }
-
-    render_bottom_buttons(){
-      return (
-        <BottomBar
-            ref={this.setBottomRef}
-            current_artist={this.state.current_artist}
-            kill_websocket={this.props.kill_websocket}
-            changeLocation={this.props.changeLocation}
-            send_message={this.props.send_message}
-            clearGameState={this.props.clearGameState}
-            hideState={this.state.hideButtonState}
-        />
-      );
-    }
-
-    render_artist_ui(){
-        if(this.state.current_artist == null){
-            return (
-                <React.Fragment>
-                  {this.render_text("Loading...")}
-                </React.Fragment>
-              );
-        }
-        if(this.state.current_artist.is_me){
+    const render_artist_ui = () => {
+        if (currentArtist == null) { return render_text("Loading..."); }
+        if (currentArtist.is_me) {
             // im drawing; either i know the location or im the spy
-            if(this.state.current_artist.is_spy){
-                return (
-                    <React.Fragment>
-                        {this.render_text("You are the spy :)") }
-                    </React.Fragment>
-                );
-            }
-            else{
-                return (
-                    <React.Fragment>
-                        {this.render_word_text() }
-                    </React.Fragment>
-                );
-            }
+            return (
+                currentArtist.is_spy
+                    ? render_text("You are the spy :)")
+                    : render_text("The location is: " + currentArtist.location)
+            );
         }
-        else{
+        else {
             // im not drawing, so lets just say someone else is 
-            if(this.state.current_artist.is_spy){
-                return (
-                    <React.Fragment>
-                        {this.render_player_text() }
-                    </React.Fragment>
-                );
-            }
-            else{
-                return (
-                    <React.Fragment>
-                        {this.render_artist_text() }
-                    </React.Fragment>
-                );
-            }
+            return (
+                currentArtist.is_spy
+                    ? render_text(currentArtist.username + " is drawing a " + player.location)
+                    : render_text(currentArtist.username + " is drawing")
+            );
         }
     }
 
-    render() {
-      return (
-        <React.Fragment>
-        <ToastContainer />
-        {/* <Timer total_time={this.state.total_time}/> */}
-        {this.state.location_modal}
-        <LocationReference
-            show_modal={this.state.show_location_modal}
-            locations={this.props.extra_game_state.locations}
-            onConfirm={this.closeLocationReference}
-            handleClickLocation={this.handleClickLocation}
-        />
-        {this.render_artist_ui()}
-        {this.render_bottom_buttons()}
-        <TooledTouchableCanvas
-          ref={this.setTouchableRef}
-          is_local_player_artist={this.state.is_local_player_artist}
-          send_message={this.props.send_message}
-          hideClearButton={true}
-        />
-        </React.Fragment>
-      );
-    }
-  }
+    return (
+        <>
+            <ToastContainer />
+            {/* <Timer total_time={this.state.total_time}/> */}
+            <LocationReference
+                show_modal={showLocationModal}
+                locations={props.extra_game_state.locations}
+                onConfirm={closeLocationReference}
+                handleClickLocation={handleClickLocation}
+            />
+            {render_artist_ui()}
+            <BottomBar
+                current_artist={currentArtist}
+                kill_websocket={props.kill_websocket}
+                changeLocation={props.changeLocation}
+                send_message={props.send_message}
+                clearGameState={props.clearGameState}
+                hideState={hideButtonState}
+            />
+            <TooledTouchableCanvas
+                sendFunctions={storeFunctions}
+                is_local_player_artist={isLocalPlayerArtist}
+                send_message={props.send_message}
+                hideClearButton={true}
+            />
+        </>
+    );
+}
 
 export default windowSize(FakeArtistCanvas);
