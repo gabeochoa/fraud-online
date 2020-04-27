@@ -3,7 +3,7 @@ import "../components/menu.css";
 import "../drawit/drawit.css";
 import ConfirmableButton from '../components/ConfirmableButton';
 import 'lodash';
-import { FakeArtistContext } from "./FakeArtistCanvas";
+import FakeArtistContext from "./FakeArtistContext";
 import { MenuContext } from "../components/Menu";
 
 const BottomBar = (props) => {
