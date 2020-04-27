@@ -27,13 +27,14 @@ const ERASER = {
 
 const ToolBar = ({
     hideClearButton,
+    hideEraser,
     onClickHandler,
     toolName,
 }) => {
     const buttons = [
         { show: !hideClearButton, name: CLEAR, icon: mdiClose, },
         { show: true, name: "pencil", icon: mdiPencil, matchingName: PENCIL.name, },
-        { show: true, name: "eraser", icon: mdiEraser, matchingName: ERASER.name, },
+        { show: !hideEraser, name: "eraser", icon: mdiEraser, matchingName: ERASER.name, },
     ]
     return buttons.map(({ show, name, icon, matchingName }) => {
         if (!show) { return null; }
@@ -70,14 +71,14 @@ const TooledTouchableCanvas = (props) => {
         const button_ = event.target.getAttribute("name");
         console.log("button was clicked: ", button_)
         switch (button_) {
-            case "pencil": 
-                setTool(myPencil); 
+            case "pencil":
+                setTool(myPencil);
                 break;
-            case "eraser": 
-                setTool(myEraser); 
+            case "eraser":
+                setTool(myEraser);
                 break;
-            case CLEAR: 
-                functions.clear_canvas(true); 
+            case CLEAR:
+                functions.clear_canvas(true);
                 break;
             default: console.warn("button clicked but no handler", button_); break;
         }
@@ -105,6 +106,7 @@ const TooledTouchableCanvas = (props) => {
                 <div id="button_bar" className="button_bar_style">
                     <ToolBar
                         hideClearButton={props.hideClearButton}
+                        hideEraser={props.hideEraser}
                         onClickHandler={onClickHandler}
                         toolName={tool.name}
                     />

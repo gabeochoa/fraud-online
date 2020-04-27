@@ -1,10 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import "../components/menu.css";
 import "../drawit/drawit.css";
 import ConfirmableButton from '../components/ConfirmableButton';
 import 'lodash';
+import { FakeArtistContext } from "./FakeArtistCanvas";
+import { MenuContext } from "../components/Menu";
 
 const BottomBar = (props) => {
+
+    const {
+        send_message,
+        kill_websocket,
+        changeLocation,
+        clearGameState,
+        username
+    } = useContext(MenuContext);
+
+    const { currentArtist, hideButtonState: hideState } = useContext(FakeArtistContext);
     //current_artist, kill_websocket, changeLocation, clearGameState, send_message
     const allButtonProps = {
         variant: "contained",
@@ -14,20 +26,20 @@ const BottomBar = (props) => {
     const onClickStringHandler = (button_) => {
         switch (button_) {
             case "end_round":
-                if (props.current_artist != undefined) {
-                    props.send_message({ command: "end_round" })
+                if (currentArtist != undefined) {
+                    send_message({ command: "end_round" })
                 }
                 break;
             case "end_game":
-                if (props.current_artist != undefined) {
-                    props.send_message({ command: "end_game" })
-                    props.changeLocation("lobby");
+                if (currentArtist != undefined) {
+                    send_message({ command: "end_game" })
+                    changeLocation("lobby");
                 }
                 break;
             case "exit_room":
-                props.kill_websocket(props.username);
-                props.changeLocation("home");
-                props.clearGameState();
+                kill_websocket(username);
+                changeLocation("home");
+                clearGameState();
                 break;
             default:
                 console.log("button clicked but not handled", button_);
@@ -37,21 +49,21 @@ const BottomBar = (props) => {
 
     const buttons = [
         {
-            show: props.hideState[0],
+            show: hideState[0],
             name: "end_round",
-            buttonProps:{ confirm_text: "Are you really done?" },
+            buttonProps: { confirm_text: "Are you really done?" },
             text: "I'm done",
         },
         {
-            show: props.hideState[1],
+            show: hideState[1],
             name: "end_game",
-            buttonProps:{ confirm_text: "Really end game?" },
+            buttonProps: { confirm_text: "Really end game?" },
             text: "End Game",
         },
         {
-            show: props.hideState[2],
+            show: hideState[2],
             name: "exit_room",
-            buttonProps:{ confirm_text: "Really exit room?"},
+            buttonProps: { confirm_text: "Really exit room?" },
             text: "Leave Game",
         },
     ];
@@ -61,16 +73,16 @@ const BottomBar = (props) => {
             {buttons.map(({
                 show, ref, name, buttonProps, text
             }) => {
-                return ( !show
-                        ? null
-                        : <ConfirmableButton
-                            key={name}
-                            name={name}
-                            onClick={onClickStringHandler}
-                            buttonProps={{ ...allButtonProps, ...buttonProps }}
-                        >
-                            {text}
-                        </ConfirmableButton>
+                return (!show
+                    ? null
+                    : <ConfirmableButton
+                        key={name}
+                        name={name}
+                        onClick={onClickStringHandler}
+                        buttonProps={{ ...allButtonProps, ...buttonProps }}
+                    >
+                        {text}
+                    </ConfirmableButton>
                 )
             }
             )}

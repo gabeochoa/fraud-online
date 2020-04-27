@@ -1,358 +1,388 @@
-import React, { Component, useState, useEffect } from "react";
+// @flow
+
+import React, { Component, useState, useEffect, useCallback, useContext } from 'react';
 import windowSize from '../components/windowSize';
-import { enableBodyScroll, disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
-import autobind from 'autobind-decorator'
-import "../components/menu.css";
-import "../drawit/drawit.css";
-import TooledTouchableCanvas from "../components/TooledTouchableCanvas";
+import '../components/menu.css';
+import '../drawit/drawit.css';
+import TooledTouchableCanvas from '../components/TooledTouchableCanvas';
 import BottomBar from './BottomBar';
-import { Button } from "@material-ui/core";
-import { mdiMapMarker, mdiToolbox, mdiBorderAll } from "@mdi/js";
-import Icon from '@mdi/react'
-import SweetAlert from "react-bootstrap-sweetalert/lib/dist/SweetAlert";
-import 'react-toastify/dist/ReactToastify.min.css';
-import { ToastContainer, toast } from 'react-toastify';
+import FakeArtistDrawingText from './FakeArtistDrawingText';
+import FakeArtistToastContainer from './FakeArtistToastContainer';
+import FakeArtistLocationReference from './FakeArtistLocationReference';
+import { clearAllBodyScrollLocks } from 'body-scroll-lock';
+import BottomGameButtons from "../components/BottomGameButtons";
+import autobind from "autobind-decorator";
+import { parse } from 'acorn';
+import { MenuContext } from '../components/Menu';
+import ErrorBoundary from 'react-error-boundary';
+import { any } from 'prop-types';
 
-const column_list = {
-    columnCount: 2,
-    columnGap: "3px",
-    columnRuleColor: "white",
-    columnRuleStyle: "solid",
-    columnRuleWidth: "10px",
-}
-const column_list_item = {
-    padding: "0 0 0 10px",
-    margin: "0 0 4px 0",
-    backgroundColor: "#f0f0f0",
-    columnSpan: "1",
-    wordWrap: "break-word",
-}
+const disableSingleScrollLock = (element) => {
+    if (element == null) { return; }
+    element.style.position = 'static';
+    element.style.overflow = 'scroll';
+};
 
-const pretty_location = (location) => {
+const disableGlobalScrollLock = () => {
+    disableSingleScrollLock(document.body);
+};
+
+const enableSingleScrollLock = (element) => {
+    if (element == null) { return; }
+    element.style.position = 'fixed';
+    element.style.overflow = 'hidden';
+};
+
+const enableGlobalScrollLock = () => {
+    enableSingleScrollLock(document.body);
+};
+
+const FakeArtistTopMeta = ({
+}) => {
+    const {
+        set_extra_game_state,
+        extra_game_state,
+    } = useContext(MenuContext);
+    const {
+        currentArtist,
+    } = useContext(FakeArtistContext);
+    const [showLocationModal, setShowLocationModal] = useState(false);
+
+    const openLocationReference = () => {
+        disableGlobalScrollLock();
+        setShowLocationModal(true);
+    };
+
+    const closeLocationReference = () => {
+        enableGlobalScrollLock();
+        if (document.body == null) { return; }
+        document.body.scrollTop = 0;
+        setShowLocationModal(false);
+    };
+
+    const handleClickLocation = (event) => {
+        while (event.target.getAttribute('name') === null) {
+            event.target = event.target.parentNode;
+        }
+        const locations = [...extra_game_state.locations];
+        const location = locations.filter(
+            (c) => c[0] == event.target.getAttribute('name')
+        )[0];
+        const index = locations.indexOf(location);
+        locations[index] = [location[0], !location[1]];
+        set_extra_game_state('locations', locations);
+    };
+
     return (
-        location == null || location == undefined || location == ""
-            ? location :
-            (
-                location
-                    .split("_")
-                    .map((item) => { return item.charAt(0).toUpperCase() + item.slice(1); })
-                    .join(" ")
-            )
+        <>
+            <FakeArtistDrawingText
+                currentArtist={currentArtist}
+                openLocationReference={openLocationReference}
+                closeLocationReference={closeLocationReference}
+            />
+            <FakeArtistLocationReference
+                show_modal={showLocationModal}
+                locations={extra_game_state.locations}
+                onConfirm={closeLocationReference}
+                handleClickLocation={handleClickLocation}
+            />
+        </>
     );
 }
 
-const LocationReference = (props) => {
-    const renderPlace = (place) => {
-        const place_text = place[1]
-            ? <p style={{ color: "#bbb", textDecoration: "line-through" }}> {pretty_location(place[0])} </p>
-            : <p> {pretty_location(place[0])} </p>;
-        return (
-            <li key={place[0]} name={place[0]} onClick={props.handleClickLocation} style={column_list_item}>
-                {place_text}
-            </li>
-        );
-    }
-    return (
-        !props.show_modal ? null :
-            (
-                <SweetAlert
-                    title={"Locations"}
-                    style={{
-                        // top: "-1em",
-                        position: "absolute",
-                        overflowY: "scroll",
-                        top: "45%",
-                        touchAction: "auto",
-                        pointerEvents: "auto",
-                    }}
-                    confirmBtnText={"close locations"}
-                    onConfirm={props.onConfirm}
-                    onCancel={props.onConfirm}
-
-                >
-                    <ul style={column_list}>
-                        {props.locations.map((place) => renderPlace(place))}
-                    </ul>
-                </SweetAlert>
-            )
-    );
-}
-
-const FakeArtistCanvas = (props) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLobby, setIsLobby] = useState(false);
+const FakeArtistCanvas2 = ({
+    changeLocation,
+    clearGameState,
+    extra_game_state,
+    game_options,
+    register_socket_callbacks,
+    reset_extra_game_state,
+    send_message,
+    set_default_game_state,
+    set_extra_game_state,
+    set_game_option,
+    unregister_socket_callbacks,
+    updateGameStarted,
+    updatePlayers,
+    kill_websocket,
+}) => {
     const [currentArtist, setCurrentArtist] = useState(null);
+    const [functions, setFunctions] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
     const [isLocalPlayerArtist, setIsLocalPlayerArtist] = useState(false);
     const [hideButtonState, setHideButtonState] = useState([true, true, true]);
-    const [showLocationModal, setShowLocationModal] = useState(false);
     const [player, setPlayer] = useState(null);
-    const showing_toast = { artist: false, round: false, voting: false, }
-    const [functions, setFunctions] = useState({});
 
-    const storeFunctions = (funcs) => {
-        setFunctions(funcs)
-    }
+    console.log("functions,", functions)
 
-    const touchable_canvas = React.createRef();
-
-    props.set_default_game_state("round", 1)
-    props.set_default_game_state("locations", [])
-
-    const notify_voting = (props) => {
-        toast("Time for Voting!", {
-            position: 'top-center',
-            onClose: () => showing_toast['voting'] = false,
-        });
+    const showToast = (toast: string) => {
+        console.log('we should really show the toast: ', toast);
     };
-
-    const _actual_round_toast = () => {
-        let cur_round = props.extra_game_state.round || 0
-        toast.info("Round " + (cur_round + 1) + " of "
-            + props.game_options.num_rounds + "!", {
-            onClose: () => showing_toast['round'] = false,
-            position: "top-center",
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-        });
-    };
-
-    const notify_round = () => {
-        props.set_extra_game_state("round",
-            props.extra_game_state.round + 1,
-            () => { _actual_round_toast() }
-        )
-    }
-
-    const notify_artist = () => {
-        toast.info("Time for Drawing; One stroke only please!", {
-            position: toast.POSITION.BOTTOM_CENTER,
-            onOpen: () => showing_toast['artist'] = true,
-            onClose: () => showing_toast['artist'] = false,
-        });
-    }
 
     useEffect(() => {
-        props.register_socket_callbacks("drawingCanvas", "onmessage", process_message)
-        props.send_message({ command: 'start_game' });
-        props.send_message({ command: 'get_room' });
-        props.reset_extra_game_state()
+        set_default_game_state('round', 1);
+        set_default_game_state('locations', []);
+        send_message({ command: 'start_game' });
+        send_message({ command: 'get_room' });
+        reset_extra_game_state();
+        register_socket_callbacks(
+            'drawingCanvas',
+            'onmessage',
+            process_message
+        );
         return () => {
             clearAllBodyScrollLocks();
-            props.unregister_socket_callbacks("drawingCanvas", "onmessage")
-        }
-    });
+            unregister_socket_callbacks('drawingCanvas', 'onmessage');
+        };
+    }, []);
+
+    const storeFunctions = (funcs) => {
+        console.log('StoreFunctions: ', funcs);
+        setFunctions(funcs);
+    };
 
     const end_round = (data, sender) => {
-        console.log("end round", data, sender)
+        // console.log("end round", data, sender)
         // when a person is done drawing....
-        // check if the new round is more than all rounds ever 
-        if (data.round >= (props.game_options.rounds)) {
+        // check if the new round is more than all rounds ever
+        if (data.round >= game_options.rounds) {
             // done with rounds, lets vote
-            props.send_message({ command: "voting" })
+            send_message({ command: 'voting' });
             return;
-        }
-        else {
+        } else {
             // otherwise the new round needs to be set
-            if (props.extra_game_state.round != data.round
-                && data.round < props.game_options.num_rounds) {
-                props.set_extra_game_state("round", data.round, notify_round());
+            if (
+                extra_game_state.round != data.round &&
+                data.round < game_options.num_rounds
+            ) {
+                // TODO Fix toasts
+                // set_extra_game_state("round", data.round, prop.notify_round());
+                set_extra_game_state('round', data.round, () => { });
             }
         }
         // console.log("end_roundish", data.players, data.current_player)
         const player = data.players[data.current_player] || data.players[0];
-        const is_local = (player.channel == sender);
-        if (is_local && !showing_toast['artist']) {
-            notify_artist()
-            showing_toast['artist'] = true
+        const is_local = player.channel == sender;
+        if (is_local) {
+            showToast('artist');
         }
         setCurrentArtist(player);
         setIsLocalPlayerArtist(is_local);
-        setHideButtonState([is_local, true, true])
-    }
+        setHideButtonState([is_local, true, true]);
+    };
 
-    const process_message = (parsedData) => {
-        // console.log("drawing canvas process message", parsedData)
-        // dont care what message, just "done loading"
-        if (isLoading) { setIsLoading(false) }
-        const command = parsedData.command;
-        if (command == "voting") {
-            setIsLocalPlayerArtist(false)
-            setHideButtonState([ false, true, true, ])
-            showing_toast['artist'] = true
-            if (!showing_toast['voting']) {
-                notify_voting();
-                showing_toast['voting'] = true
+    const draw = useCallback(
+        (msg) => {
+            console.log("i want to draw what does my paint look like: ", functions)
+            functions.upscale_paint(msg.prev, msg.cur, msg.tool);
+        }, [functions]
+    );
+
+    const end_game = useCallback(() => {
+        reset_extra_game_state();
+        updateGameStarted(false);
+        changeLocation('_back');
+        functions.clear_canvas(false);
+        setHideButtonState([false, false, false]);
+    }, [functions]);
+
+    const process_message = useCallback(
+        (parsedData) => {
+            // console.log("drawing canvas process message", parsedData)
+            // dont care what message, just "done loading"
+            if (isLoading) {
+                setIsLoading(false);
             }
-            return
-        }
+            const command = parsedData.command;
+            if (command == 'voting') {
+                setIsLocalPlayerArtist(false);
+                setHideButtonState([false, true, true]);
+                showToast('voting');
+                return;
+            }
 
-        const sender = parsedData.sender;
-        let players = parsedData.message.players;
-        if (players) {
-            players.forEach(
-                (item) => {
+            const sender = parsedData.sender;
+            let players = parsedData.message.players;
+            if (players) {
+                players.forEach((item) => {
                     if (item.channel == sender) {
                         item.is_me = true;
                         setPlayer(item);
                     }
-                }
-            );
-            const is_game_started = parsedData.message.is_game_started;
-            props.updatePlayers(players);
-            props.updateGameStarted(is_game_started);
-        }
-
-        let locations = parsedData.message.locations
-        if (locations) {
-            // console.log(parsedData.message.locations)
-            if (props.extra_game_state.locations &&
-                props.extra_game_state.locations.length == 0) {
-                locations = [...parsedData.message.locations].map((item) => { return [item, false] })
-                props.set_extra_game_state("locations", locations);
+                });
+                const is_game_started = parsedData.message.is_game_started;
+                updatePlayers(players);
+                updateGameStarted(is_game_started);
             }
-        }
 
-        if (parsedData.message.num_rounds) {
-            props.set_game_option("num_rounds", parsedData.message.num_rounds)
-        }
+            let locations = parsedData.message.locations;
+            if (locations) {
+                // console.log(parsedData.message.locations)
+                if (
+                    extra_game_state.locations &&
+                    extra_game_state.locations.length == 0
+                ) {
+                    locations = [...parsedData.message.locations].map(
+                        (item) => {
+                            return [item, false];
+                        }
+                    );
+                    set_extra_game_state('locations', locations);
+                }
+            }
 
-        switch (command) {
-            case "get_room_response": //fall through
-            case "start_game": // fall through
-            case "end_round":
-                end_round(parsedData.message, sender)
-                break;
-            case "end_game":
-                props.reset_extra_game_state()
-                props.updateGameStarted(false);
-                props.changeLocation("_back");
-                touchable_canvas.clear_canvas(false);
-                setHideButtonState([false, false, false])
-                break
-            case "draw":
-                const msg = parsedData.message;
-                touchable_canvas.upscale_paint(msg.prev, msg.cur, msg.tool)
-                break
-        }
-    }
+            if (parsedData.message.num_rounds) {
+                set_game_option(
+                    'num_rounds',
+                    parsedData.message.num_rounds
+                );
+            }
 
-    const onClickHandler = (event) => {
-        if (event.target == canvas) { event.preventDefault(); }
-        while (event.target.getAttribute("name") === null) {
-            event.target = event.target.parentNode;
-        }
-        const button_ = event.target.getAttribute("name");
-        switch (button_) {
-            case "mapmarker": openLocationReference(); break;
-            case "toolbox": closeLocationReference(); break;
-            default: break;
-        }
-    }
+            switch (command) {
+                case 'get_room_response': //fall through
+                case 'start_game': // fall through
+                case 'end_round':
+                    end_round(parsedData.message, sender);
+                    break;
+                case 'end_game':
+                    end_game();
+                    break;
+                case 'draw':
+                    draw(parsedData.message);
+                    break;
+            }
+        },
+        [end_round, draw, end_game]
+    );
 
-    const disableSingleScrollLock = (element) => {
-        element.style.position = "static";
-        element.style.overflow = "scroll";
-    }
-
-    const disableGlobalScrollLock = () => {
-        disableSingleScrollLock(document.body)
-    }
-
-    const enableSingleScrollLock = (element) => {
-        element.style.position = "fixed";
-        element.style.overflow = "hidden";
-    }
-
-    const enableGlobalScrollLock = () => {
-        enableSingleScrollLock(document.body)
-    }
-
-    const openLocationReference = () => {
-        disableGlobalScrollLock();
-        setShowLocationModal(true)
-    }
-
-    const closeLocationReference = () => {
-        enableGlobalScrollLock();
-        document.body.scrollTop = 0;
-        setShowLocationModal(false)
-    }
-
-    const handleClickLocation = (event) => {
-        while (event.target.getAttribute("name") === null) {
-            event.target = event.target.parentNode;
-        }
-        const locations = [...props.extra_game_state.locations]
-        const location = locations.filter(c => c[0] == event.target.getAttribute("name"))[0];
-        const index = locations.indexOf(location);
-        locations[index] = [location[0], !location[1]];
-        props.set_extra_game_state("locations", locations);
-    }
-
-    const render_text = (text) => {
-        return (
-            <div style={{ position: "inherit", display: "-webkit-inline-box", left: 40, margin: 3 }}>
-                <h1 style={{ color: '#4a4a4a' }}> {pretty_location(text)} </h1>
-                <Button
-                    name="mapmarker"
-                    onClick={onClickHandler}
-                    style={{
-                        top: "-0.75em",
-                        margin: 0,
-                        padding: 0,
-                    }}
-                >
-                    <Icon path={mdiMapMarker} size={"1em"} />
-                </Button>
-            </div>
-        );
-    }
-
-    const render_artist_ui = () => {
-        if (currentArtist == null) { return render_text("Loading..."); }
-        if (currentArtist.is_me) {
-            // im drawing; either i know the location or im the spy
-            return (
-                currentArtist.is_spy
-                    ? render_text("You are the spy :)")
-                    : render_text("The location is: " + currentArtist.location)
-            );
-        }
-        else {
-            // im not drawing, so lets just say someone else is 
-            return (
-                currentArtist.is_spy
-                    ? render_text(currentArtist.username + " is drawing a " + player.location)
-                    : render_text(currentArtist.username + " is drawing")
-            );
-        }
-    }
 
     return (
+
         <>
-            <ToastContainer />
-            {/* <Timer total_time={this.state.total_time}/> */}
-            <LocationReference
-                show_modal={showLocationModal}
-                locations={props.extra_game_state.locations}
-                onConfirm={closeLocationReference}
-                handleClickLocation={handleClickLocation}
+            <FakeArtistTopMeta
+                currentArtist={currentArtist}
+                set_extra_game_state={set_extra_game_state}
+                extra_game_state={extra_game_state}
             />
-            {render_artist_ui()}
+            <FakeArtistToastContainer />
+            {/* <Timer total_time={this.state.total_time}/> */}
             <BottomBar
                 current_artist={currentArtist}
-                kill_websocket={props.kill_websocket}
-                changeLocation={props.changeLocation}
-                send_message={props.send_message}
-                clearGameState={props.clearGameState}
+                kill_websocket={kill_websocket}
+                changeLocation={changeLocation}
+                send_message={send_message}
+                clearGameState={clearGameState}
                 hideState={hideButtonState}
             />
             <TooledTouchableCanvas
                 sendFunctions={storeFunctions}
                 is_local_player_artist={isLocalPlayerArtist}
-                send_message={props.send_message}
+                send_message={send_message}
                 hideClearButton={true}
+            />
+        </>
+    );
+};
+
+const emptyFunction = () => { };
+export const FakeArtistContext = React.createContext({
+    currentArtist: null,
+    setCurrentArtist: emptyFunction,
+    hideButtonState: [true, true, true],
+});
+const FakeArtistProvider = FakeArtistContext.Provider;
+const FakeArtistConsumer = FakeArtistContext.Consumer;
+
+const FakeArtistCanvasMessageHandler = (props) => {
+    const {
+        register_socket_callbacks,
+        unregister_socket_callbacks,
+    } = useContext(MenuContext);
+
+    useEffect(() => {
+        const socketCBName = 'FakeArtistCanvasMessageHandler';
+        register_socket_callbacks(socketCBName, 'onmessage', () => { });
+        return () => {
+            unregister_socket_callbacks(socketCBName, 'onmessage');
+        };
+    }, []);
+    return (
+        <></>
+    );
+}
+const FakeArtistCanvas = (props) => {
+    const [currentArtist, setCurrentArtist] = useState(null);
+    const hideButtonState = [true, true, true];
+    const {
+        set_default_game_state,
+        send_message,
+        reset_extra_game_state,
+    } = useContext(MenuContext);
+
+    useEffect(() => {
+        set_default_game_state('round', 1);
+        set_default_game_state('locations', []);
+        send_message({ command: 'start_game' });
+        send_message({ command: 'get_room' });
+        reset_extra_game_state();
+        return () => { clearAllBodyScrollLocks(); };
+    }, []);
+
+    return (
+        <FakeArtistProvider value={{
+            currentArtist,
+            setCurrentArtist,
+            hideButtonState,
+        }}>
+            <ErrorBoundary>
+                <FakeArtistCanvasMessageHandler />
+                <FakeArtistTopMeta />
+                <FakeArtistToastContainer />
+                <BottomBar />
+                <FakeArtistTouchableCanvas />
+            </ErrorBoundary>
+        </FakeArtistProvider>
+    );
+}
+
+const FakeArtistTouchableCanvas = (props) => {
+    // TODO 
+    const is_local_player_artist = true;
+
+    const {
+        send_message,
+        register_socket_callbacks,
+        unregister_socket_callbacks,
+    } = useContext(MenuContext);
+    const [functions, setFunctions] = useState({})
+
+    const process_message = (parsedData) => {
+        const sender = parsedData.sender;
+        switch (parsedData.command) {
+            case "draw":
+                const msg = parsedData.message;
+                functions.upscale_paint(msg.prev, msg.cur, msg.tool);
+                break;
+        }
+    }
+
+    useEffect(() => {
+        register_socket_callbacks("drawingCanvas", "onmessage", process_message);
+        send_message({ command: "get_room" });
+        return () => {
+            clearAllBodyScrollLocks();
+            unregister_socket_callbacks("drawingCanvas", "onmessage");
+        }
+    });
+
+    return (
+        <>
+            <TooledTouchableCanvas
+                hideClearButton={true}
+                hideEraser={true}
+                sendFunctions={setFunctions}
+                is_local_player_artist={is_local_player_artist}
+                send_message={send_message}
             />
         </>
     );
