@@ -1,23 +1,15 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import key from "weak-key";
-
+import React from "react";
 
 const divStyle = {
     margin: '40px',
     border: '5px solid white'
-  };
+};
 
-class Container extends Component{
-    constructor(props){
-        super(props);
-    }
-    render(){
-        return (
+const Container = (props) => {
+    return (
         <div style={divStyle}>
             {this.props.children}
         </div>
-        );
-    }
+    );
 }
 export default Container;
