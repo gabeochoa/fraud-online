@@ -40,7 +40,7 @@ const process_message = (
     updatePlayers,
     updateGameStarted
 ) => {
-    console.log("Lobby process_message", parsedData);
+    // console.log("Lobby process_message", parsedData);
     if (!isLoaded) { setIsLoaded(true) }
     switch (parsedData.command) {
         case "get_room_response":
