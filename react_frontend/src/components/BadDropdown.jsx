@@ -1,24 +1,22 @@
-import React, {Component} from "react";
-import autobind from "autobind-decorator";
+import React from "react";
 import Select from 'react-select';
 
-@autobind
-class BadDropdown extends React.Component{
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-        return (
-            <Select 
-                name={this.props.name}
-                options={this.props.options} 
-                onChange={this.props.onChange} 
-                value={this.props.default_option} 
-                placeholder={this.props.placeholder || "Select an option"}
-            />
-        );
-    }
+const BadDropdown = ({
+    name,
+    options,
+    onChange,
+    default_option,
+    placeholder = "Select an option",
+}) => {
+    return (
+        <Select
+            name={name}
+            options={options}
+            onChange={onChange}
+            value={default_option}
+            placeholder={placeholder}
+        />
+    );
 }
 
 export default BadDropdown;

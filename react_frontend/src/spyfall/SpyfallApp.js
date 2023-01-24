@@ -15,75 +15,43 @@ import { mdiHatFedora } from '@mdi/js'
 import Icon from '@mdi/react'
 import Game from "./game";
 
-
-@autobind
-class SpyfallApp extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render_header(){
-    return (<React.Fragment>
+const SpyfallApp = () => {
+    const header = (
+      <>
         <div className="div_set">
-          <h4 className="header_font"> 
-            <Icon path={mdiHatFedora} size={"1em"}/> 
+          <h4 className="header_font">
+            <Icon path={mdiHatFedora} size={"1em"}/>
             Spyfall! <sup className="sup_font">Beta</sup>
           </h4>
           <hr className="hrstyle" />
         </div>
-      </React.Fragment>);
-  } 
-  
-  render_footer(){
-    return <Footer />
-  }
-
-  render() {
-    let home_jsx = (
-      <Home/>
-    );
-    let lobby_jsx = (
-      <Lobby/>
-    );
-
-    let create_jsx = (
-      <CreateSpyfallGame/>
-    );
-
-    let join_jsx = (
-      <JoinGame/>
-    );
-
-    let game_jsx = (
-      <Game/> 
+      </>
     );
 
     var location_data = {
-      home: home_jsx,
-      lobby: lobby_jsx,
-      create: create_jsx,
-      join: join_jsx,
-      game: game_jsx,
+      home: <Home/>,
+      lobby: <Lobby/>,
+      create: <CreateSpyfallGame/>,
+      join: <JoinGame/>,
+      game: <Game/>,
       about: <SpyfallAbout/>,
     }
-  
+
     return(
       <div style={top_level}>
         <Menu
           starting_location="home"
           all_locations={location_data}
-          header={this.render_header()}
-          footer={this.render_footer()}
+          header={header}
+          footer={<Footer/>}
           socket_room="spyfall"
           />
       </div>
     );
-
-  }
 }
 
 const top_level = {
-  display: "block", 
+  display: "block",
   justifyContent: "center",
   margin: "auto",
   top: "0",
