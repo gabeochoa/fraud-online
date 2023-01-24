@@ -6,10 +6,22 @@ import time
 from urllib.parse import parse_qs
 import json
 import random
+import pickle
 
 class BaseConsumer(WebsocketConsumer):
     # def __init__(self, *args, **kwargs):
     #     super(BaseConsumer, self).__init__(self, *args, **kwargs)
+    def cache_set(self, key, value, timeout=None):
+        # DO NOT UNCOMMENT THIS UNLESS YOU CHANGE ALL CHILD CONSUMERS
+        # cache.set(key, pickle.dumps(value), timeout=timeout)
+        cache.set(key, (value), timeout=timeout)
+
+    def cache_get(self, key, default=None):
+        x = cache.get(key, default=default)
+        return x
+        # if x is None:
+        #     return x
+        # return pickle.loads(x)
 
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -38,7 +50,8 @@ class BaseConsumer(WebsocketConsumer):
         raise NotImplementedError("Implement get user")
 
     def is_game_started(self):
-        value = cache.get(self.room_group_name, default=None)
+        value = self.cache_get(self.room_group_name, default={})
+        print("is game started", value)
         for player in value['players']:
             if self.player_in_game(player):
                 return True  # we found someone in the game still 
@@ -48,9 +61,9 @@ class BaseConsumer(WebsocketConsumer):
 
     def _store_is_game_started(self, overwrite=False, is_started=False):
         '''if is_started is set, will overwrite the is_game_started'''
-        value = cache.get(self.room_group_name, default=None)
+        value = self.cache_get(self.room_group_name, default={})
         value['is_game_started'] = is_started if overwrite else self.is_game_started()
-        cache.set(self.room_group_name, value, timeout=None)
+        self.cache_set(self.room_group_name, value)
 
     def _store_extra_in_cache(self):
         self._store_is_game_started()
@@ -60,7 +73,7 @@ class BaseConsumer(WebsocketConsumer):
         raise NotImplementedError("Implement store_extra_in_cache")
  
     def store_user_in_cache(self):
-        value = cache.get(self.room_group_name, default=None)
+        value = self.cache_get(self.room_group_name, default=None)
         player = {
             "id": 0,
             "channel": self.channel_name,
@@ -79,7 +92,7 @@ class BaseConsumer(WebsocketConsumer):
 
         value["players"].append(player)
         # set in cache
-        cache.set(self.room_group_name, value, timeout=None)
+        self.cache_set(self.room_group_name, value, timeout=None)
 
     def player_in_game(self, player):
         raise NotImplementedError("is player in game")
@@ -88,7 +101,7 @@ class BaseConsumer(WebsocketConsumer):
         return self._is_player_in_game(player)
 
     def remove_person(self, channel):
-        value = cache.get(self.room_group_name, default=None)
+        value = self.cache_get(self.room_group_name, default=None)
         players = []
         for player in value['players']:
             if player['channel'] == channel: continue
@@ -100,10 +113,10 @@ class BaseConsumer(WebsocketConsumer):
         self._store_is_game_started()
 
         value['players'] = players
-        cache.set(self.room_group_name, value, timeout=None)
+        self.cache_set(self.room_group_name, value, timeout=None)
    
     def remove_user_from_cache(self, player):
-        value = cache.get(self.room_group_name, default=None)
+        value = self.cache_get(self.room_group_name, default=None)
         if value is None: # no one to remove ? 
             value = {
                 "players": [],
@@ -116,7 +129,7 @@ class BaseConsumer(WebsocketConsumer):
                 if p['id'] == player['id']: continue  # skip the one we are kicking
                 players.append(p)
             value['players'] = players
-        cache.set(self.room_group_name, value, timeout=None)
+        self.cache_set(self.room_group_name, value, timeout=None)
         return 
 
     def kick_player(self, message):

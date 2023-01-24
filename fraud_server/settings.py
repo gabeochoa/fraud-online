@@ -26,10 +26,12 @@ SECRET_KEY = '@=ddt#+(96k_(_ywakqiqc1q!vdm@urw)y6-dmcg_yck(el1x%'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "*",
     "localhost",
     "127.0.0.1",
     "fraud-online.herokuapp.com",
     "ochoag.com",
+    "192.168.1.10"
 ]
 SECURE_SSL_REDIRECT = False
 
